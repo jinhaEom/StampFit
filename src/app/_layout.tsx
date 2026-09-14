@@ -6,7 +6,7 @@ import { syncAll } from '@/lib/sync';
 import { useAdsStore } from '@/store/useAdsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
-import MyHealthWidget from '@/widget/MyHealthWidget';
+import { startWidgetSync } from '@/widget/syncWidget';
 import * as Linking from 'expo-linking';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -20,11 +20,12 @@ export default function RootLayout() {
   const initAds = useAdsStore((s) => s.init);
 
   useEffect(() => {
+    const stopWidgetSync = startWidgetSync();
     loadAll();
     initializeAuth();
     mobileAds().initialize();
     initAds();
-    MyHealthWidget.updateSnapshot({ count: 1 });
+    return stopWidgetSync;
   }, [loadAll, initializeAuth, initAds]);
 
   const userId = useAuthStore((s) => s.user?.id);

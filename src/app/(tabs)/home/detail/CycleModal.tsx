@@ -124,14 +124,10 @@ export const CycleModal = ({ visible, onClose }: CycleModalProps) => {
             className="items-center rounded-[10px] bg-accent py-[12px]"
             onPress={handleSaveCycle}
           >
-            <Text className="text-[15px] font-semibold text-white">저장</Text>
+            <Text className="text-[15px] text-[#000000]">저장</Text>
           </Pressable>
 
-          {cycle && cycle.steps.length > 0 && (
-            <Text className="mt-[10px] text-[12px] text-dim text-center">
-              다음 차례: {cycle.steps[cycle.currentIndex]?.label}
-            </Text>
-          )}
+
         </View>
       </View>
 

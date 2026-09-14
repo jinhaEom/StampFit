@@ -42,13 +42,12 @@
           "widgets": [
             {
               "name": "MyHealthWidget",
-              "displayName": "My Health Widget",
-              "description": "A sample home screen widget",
+              "displayName": "오늘의 운동",
+              "description": "연속 기록일수와 오늘 할 운동을 한눈에 확인하세요",
               "ios": {
                 "supportedFamilies": [
                   "systemSmall",
-                  "systemMedium",
-                  "systemLarge"
+                  "systemMedium"
                 ]
               }
             }
@@ -65,7 +64,7 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
-      "expo-build-properties",
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,
