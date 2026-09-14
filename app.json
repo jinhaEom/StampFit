@@ -36,6 +36,25 @@
           "imageWidth": 76
         }
       ],
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "MyHealthWidget",
+              "displayName": "My Health Widget",
+              "description": "A sample home screen widget",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "systemLarge"
+                ]
+              }
+            }
+          ]
+        }
+      ],
       "expo-sqlite",
       "expo-web-browser",
       "@react-native-google-signin/google-signin",
@@ -46,7 +65,7 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
-      "expo-build-properties"
+      "expo-build-properties",
     ],
     "experiments": {
       "typedRoutes": true,

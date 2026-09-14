@@ -6,6 +6,7 @@ import { syncAll } from '@/lib/sync';
 import { useAdsStore } from '@/store/useAdsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
+import MyHealthWidget from '@/widget/MyHealthWidget';
 import * as Linking from 'expo-linking';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +24,7 @@ export default function RootLayout() {
     initializeAuth();
     mobileAds().initialize();
     initAds();
+    MyHealthWidget.updateSnapshot({ count: 1 });
   }, [loadAll, initializeAuth, initAds]);
 
   const userId = useAuthStore((s) => s.user?.id);

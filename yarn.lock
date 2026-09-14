@@ -1050,6 +1050,14 @@
     sf-symbols-typescript "^2.1.0"
     vaul "^1.1.2"
 
+"@expo/ui@~57.0.18":
+  version "57.0.18"
+  resolved "https://registry.yarnpkg.com/@expo/ui/-/ui-57.0.18.tgz#5897bbd15da8af0ea339ebefc962892fb7210db8"
+  integrity sha512-9RkA26v0FSyHlkQCyavZrT8EzsALfkNHIFO5uC+IsAxzWzItdOWdy6asjpg1yaCvBEGMYkP17FUZxluhVbeleA==
+  dependencies:
+    sf-symbols-typescript "^2.1.0"
+    vaul "^1.1.2"
+
 "@expo/vector-icons@^15.0.2":
   version "15.1.1"
   resolved "https://registry.npmjs.org/@expo/vector-icons/-/vector-icons-15.1.1.tgz"
@@ -3492,6 +3500,14 @@ expo-web-browser@~57.0.2:
   version "57.0.2"
   resolved "https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-57.0.2.tgz"
   integrity sha512-3vl5kvd7PB48ub6PpNIJUuPxO8xVa6D8RnIgNba6SXRwqFprOfeEZgwTgtm41kz0AAtvMOztUVNEUkwrHKjqMQ==
+
+expo-widgets@~57.0.19:
+  version "57.0.19"
+  resolved "https://registry.yarnpkg.com/expo-widgets/-/expo-widgets-57.0.19.tgz#5f94ed3bf73bf1b40d0d9875c022f610f31466b3"
+  integrity sha512-bDvR/Y72524SVUCRQARRZG+1R5MolmdyKiqJDKrzRAME1/r3giTOZhsjvKSyRFIF4Og2hoNEEixH3EcydAH0PQ==
+  dependencies:
+    "@expo/plist" "^0.8.1"
+    "@expo/ui" "~57.0.18"
 
 expo@~57.0.20:
   version "57.0.20"
