@@ -10,7 +10,11 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.jinhaeom.myhealth",
-      "appleTeamId": "DNPA47GWF6"
+      "appleTeamId": "DNPA47GWF6",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다.",
+        "NSPhotoLibraryAddUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다."
+      }
     },
     "android": {
       "package": "com.jinhaeom.myhealth",
@@ -64,7 +68,15 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
-      "expo-build-properties"
+      "expo-build-properties",
+      "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다.",
+          "savePhotosPermission": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -56,6 +56,15 @@ export default function MonthView() {
     </View>
   );
 
+  const isCurrentMonth =
+    pager.current.year === Number(today.slice(0, 4)) &&
+    pager.current.month === Number(today.slice(5, 7));
+
+  const goToday = () => {
+    pager.goToToday();
+    setSelected(today);
+  };
+
   return (
     <View className="flex-1">
       <View className="px-[16px]">
@@ -63,9 +72,12 @@ export default function MonthView() {
           <Pressable onPress={() => pager.goToMonth(-1)} hitSlop={10}>
             <Ionicons name="chevron-back" size={20} color={Colors.gray2Color} />
           </Pressable>
-          <Text className="text-[17px] font-medium text-fg">
-            {pager.current.year}년 {pager.current.month}월
-          </Text>
+          <View className="flex-row items-center gap-[8px]">
+            <Text className="text-[17px] font-medium text-fg">
+              {pager.current.year}년 {pager.current.month}월
+            </Text>
+
+          </View>
           <Pressable onPress={() => pager.goToMonth(1)} hitSlop={10}>
             <Ionicons name="chevron-forward" size={20} color={Colors.gray2Color} />
           </Pressable>
@@ -73,7 +85,7 @@ export default function MonthView() {
 
         <View className="mb-[4px] flex-row">
           {WEEKDAY.map((w) => (
-            <Text key={w} className="flex-1 text-center text-[12px] text-sub">
+            <Text key={w} className="flex-1 text-center text-[13px] text-sub">
               {w}
             </Text>
           ))}
@@ -99,14 +111,27 @@ export default function MonthView() {
             />
           </Animated.View>
         </GestureDetector>
+        {!isCurrentMonth && (
+          <Pressable
+            className="rounded-full bg-card px-[12px] py-[4px]  items-center justify-center self-end"
+            onPress={goToday}
+            hitSlop={8}
+          >
+            <View className='flex-row items-center gap-[4px]'>
+
+              <Ionicons name="caret-back-circle" size={20} color={'white'} />
+              <Text className="text-[12px] text-white">오늘로 돌아가기</Text>
+            </View>
+          </Pressable>
+        )}
       </View>
 
       <ScrollView
-        className="flex-1"
+        className="flex-1 mt-[12px]"
         contentContainerClassName={`px-[16px] ${SCROLL_BOTTOM}`}
         showsVerticalScrollIndicator={false}
       >
-        <DayDetail date={selected} log={logsByDate.get(selected)} />
+         <DayDetail date={selected} log={logsByDate.get(selected)} />
       </ScrollView>
     </View>
   );

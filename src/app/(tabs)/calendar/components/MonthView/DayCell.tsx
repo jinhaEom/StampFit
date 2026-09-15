@@ -46,7 +46,7 @@ function DayCell({
           {Number(date.slice(8, 10))}
         </Text>
 
-        <Text className="h-[12px] text-[10px] leading-[12px] text-sub" numberOfLines={1}>
+        <Text className="h-[12px] text-[12px] leading-[12px] text-sub" numberOfLines={1}>
           {parts.length ? `${parts[0]}${parts.length > 1 ? ` +${parts.length - 1}` : ''}` : ''}
         </Text>
 
@@ -55,17 +55,17 @@ function DayCell({
             pointerEvents="none"
             className="absolute top-[49px] items-center"
           >
-            <Text className="mb-[1px] text-[9px] leading-[11px] text-sub" numberOfLines={1}>
+            <Text className="mb-[1px] text-[10px] leading-[11px] text-sub" numberOfLines={1}>
               {INTENSITY_LABELS[log.intensity - 1]}
             </Text>
-            <Text className="text-[12px] leading-[14px]">
+            <Text className="text-[12px] leading-[14px] mt-[2px]">
               {CONDITION_EMOJI[log.condition - 1]}
             </Text>
           </View>
         )}
 
         {log && !expanded && (
-          <View pointerEvents="none" className="absolute top-[40px] h-[5px] w-[5px]">
+          <View pointerEvents="none" className="absolute top-[42px] h-[5px] w-[5px]">
             <Image
               source={require('@/assets/images/ic_lime_dot.png')}
               style={{ width: 5, height: 5 }}

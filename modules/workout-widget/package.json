@@ -1,0 +1,8 @@
+{
+  "name": "workout-widget",
+  "version": "1.0.0",
+  "description": "홈 화면 위젯 네이티브 모듈",
+  "main": "src/WorkoutWidgetModule.ts",
+  "license": "UNLICENSED",
+  "private": true
+}
