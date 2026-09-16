@@ -67,7 +67,7 @@ function DayCell({
         {log && !expanded && (
           <View pointerEvents="none" className="absolute top-[42px] h-[5px] w-[5px]">
             <Image
-              source={require('@/assets/images/ic_lime_dot.png')}
+              source={require('@/assets/images/ic_mint_dot.png')}
               style={{ width: 5, height: 5 }}
             />
           </View>

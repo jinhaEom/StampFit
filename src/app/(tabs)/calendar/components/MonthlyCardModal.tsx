@@ -9,12 +9,13 @@ import * as Sharing from 'expo-sharing';
 import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Modal,
   Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-simple-toast';
@@ -125,12 +126,7 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
             <View className="flex-row items-center justify-between pb-[16px]">
 
               <View className="flex-row items-center gap-[8px] ">
-                <View className="h-[24px] w-[24px] items-center justify-center rounded-[6px] bg-accent">
-                  <Text className="text-[14px] font-black text-on-accent">H</Text>
-                </View>
-                <Text className="text-[13px] font-bold tracking-widest text-fg">
-                  MYHEALTH
-                </Text>
+                <Image source={require('@/assets/images/stampfit-wordmark.png')} style={{ width: 100, height: 27.5 }} resizeMode='contain' />
               </View>
 
               <View className='h-[24px] w-[24px]'>
@@ -138,7 +134,7 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
               </View>
             </View>
 
-            <View className="mt-[20px]">
+            <View className="mt-[12px]">
               <Text className="text-[12px] font-medium tracking-wider text-accent uppercase">
                 Monthly Workout Report
               </Text>

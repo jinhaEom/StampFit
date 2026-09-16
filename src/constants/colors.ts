@@ -13,7 +13,7 @@ export const Colors = {
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
   },
-  mainColor: '#C8F04A',
+  mainColor: '#4FD1B3',
   tabBarColor: '#0E0F11',
   gray1Color: '#26282C',
   gray2Color: '#8A8C91',

@@ -1,4 +1,3 @@
-import GlowIcon from '@/components/GlowIcon';
 import { SocialAuthButtons } from '@/components/SocialAuthButtons';
 import { Colors } from '@/constants/colors';
 import { supabase } from '@/lib/supabase';
@@ -8,6 +7,7 @@ import { useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     Pressable,
@@ -18,6 +18,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-simple-toast';
+
+type FieldName = 'email' | 'password';
+
 export default function LoginScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -26,6 +29,7 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [focusedField, setFocusedField] = useState<FieldName | null>(null);
 
     const onLogin = async () => {
         const trimmedEmail = email.trim();
@@ -56,71 +60,101 @@ export default function LoginScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <ScrollView
-                contentContainerClassName="flex-grow justify-center px-[24px]"
-                contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}
+                contentContainerClassName="flex-grow px-[24px]"
+                contentContainerStyle={{ paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
-                <View className="mb-[36px] items-center">
-                    <GlowIcon />
-                    <Text className="text-[26px] font-semibold text-fg">My Health</Text>
-                    <Text className="mt-[6px] text-[14px] text-sub">매일매일 운동기록하는 습관을 길러봐요</Text>
-                </View>
+                <Image
+                    source={require('@/assets/images/stampfit-wordmark.png')}
+                    style={{ width: 132, height: 36.6, marginTop: 24 }}
+                    resizeMode="contain"
+                />
+                <Text className="mt-[24px] text-[20px] font-extrabold text-white">
+                    매일 한칸씩, 운동습관을 길러봐요
+                </Text>
 
-                <View className="gap-[12px]">
-                    <View className="flex-row items-center gap-[10px] rounded-[14px] bg-card px-[14px]">
-                        <Ionicons name="mail-outline" size={18} color={Colors.disabledColor} />
-                        <TextInput
-                            className="h-[50px] flex-1 text-[15px] text-fg"
-                            placeholder="이메일"
-                            placeholderTextColor={Colors.disabledColor}
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            keyboardType="email-address"
-                            returnKeyType="next"
-                        />
-                    </View>
-                    <View className="flex-row items-center gap-[10px] rounded-[14px] bg-card px-[14px]">
-                        <Ionicons name="lock-closed-outline" size={18} color={Colors.disabledColor} />
-                        <TextInput
-                            className="h-[50px] flex-1 text-[15px] text-fg"
-                            placeholder="비밀번호"
-                            placeholderTextColor={Colors.disabledColor}
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={!showPassword}
-                            returnKeyType="done"
-                            onSubmitEditing={onLogin}
-                        />
-                        <Pressable onPress={() => setShowPassword((v) => !v)} hitSlop={8}>
-                            <Ionicons
-                                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                                size={18}
-                                color={Colors.disabledColor}
+
+
+                <View className="mt-[40px]">
+                    <View className="mb-[28px]">
+                        <Text
+                            className={`mb-[8px] text-[13px] font-medium ${focusedField === 'email' ? 'text-accent' : 'text-sub'
+                                }`}
+                        >
+                            이메일
+                        </Text>
+                        <View
+                            className={`border-b pb-[10px] ${focusedField === 'email' ? 'border-accent' : 'border-line'
+                                }`}
+                        >
+                            <TextInput
+                                className="p-0 text-[17px] text-fg"
+                                placeholder="you@example.com"
+                                placeholderTextColor={Colors.disabledColor}
+                                value={email}
+                                onChangeText={setEmail}
+                                onFocus={() => setFocusedField('email')}
+                                onBlur={() => setFocusedField((f) => (f === 'email' ? null : f))}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                keyboardType="email-address"
+                                returnKeyType="next"
                             />
-                        </Pressable>
+                        </View>
                     </View>
-                </View>
 
-                <Pressable className="mt-[12px] self-end" hitSlop={8}>
-                    <Text className="text-[13px] text-sub">비밀번호를 잊으셨나요?</Text>
-                </Pressable>
+                    <View>
+                        <Text
+                            className={`mb-[8px] text-[13px] font-medium ${focusedField === 'password' ? 'text-accent' : 'text-sub'
+                                }`}
+                        >
+                            비밀번호
+                        </Text>
+                        <View
+                            className={`flex-row items-center border-b pb-[10px] ${focusedField === 'password' ? 'border-accent' : 'border-line'
+                                }`}
+                        >
+                            <TextInput
+                                className="flex-1 p-0 text-[17px] text-fg"
+                                placeholder="비밀번호 입력"
+                                placeholderTextColor={Colors.disabledColor}
+                                value={password}
+                                onChangeText={setPassword}
+                                onFocus={() => setFocusedField('password')}
+                                onBlur={() => setFocusedField((f) => (f === 'password' ? null : f))}
+                                secureTextEntry={!showPassword}
+                                returnKeyType="done"
+                                onSubmitEditing={onLogin}
+                            />
+                            <Pressable onPress={() => setShowPassword((v) => !v)} hitSlop={8}>
+                                <Ionicons
+                                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                                    size={18}
+                                    color={Colors.disabledColor}
+                                />
+                            </Pressable>
+                        </View>
+                    </View>
+
+                    <Pressable className="mt-[14px] self-end" hitSlop={8}>
+                        <Text className="text-[13px] text-sub">비밀번호를 잊으셨나요?</Text>
+                    </Pressable>
+                </View>
 
                 <Pressable
-                    className="mt-[20px] h-[52px] items-center justify-center rounded-[14px] bg-accent"
+                    className="mt-[32px] h-[56px] items-center justify-center rounded-[16px] bg-accent active:opacity-80"
                     onPress={onLogin}
                     disabled={submitting}
                 >
                     {submitting ? (
                         <ActivityIndicator color={Colors.onAccent} />
                     ) : (
-                        <Text className="text-[15px] font-semibold text-on-accent">로그인</Text>
+                        <Text className="text-[16px] font-bold text-on-accent">로그인</Text>
                     )}
                 </Pressable>
 
-                <View className="my-[24px] flex-row items-center gap-[10px]">
+                <View className="my-[28px] flex-row items-center gap-[10px]">
                     <View className="h-[1px] flex-1 bg-line" />
                     <Text className="text-[12px] text-dim">또는</Text>
                     <View className="h-[1px] flex-1 bg-line" />
@@ -128,11 +162,11 @@ export default function LoginScreen() {
 
                 <SocialAuthButtons mode="login" onSuccess={() => router.replace('/home')} />
 
-                <View className="mt-[28px] flex-row justify-center gap-[6px]">
+                <View className="mt-[32px] flex-row justify-center gap-[6px]">
                     <Text className="text-[13px] text-sub">계정이 없으신가요?</Text>
                     <Link href="/signup" replace asChild>
                         <Pressable hitSlop={8}>
-                            <Text className="text-[13px] font-medium text-accent">회원가입</Text>
+                            <Text className="text-[13px] font-semibold text-accent">회원가입</Text>
                         </Pressable>
                     </Link>
                 </View>
