@@ -1,6 +1,6 @@
 # 스탬핏 (StampFit)
 ￼
-<img src="/Users/jinhaeom/Desktop/StampFit/assets/images/stampfit-wordmark.png" width="650" height="180" /> 
+<img src="./assets/images/stampfit-wordmark.png" width="650" height="180" /> 
 
 > **복잡한 기록 없이 간단하게 기록하는 나만의 운동 캘린더**
 
