@@ -13,7 +13,7 @@ module.exports = {
         fg: '#ECECEC',
         sub: '#8A8C91',
         dim: '#6E7075',
-        accent: '#C8F04A', // 라임 (민트면 #4FD1B3)
+        accent: '#4FD1B3', // 민트
         'on-accent': '#111214',
         danger: '#E5484D',
       },

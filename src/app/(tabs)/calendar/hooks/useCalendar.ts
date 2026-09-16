@@ -69,6 +69,9 @@ export function useCalendar() {
         listRef.current?.scrollToIndex({ index: next, animated: true });
       }
     },
+    goToToday: () => {
+      listRef.current?.scrollToIndex({ index: RANGE, animated: true });
+    },
     onMomentumScrollEnd: (e: NativeSyntheticEvent<NativeScrollEvent>) =>
       setIndex(Math.round(e.nativeEvent.contentOffset.x / PAGE_WIDTH)),
     getItemLayout: (_: unknown, i: number) => ({

@@ -23,7 +23,7 @@ export type MyHealthWidgetProps = {
 // 'widget' 함수는 별도 런타임에서 실행되므로 상수·헬퍼를 전부 함수 안에 둬야 함
 const MyHealthWidget = (props: MyHealthWidgetProps, environment: WidgetEnvironment) => {
   'widget';
-  const ACCENT = '#C8F04A';
+  const ACCENT = '#4FD1B3';
   const FG = '#ECECEC';
   const SUB = '#8A8C91';
   const CELL = '#26282C';

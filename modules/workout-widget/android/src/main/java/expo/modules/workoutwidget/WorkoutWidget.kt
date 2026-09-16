@@ -35,7 +35,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 
-private val Accent = Color(0xFFC8F04A)
+private val Accent = Color(0xFF4FD1B3)
 private val Fg = Color(0xFFECECEC)
 private val Sub = Color(0xFF8A8C91)
 private val Cell = Color(0xFF26282C)

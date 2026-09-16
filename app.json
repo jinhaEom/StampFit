@@ -1,21 +1,25 @@
 {
   "expo": {
-    "name": "myHealth",
-    "slug": "myHealth",
+    "name": "스탬핏",
+    "slug": "stampfit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myhealth",
+    "scheme": "stampfit",
     "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.jinhaeom.myhealth",
-      "appleTeamId": "DNPA47GWF6"
+      "icon": "./assets/images/icon.png",
+      "bundleIdentifier": "com.jinhaeom.stampfit",
+      "appleTeamId": "DNPA47GWF6",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다.",
+        "NSPhotoLibraryAddUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다."
+      }
     },
     "android": {
-      "package": "com.jinhaeom.myhealth",
+      "package": "com.jinhaeom.stampfit",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0E0F11",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -31,7 +35,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0E0F11",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
@@ -64,7 +68,15 @@
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
-      "expo-build-properties"
+      "expo-build-properties",
+      "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다.",
+          "savePhotosPermission": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
