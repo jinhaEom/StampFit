@@ -86,18 +86,14 @@ export function getMonthlyAnalytics(
   let totalDistributedMinutes = 0;
 
   for (const log of currentLogs) {
-    const validParts = log.partIds.filter((id) => Boolean(partNamesById[id]));
-    if (validParts.length === 0) continue;
+    for (const part of log.parts) {
+      if (!partNamesById[part.id]) continue;
 
-    // 복수 부위일 경우 균등 분배
-    const minPerPart = log.durationMin / validParts.length;
-
-    for (const partId of validParts) {
-      const existing = partMap.get(partId) ?? { minutes: 0, count: 0 };
-      existing.minutes += minPerPart;
-      existing.count += 1;  
-      partMap.set(partId, existing);
-      totalDistributedMinutes += minPerPart;
+      const existing = partMap.get(part.id) ?? { minutes: 0, count: 0 };
+      existing.minutes += part.durationMin;
+      existing.count += 1;
+      partMap.set(part.id, existing);
+      totalDistributedMinutes += part.durationMin;
     }
   }
 

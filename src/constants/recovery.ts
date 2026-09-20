@@ -10,7 +10,9 @@ export const INTENSITY_LABELS = ['아주 약하게', '약하게', '적당히', '
 export const CONDITION_LABELS = ['매우 나쁨', '나쁨', '보통', '좋음', '매우 좋음'];
 export const CONDITION_EMOJI = ['😫', '😕', '😐', '🙂', '😄'];
 
-export const DURATION_DEFAULT = 60;
+/** 부위를 새로 선택했을 때 기본으로 채워지는 시간 */
+export const DURATION_DEFAULT = 30;
 export const DURATION_STEP = 5;
-export const DURATION_SLIDER_MAX = 180;
 export const DURATION_MAX = 600;
+/** 부위별 시간 카드의 빠른 선택 칩 */
+export const DURATION_QUICK_PICKS = [10, 20, 30, 45, 60, 90];

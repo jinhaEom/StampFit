@@ -30,7 +30,7 @@ function DayCell({
   onSelect,
   pillStyle,
 }: Props) {
-  const parts = log?.partIds.flatMap((id) => partNames.get(id) ?? []) ?? [];
+  const parts = log?.parts.flatMap((p) => partNames.get(p.id) ?? []) ?? [];
 
   return (
     <Pressable className="flex-1 items-center py-[3px]" onPress={() => onSelect(date)}>

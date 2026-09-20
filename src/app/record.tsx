@@ -1,20 +1,18 @@
 import { AlertModal } from '@/components/AlertModal';
 import { Chip } from '@/components/Chip';
+import { PartDurationCard } from '@/components/PartDurationCard';
 import { ScaleSelector } from '@/components/ScaleSelector';
 import { Colors } from '@/constants/colors';
 import {
   CONDITION_EMOJI,
   CONDITION_LABELS,
   DURATION_DEFAULT,
-  DURATION_MAX,
-  DURATION_SLIDER_MAX,
-  DURATION_STEP,
   INTENSITY_LABELS,
 } from '@/constants/recovery';
-import { formatKorean, todayStr } from '@/lib/date';
+import { formatDuration, formatKorean, todayStr } from '@/lib/date';
+import type { WorkoutLogPart } from '@/lib/types';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { Ionicons } from '@expo/vector-icons';
-import Slider from '@react-native-community/slider';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
@@ -40,29 +38,37 @@ export default function RecordScreen() {
   const addPart = useWorkoutStore((s) => s.addPart);
   const existing = useWorkoutStore((s) => s.logs.find((l) => l.logDate === logDate));
 
-  // 비활성 부위여도 기존 기록에 포함돼 있으면 보여준다 (과거 기록 유지 원칙)
-  const visibleParts = parts.filter((p) => p.isActive || existing?.partIds.includes(p.id));
+  const existingPartIds = React.useMemo(() => existing?.parts.map((p) => p.id) ?? [], [existing]);
 
-  const [selected, setSelected] = React.useState<string[]>(existing?.partIds ?? []);
-  const [duration, setDuration] = React.useState(existing?.durationMin ?? DURATION_DEFAULT);
-  const [durationText, setDurationText] = React.useState(
-    String(existing?.durationMin ?? DURATION_DEFAULT),
-  );
+  // 비활성 부위여도 기존 기록에 포함돼 있으면 보여준다 (과거 기록 유지 원칙)
+  const visibleParts = parts.filter((p) => p.isActive || existingPartIds.includes(p.id));
+
+  const [entries, setEntries] = React.useState<WorkoutLogPart[]>(existing?.parts ?? []);
   const [intensity, setIntensity] = React.useState(existing?.intensity ?? 3);
   const [condition, setCondition] = React.useState(existing?.condition ?? 3);
   const [memo, setMemo] = React.useState(existing?.memo ?? '');
   const [adding, setAdding] = React.useState(false);
   const [newName, setNewName] = React.useState('');
+  const [dupAlertVisible, setDupAlertVisible] = React.useState(false);
+
+  const selectedIds = entries.map((e) => e.id);
 
   const togglePart = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelected((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
+    setEntries((prev) =>
+      prev.some((e) => e.id === id)
+        ? prev.filter((e) => e.id !== id)
+        : [...prev, { id, durationMin: DURATION_DEFAULT }],
+    );
   };
 
-  const applyDuration = (min: number) => {
-    const v = Math.max(0, Math.min(DURATION_MAX, Math.round(min)));
-    setDuration(v);
-    setDurationText(String(v));
+  // 카드의 삭제 버튼 전용 — 사라지는 애니메이션이 끝난 뒤 호출되므로 햅틱은 카드 쪽에서 즉시 준다
+  const removeEntry = (id: string) => {
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const updateDuration = (id: string, durationMin: number) => {
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, durationMin } : e)));
   };
 
   const onAddPart = () => {
@@ -70,32 +76,25 @@ export default function RecordScreen() {
     if (!name) return;
     const id = addPart(name);
     if (!id) {
-      <AlertModal
-        visible={adding}
-        title="이미 있는 부위예요"
-        contents="이미 있는 부위예요"
-        okLabel="확인"
-        onOk={() => {
-          setAdding(false);
-        }}
-      />
+      setDupAlertVisible(true);
       return;
     }
-    setSelected((prev) => [...prev, id]);
+    setEntries((prev) => [...prev, { id, durationMin: DURATION_DEFAULT }]);
     setNewName('');
     setAdding(false);
   };
 
-  const canSave = selected.length > 0 && duration > 0;
+  const selectedParts = visibleParts.filter((p) => selectedIds.includes(p.id));
+  const totalMin = entries.reduce((sum, e) => sum + e.durationMin, 0);
+  const canSave = entries.length > 0 && entries.every((e) => e.durationMin > 0);
 
   const onSave = () => {
     saveLog({
       logDate,
-      durationMin: duration,
       intensity,
       condition,
       memo: memo.trim() || null,
-      partIds: selected,
+      parts: entries,
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();
@@ -132,7 +131,7 @@ export default function RecordScreen() {
               <Chip
                 key={p.id}
                 label={p.name}
-                selected={selected.includes(p.id)}
+                selected={selectedIds.includes(p.id)}
                 onPress={() => togglePart(p.id)}
               />
             ))}
@@ -165,35 +164,31 @@ export default function RecordScreen() {
             </View>
           )}
 
-          {/* 2. 총 시간 */}
-          <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">총 시간</Text>
-          <View className="flex-row items-center gap-[12px]">
-            <Slider
-              style={{ flex: 1, height: 40 }}
-              minimumValue={DURATION_STEP}
-              maximumValue={DURATION_SLIDER_MAX}
-              step={DURATION_STEP}
-              value={Math.min(duration, DURATION_SLIDER_MAX)}
-              onValueChange={applyDuration}
-              minimumTrackTintColor={Colors.whiteColor}
-              maximumTrackTintColor={Colors.gray1Color}
-              thumbTintColor={Colors.whiteColor}
-            />
-            <View className="flex-row items-center gap-[4px]">
-              <TextInput
-                className="min-w-[52px] rounded-[10px] bg-card px-[10px] py-[8px] text-right text-[16px] text-fg"
-                value={durationText}
-                onChangeText={(t) => setDurationText(t.replace(/[^0-9]/g, ''))}
-                onEndEditing={() => {
-                  const n = parseInt(durationText, 10);
-                  applyDuration(Number.isNaN(n) ? duration : n);
-                }}
-                keyboardType="number-pad"
-                maxLength={3}
-              />
-              <Text className="text-[15px] text-sub">분</Text>
-            </View>
-          </View>
+          {/* 2. 부위별 시간 */}
+          {selectedParts.length > 0 && (
+            <>
+              <View className="mb-[10px] mt-[22px] flex-row items-center justify-between">
+                <Text className="text-[13px] text-sub">부위별 시간</Text>
+                <Text className="text-[13px] font-medium text-fg">
+                  총 {formatDuration(totalMin)}
+                </Text>
+              </View>
+              <View className="gap-[10px]">
+                {selectedParts.map((p) => {
+                  const entry = entries.find((e) => e.id === p.id)!;
+                  return (
+                    <PartDurationCard
+                      key={p.id}
+                      name={p.name}
+                      durationMin={entry.durationMin}
+                      onChange={(min) => updateDuration(p.id, min)}
+                      onRemove={() => removeEntry(p.id)}
+                    />
+                  );
+                })}
+              </View>
+            </>
+          )}
 
           {/* 강도 */}
           <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">강도</Text>
@@ -230,11 +225,23 @@ export default function RecordScreen() {
             <Text
               className={`text-[16px] font-medium ${canSave ? 'text-on-accent' : 'text-dim'}`}
             >
-              {canSave ? '저장' : '부위를 선택하세요'}
+              {entries.length === 0
+                ? '부위를 선택하세요'
+                : canSave
+                  ? '저장'
+                  : '부위별 시간을 입력하세요'}
             </Text>
           </Pressable>
         </View>
       </View>
+
+      <AlertModal
+        visible={dupAlertVisible}
+        title="이미 있는 부위예요"
+        contents="이미 있는 부위예요"
+        okLabel="확인"
+        onOk={() => setDupAlertVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 }

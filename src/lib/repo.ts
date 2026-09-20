@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { todayStr, weekStart } from './date';
 import { getDb, seedDefaultPartsIfEmpty, wipeLocalData } from './db';
-import type { BodyPart, Goal, WorkoutCycle, WorkoutCycleStep, WorkoutLog } from './types';
+import type { BodyPart, Goal, WorkoutCycle, WorkoutCycleStep, WorkoutLog, WorkoutLogPart } from './types';
 
 /**
  * 로컬 DB CRUD.
@@ -45,13 +45,13 @@ export function getLogs(): WorkoutLog[] {
   const rows = db.getAllSync<LogRow>(
     'SELECT id, log_date, duration_min, intensity, condition, memo FROM workout_logs WHERE deleted_at IS NULL ORDER BY log_date',
   );
-  const partRows = db.getAllSync<{ log_id: string; body_part_id: string }>(
-    'SELECT log_id, body_part_id FROM workout_log_parts',
+  const partRows = db.getAllSync<{ log_id: string; body_part_id: string; duration_min: number }>(
+    'SELECT log_id, body_part_id, duration_min FROM workout_log_parts',
   );
-  const partsByLog = new Map<string, string[]>();
+  const partsByLog = new Map<string, WorkoutLogPart[]>();
   for (const p of partRows) {
     const list = partsByLog.get(p.log_id) ?? [];
-    list.push(p.body_part_id);
+    list.push({ id: p.body_part_id, durationMin: p.duration_min });
     partsByLog.set(p.log_id, list);
   }
   return rows.map((r) => ({
@@ -61,22 +61,22 @@ export function getLogs(): WorkoutLog[] {
     intensity: r.intensity,
     condition: r.condition,
     memo: r.memo,
-    partIds: partsByLog.get(r.id) ?? [],
+    parts: partsByLog.get(r.id) ?? [],
   }));
 }
 
 export interface UpsertLogInput {
   logDate: string;
-  durationMin: number;
   intensity: number;
   condition: number;
   memo: string | null;
-  partIds: string[];
+  parts: WorkoutLogPart[];
 }
 
 export function upsertLog(input: UpsertLogInput) {
   const db = getDb();
   const now = nowIso();
+  const durationMin = input.parts.reduce((sum, p) => sum + p.durationMin, 0);
   db.withTransactionSync(() => {
     const existing = db.getFirstSync<{ id: string }>(
       'SELECT id FROM workout_logs WHERE log_date = ?', input.logDate,
@@ -88,18 +88,21 @@ export function upsertLog(input: UpsertLogInput) {
            SET duration_min = ?, intensity = ?, condition = ?, memo = ?,
                updated_at = ?, deleted_at = NULL, synced = 0
          WHERE id = ?`,
-        input.durationMin, input.intensity, input.condition, input.memo, now, id,
+        durationMin, input.intensity, input.condition, input.memo, now, id,
       );
     } else {
       db.runSync(
         `INSERT INTO workout_logs (id, log_date, duration_min, intensity, condition, memo, updated_at, synced)
          VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
-        id, input.logDate, input.durationMin, input.intensity, input.condition, input.memo, now,
+        id, input.logDate, durationMin, input.intensity, input.condition, input.memo, now,
       );
     }
     db.runSync('DELETE FROM workout_log_parts WHERE log_id = ?', id);
-    for (const partId of input.partIds) {
-      db.runSync('INSERT INTO workout_log_parts (log_id, body_part_id) VALUES (?, ?)', id, partId);
+    for (const part of input.parts) {
+      db.runSync(
+        'INSERT INTO workout_log_parts (log_id, body_part_id, duration_min) VALUES (?, ?, ?)',
+        id, part.id, part.durationMin,
+      );
     }
     // 새 기록일 때만 싸이클을 다음 단계로 넘긴다 (기존 기록 수정 시에는 넘기지 않음)
     if (!existing) advanceCycleStep(db);

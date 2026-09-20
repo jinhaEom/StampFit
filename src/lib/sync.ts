@@ -60,17 +60,17 @@ async function pullMerge() {
     supabase
       .from('workout_logs')
       .select('id, log_date, duration_min, intensity, condition, memo, updated_at, deleted_at'),
-    supabase.from('workout_log_parts').select('log_id, body_part_id'),
+    supabase.from('workout_log_parts').select('log_id, body_part_id, duration_min'),
   ]);
   const error = partsRes.error ?? logsRes.error ?? logPartsRes.error;
   if (error) throw error;
 
   const serverParts = (partsRes.data ?? []) as ServerPart[];
   const serverLogs = (logsRes.data ?? []) as ServerLog[];
-  const partsByLog = new Map<string, string[]>();
+  const partsByLog = new Map<string, { body_part_id: string; duration_min: number }[]>();
   for (const row of logPartsRes.data ?? []) {
     const list = partsByLog.get(row.log_id) ?? [];
-    list.push(row.body_part_id);
+    list.push({ body_part_id: row.body_part_id, duration_min: row.duration_min });
     partsByLog.set(row.log_id, list);
   }
 
@@ -135,8 +135,11 @@ async function pullMerge() {
         );
       }
       db.runSync('DELETE FROM workout_log_parts WHERE log_id = ?', sl.id);
-      for (const partId of partsByLog.get(sl.id) ?? []) {
-        db.runSync('INSERT OR IGNORE INTO workout_log_parts (log_id, body_part_id) VALUES (?, ?)', sl.id, partId);
+      for (const part of partsByLog.get(sl.id) ?? []) {
+        db.runSync(
+          'INSERT OR IGNORE INTO workout_log_parts (log_id, body_part_id, duration_min) VALUES (?, ?, ?)',
+          sl.id, part.body_part_id, part.duration_min,
+        );
       }
     }
   });
@@ -194,8 +197,8 @@ async function pushUnsynced(userId: string) {
 
   // 부위 연결은 기록 단위로 서버 것을 지우고 로컬 것으로 갈아끼운다
   const logIds = logs.map((l) => l.id);
-  const junction = db.getAllSync<{ log_id: string; body_part_id: string }>(
-    `SELECT log_id, body_part_id FROM workout_log_parts WHERE log_id IN (${logIds.map(() => '?').join(', ')})`,
+  const junction = db.getAllSync<{ log_id: string; body_part_id: string; duration_min: number }>(
+    `SELECT log_id, body_part_id, duration_min FROM workout_log_parts WHERE log_id IN (${logIds.map(() => '?').join(', ')})`,
     ...logIds,
   );
   const { error: delError } = await supabase.from('workout_log_parts').delete().in('log_id', logIds);

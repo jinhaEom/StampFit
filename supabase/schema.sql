@@ -25,9 +25,12 @@ create table if not exists public.workout_log_parts (
   log_id uuid not null references public.workout_logs (id) on delete cascade,
   body_part_id uuid not null references public.body_parts (id) on delete cascade,
   user_id uuid not null references auth.users (id) on delete cascade,
+  duration_min integer not null default 0,
   primary key (log_id, body_part_id)
 );
 
+-- 이미 생성된 프로젝트에도 안전하게 적용되는 컬럼 추가 (부위별 시간 기록 지원)
+alter table public.workout_log_parts add column if not exists duration_min integer not null default 0;
 alter table public.body_parts enable row level security;
 alter table public.workout_logs enable row level security;
 alter table public.workout_log_parts enable row level security;

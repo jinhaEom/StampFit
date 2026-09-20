@@ -36,9 +36,11 @@ export default function DayDetail({ date, log }: { date: string; log: WorkoutLog
       ) : (
         <>
           <View className="mt-[10px] flex-row flex-wrap gap-[6px]">
-            {log.partIds.map((id) => {
-              const name = partNamesById[id];
-              return name ? <Chip key={id} label={name} small /> : null;
+            {log.parts.map((p) => {
+              const name = partNamesById[p.id];
+              return name ? (
+                <Chip key={p.id} label={`${name} ${p.durationMin}분`} small />
+              ) : null;
             })}
           </View>
           <Text className="mt-[10px] text-[14px] text-fg">

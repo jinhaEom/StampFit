@@ -47,6 +47,7 @@ function migrate(db: SQLiteDatabase) {
     CREATE TABLE IF NOT EXISTS workout_log_parts (
       log_id TEXT NOT NULL,
       body_part_id TEXT NOT NULL,
+      duration_min INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (log_id, body_part_id)
     );
 
@@ -79,6 +80,8 @@ function migrate(db: SQLiteDatabase) {
 
   // 이미 설치된 기기의 body_parts 테이블에는 deleted_at 컬럼이 없을 수 있어 있는지 확인 후 추가한다.
   ensureColumn(db, 'body_parts', 'deleted_at', 'TEXT');
+  // 부위별 시간 기록 이전 버전 기기에는 duration_min 컬럼이 없을 수 있다.
+  ensureColumn(db, 'workout_log_parts', 'duration_min', 'INTEGER NOT NULL DEFAULT 0');
 }
 
 function ensureColumn(db: SQLiteDatabase, table: string, column: string, ddl: string) {

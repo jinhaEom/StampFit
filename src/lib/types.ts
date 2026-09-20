@@ -7,18 +7,25 @@ export interface BodyPart {
   isActive: boolean;
 }
 
-/** 하루 기록 — 날짜당 1건 */
+/** 하루 기록에서 부위 하나가 차지한 시간 */
+export interface WorkoutLogPart {
+  id: string;
+  durationMin: number;
+}
+
+/** 하루 기록 — 날짜당 1건, 부위마다 시간을 따로 기록 */
 export interface WorkoutLog {
   id: string;
   /** YYYY-MM-DD (로컬 기준) */
   logDate: string;
+  /** 전체 부위 시간의 합 (파생값) */
   durationMin: number;
   /** 1~5, 평소 대비 강도 */
   intensity: number;
   /** 1~5, 몸 상태 */
   condition: number;
   memo: string | null;
-  partIds: string[];
+  parts: WorkoutLogPart[];
 }
 
 /** 주간 운동 횟수 목표 */
