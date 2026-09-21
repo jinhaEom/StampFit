@@ -1,55 +1,22 @@
 import { AlertModal } from '@/components/AlertModal';
-import { Colors } from '@/constants/colors';
-import { BodyPart } from '@/lib/types';
+import { Colors, PART_PALETTE } from '@/constants/colors';
 import { useAdsStore } from '@/store/useAdsStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { ActivityIndicator, Pressable, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import {
-  NestableDraggableFlatList,
-  NestableScrollContainer,
-  RenderItemParams,
-  ScaleDecorator,
-} from 'react-native-draggable-flatlist';
+import { useRouter } from 'expo-router';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import { useSettings } from './hooks/useSettings';
 
 export default function SettingScreen() {
+  const router = useRouter();
   const {
     insets,
     parts,
-    addPart,
-    setPartActive,
-    setParts,
     resetAll,
-    newName,
-    setNewName,
     logout,
-    goal,
-    goalCountInput,
-    setGoalCountInput,
-    goalRecurring,
-    setGoalRecurring,
-    saveGoal,
-    duplicateAlertVisible,
-    setDuplicateAlertVisible,
-    invalidGoalAlertVisible,
-    setInvalidGoalAlertVisible,
     resetConfirmVisible,
     setResetConfirmVisible,
-    deleteTargetId,
-    requestDeletePart,
-    cancelDeletePart,
-    confirmDeletePart,
-    cycle,
-    cycleSteps,
-    addCycleStep,
-    removeCycleStep,
-    toggleCycleStepPart,
-    moveCycleStep,
-    saveCycle,
-    invalidCycleAlertVisible,
-    setInvalidCycleAlertVisible,
   } = useSettings();
 
   const adsRemoved = useAdsStore((s) => s.adsRemoved);
@@ -57,27 +24,19 @@ export default function SettingScreen() {
   const purchaseRemoveAds = useAdsStore((s) => s.purchaseRemoveAds);
   const restorePurchases = useAdsStore((s) => s.restorePurchases);
 
-  const [editMode, setEditMode] = useState(false);
+  const authUser = useAuthStore((s) => s.user);
+  const PROVIDER_LABEL: Record<string, string> = { google: '구글', apple: 'Apple', email: '이메일' };
+  const provider = authUser?.app_metadata?.provider;
+  const accountLabel =
+    authUser?.email ?? (provider ? (PROVIDER_LABEL[provider] ?? provider) : '알 수 없음');
 
-  const onAdd = () => {
-    const name = newName.trim();
-    if (!name) return;
-    if (!addPart(name)) setDuplicateAlertVisible(true);
-    else setNewName('');
-  };
-
-  const onSaveGoal = () => {
-    Toast.show("저장되었어요.", Toast.SHORT);
-    if (!saveGoal()) setInvalidGoalAlertVisible(true);
-  };
-
-  const onSaveCycle = () => {
-    if (!saveCycle()) {
-      setInvalidCycleAlertVisible(true);
-      return;
-    }
-    Toast.show('저장되었어요.', Toast.SHORT);
-  };
+  const MAX_DOTS = 5;
+  const partDots = parts.slice(0, MAX_DOTS).map((p, i) => ({
+    id: p.id,
+    isActive: p.isActive,
+    color: PART_PALETTE[i % PART_PALETTE.length],
+  }));
+  const overflowCount = Math.max(0, parts.length - MAX_DOTS);
 
   const onLogout = async () => {
     await logout();
@@ -86,96 +45,33 @@ export default function SettingScreen() {
 
   return (
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }}>
-      <NestableScrollContainer
+      <ScrollView
         contentContainerClassName="px-[16px] pb-[24px] ios:pb-[74px] android:pb-[104px]"
         showsVerticalScrollIndicator={false}
       >
         <Text className="mt-[8px] text-[26px] font-medium text-fg">설정</Text>
 
-
-        <View className="mb-[8px] mt-[24px] flex-row items-center justify-between">
-          <Text className="text-[13px] text-sub">부위 관리</Text>
-          <TouchableOpacity onPress={() => setEditMode((v) => !v)} hitSlop={8} className="p-[4px]">
-            <Ionicons name={editMode ? 'checkmark' : 'pencil'} size={16} color={Colors.gray2Color} />
-          </TouchableOpacity>
-        </View>
-        <View className="rounded-[16px] bg-card p-[16px]">
-          <NestableDraggableFlatList
-            data={parts}
-            onDragEnd={({ data }) => setParts(data)}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item, drag, isActive, getIndex }: RenderItemParams<BodyPart>) => {
-              const index = getIndex?.() ?? 0;
-              return (
-                <ScaleDecorator>
-                  <View
-                    className={`flex-row items-center gap-[10px] py-[6px] ${index > 0 ? 'mt-[4px]' : ''
-                      } ${isActive ? 'opacity-70' : ''}`}
-                  >
-                    <TouchableOpacity
-                      onPressIn={drag}
-                      disabled={isActive}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      className="p-[4px]"
-                    >
-                      <Ionicons name="reorder-two" size={20} color={Colors.gray2Color} />
-                    </TouchableOpacity>
-
-                    <Text className={`flex-1 text-[15px] ${item.isActive ? 'text-fg' : 'text-dim line-through'}`}>
-                      {item.name}
-                    </Text>
-
-                    {editMode ? (
-                      <TouchableOpacity onPress={() => requestDeletePart(item.id)} hitSlop={8}>
-                        <View className=" rounded-lg bg-red-600 py-[6px] px-[10px]">
-                          <Text className="text-[12px] font-bold text-white">삭제</Text>
-                        </View>
-                      </TouchableOpacity>
-                    ) : (
-                      <Switch
-                        value={item.isActive}
-                        onValueChange={(v) => setPartActive(item.id, v)}
-                        trackColor={{ false: Colors.gray1Color, true: Colors.mainColor }}
-                        thumbColor={Colors.whiteColor}
-                      />
-                    )}
-                  </View>
-                </ScaleDecorator>
-              );
-            }}
-          />
-          <View className="mt-[12px] flex-row items-center gap-[10px]">
-            <TextInput
-              className="flex-1 rounded-[8px] bg-bg px-[10px] py-[8px] text-[15px] text-fg"
-              value={newName}
-              onChangeText={setNewName}
-              placeholder="새 부위 추가"
-              placeholderTextColor={Colors.disabledColor}
-              onSubmitEditing={onAdd}
-              returnKeyType="done"
-            />
-            <Pressable onPress={onAdd} hitSlop={8}>
-              <Text className="text-[15px] font-medium text-fg">추가</Text>
-            </Pressable>
-          </View>
-          <Text className="mt-[12px] text-[12px] text-dim">
-            끄면 기록 화면에서 숨겨져요. 과거 기록은 유지돼요.
-          </Text>
-        </View>
+        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">부위 관리</Text>
+        <TouchableOpacity
+          className="flex-row items-center justify-between rounded-[16px] bg-card p-[16px]"
+          activeOpacity={0.8}
+          onPress={() => router.push('/settings/parts')}
+        >
+          <Text className="text-[15px] text-fg">부위 설정</Text>
+          <Ionicons name="chevron-forward" size={16} color={Colors.gray2Color} />
+        </TouchableOpacity>
 
         <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">계정</Text>
         <View className="rounded-[16px] bg-card p-[16px]">
           <View className="flex-row items-center justify-between">
             <Text className="text-[15px] text-dim">로그인 계정</Text>
-            <Text className="text-[13px] text-sub">구글 · Apple TODO</Text>
+            <Text className="ml-[12px] flex-1 text-right text-[13px] text-sub" numberOfLines={1}>
+              {accountLabel}
+            </Text>
           </View>
         </View>
-        <View className="rounded-[16px] bg-card p-[16px] mt-[12px]">
 
-          <TouchableOpacity onPress={onLogout} className="flex-row items-center justify-between ">
-            <Text className="text-[15px] text-dim">로그아웃</Text>
-          </TouchableOpacity>
-        </View>
+
         <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">광고</Text>
         <View className="rounded-[16px] bg-card p-[16px]">
           {adsRemoved ? (
@@ -203,7 +99,18 @@ export default function SettingScreen() {
             </>
           )}
         </View>
-        {/* ── 앱 정보 ── */}
+
+
+        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">데이터 관리</Text>
+        <TouchableOpacity
+          className="rounded-[16px] bg-card p-[16px]"
+          activeOpacity={0.8}
+          onPress={() => setResetConfirmVisible(true)}
+        >
+          <Text className="text-[15px] text-danger">모든 기록 초기화</Text>
+        </TouchableOpacity>
+
+
         <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">앱 정보</Text>
         <View className="rounded-[16px] bg-card p-[16px]">
           <View className="flex-row items-center justify-between">
@@ -211,39 +118,12 @@ export default function SettingScreen() {
             <Text className="text-[13px] text-sub">{'1.0.0'}</Text>
           </View>
         </View>
-      </NestableScrollContainer>
 
-      <AlertModal
-        visible={duplicateAlertVisible}
-        title="이미 있는 부위예요"
-        contents="다른 이름을 입력해 주세요"
-        okLabel="확인"
-        onOk={() => setDuplicateAlertVisible(false)}
-      />
-      <AlertModal
-        visible={invalidGoalAlertVisible}
-        title="목표 횟수 오류"
-        contents="1 이상의 숫자를 입력해 주세요"
-        okLabel="확인"
-        onOk={() => setInvalidGoalAlertVisible(false)}
-      />
-      <AlertModal
-        visible={invalidCycleAlertVisible}
-        title="싸이클 단계 오류"
-        contents="모든 단계에 부위를 하나 이상 선택해 주세요"
-        okLabel="확인"
-        onOk={() => setInvalidCycleAlertVisible(false)}
-      />
-      <AlertModal
-        visible={!!deleteTargetId}
-        title="부위 삭제"
-        contents="목록에서 사라지고 지난 기록은 그대로 남아요. 같은 이름으로 다시 추가하면 되살릴 수 있어요."
-        okLabel="삭제"
-        cancelLabel="취소"
-        danger
-        onOk={confirmDeletePart}
-        onCancel={cancelDeletePart}
-      />
+        <TouchableOpacity onPress={onLogout} className="items-end  mt-[24px]">
+          <Text className="text-[15px] text-dim">로그아웃</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
       <AlertModal
         visible={resetConfirmVisible}
         title="데이터 초기화"
