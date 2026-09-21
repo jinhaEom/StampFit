@@ -10,14 +10,27 @@ import { Pressable, Text, View } from 'react-native';
 /** 날짜 탭 시 상세  */
 
 
-export default function DayDetail({ date, log }: { date: string; log: WorkoutLog | undefined }) {
+export default function DayDetail({
+  date,
+  log,
+  onBeforeNavigate,
+  onAfterDelete,
+}: {
+  date: string;
+  log: WorkoutLog | undefined;
+  onBeforeNavigate?: () => void;
+  onAfterDelete?: () => void;
+}) {
   const router = useRouter();
   const today = todayStr();
   const partNamesById = useWorkoutStore((s) => s.partNamesById);
   const removeLog = useWorkoutStore((s) => s.removeLog);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
-  const goRecord = () => router.push({ pathname: '/record', params: { date } });
+  const goRecord = () => {
+    onBeforeNavigate?.();
+    router.push({ pathname: '/record', params: { date } });
+  };
 
   return (
     <View className="rounded-[16px] bg-card p-[16px]">
@@ -48,12 +61,12 @@ export default function DayDetail({ date, log }: { date: string; log: WorkoutLog
             {INTENSITY_LABELS[log.intensity - 1]}) · 컨디션 {CONDITION_EMOJI[log.condition - 1]}
           </Text>
           {log.memo ? <Text className="mt-[6px] text-[13px] text-sub">{log.memo}</Text> : null}
-          <View className="mt-[14px] flex-row gap-[20px]">
-            <Pressable onPress={goRecord} hitSlop={8}>
-              <Text className="text-[14px] font-medium text-fg">수정</Text>
+          <View className="mt-[14px] flex-row justify-end gap-[10px]">
+            <Pressable onPress={goRecord} hitSlop={8} className="rounded-[12px] border border-line py-[8px] px-[12px]">
+              <Text className="text-[16px] font-medium text-fg">수정</Text>
             </Pressable>
-            <Pressable onPress={() => setConfirmVisible(true)} hitSlop={8}>
-              <Text className="text-[14px] text-danger">삭제</Text>
+            <Pressable onPress={() => setConfirmVisible(true)} hitSlop={8} className="rounded-[12px] border border-line py-[8px] px-[12px]">
+              <Text className="text-[16px] text-danger">삭제</Text>
             </Pressable>
           </View>
         </>
@@ -68,6 +81,7 @@ export default function DayDetail({ date, log }: { date: string; log: WorkoutLog
         onOk={() => {
           setConfirmVisible(false);
           removeLog(date);
+          onAfterDelete?.();
         }}
         onCancel={() => setConfirmVisible(false)}
       />

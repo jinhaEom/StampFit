@@ -1,12 +1,17 @@
 import { AdBanner } from '@/components/AdBanner';
 import { WeekGrass } from '@/components/WeekGrass';
-import { Colors } from '@/constants/colors';
 import { BottomTabInset } from '@/constants/constant';
-import { formatDuration, formatKorean } from '@/lib/date';
-import { Ionicons } from '@expo/vector-icons';
+import { formatDuration } from '@/lib/date';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import Toast from 'react-native-simple-toast';
+import { GoalTile } from './components/GoalTile';
+import { MonthlyReportTeaser } from './components/MonthlyReportTeaser';
+import { PartBalanceCard } from './components/PartBalanceCard';
+import { StreakHero } from './components/StreakHero';
+import { TodayCycleHeader } from './components/TodayCycleHeader';
 import { CycleModal } from './detail/CycleModal';
+import { DayLogModal } from './detail/DayLogModal';
 import { GoalModal } from './detail/GoalModal';
 import { useHome } from './hooks/useHome';
 
@@ -15,11 +20,16 @@ export default function HomeScreen() {
     insets,
     router,
     today,
+    logsByDate,
+    hasAnyLogs,
     weekDays,
     weekLogs,
     weekMin,
+    weekPartStats,
+    monthAnalytics,
     goalProgress,
     consecutiveDays,
+    hasLoggedToday,
     quoteOfDay,
     currentCycleStep,
     nextCycleStep,
@@ -29,108 +39,72 @@ export default function HomeScreen() {
     setIsGoalModalOpen,
   } = useHome();
 
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const handlePressDay = (date: string) => {
+    if (date > today) {
+      Toast.show('미래 날짜예요', Toast.SHORT);
+      return;
+    }
+    setSelectedDate(date);
+  };
+
   return (
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
       <ScrollView contentContainerClassName="px-[16px] pb-[24px]" showsVerticalScrollIndicator={false}>
-        <Text className="mt-[8px] text-[13px] text-sub">{formatKorean(today)}</Text>
-        <Text className="mt-[2px] text-[26px] font-medium text-fg">오늘</Text>
+
+        <StreakHero
+          consecutiveDays={consecutiveDays}
+          hasLoggedToday={hasLoggedToday}
+          hasAnyLogs={hasAnyLogs}
+        />
+
+        <TodayCycleHeader
+          currentCycleStep={currentCycleStep}
+          nextCycleStep={nextCycleStep}
+          onEditCycle={() => setIsCycleModalOpen(true)}
+        />
+
         {quoteOfDay && (
-          <>
-            <Text className="mt-[20px] text-[13px] italic leading-6 text-sub">
-              “{quoteOfDay.quote}”
+          <View className="mt-[22px]">
+            <Text className="text-[13px] italic leading-6" style={{ color: '#C7C9CC' }}>
+              "{quoteOfDay.quote}"
             </Text>
-            <Text className="mt-[2px] text-[13px] italic leading-6 text-sub">
-              - {quoteOfDay.author}
-            </Text>
-          </>
-        )}
-        <View className="flex-row justify-between w-full gap-[12px]">
-          <View className="mt-[24px] rounded-[16px] bg-card p-[16px] w-1/3">
-            <Text className="text-[13px] text-sub">
-              연속 기록일수
-            </Text>
-            <Text className="mt-[2px] text-[26px] font-semibold text-fg">🔥 {consecutiveDays}일</Text>
+            <Text className="mt-[3px] text-[11px] text-dim">— {quoteOfDay.author}</Text>
           </View>
-          {/* 운동 싸이클 */}
-          {currentCycleStep ? (
-            <View className="mt-[24px] rounded-[16px] bg-card p-[16px] flex-1">
-              <View className="flex-row justify-between">
-                <Text className="text-[13px] text-sub">오늘 할 운동</Text>
-                <TouchableOpacity
-                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                  onPress={() => setIsCycleModalOpen(true)}
-                >
-                  <Ionicons name="pencil" size={16} color={Colors.gray2Color} />
-                </TouchableOpacity>
-              </View>
-              <Text className="mt-[6px] text-[28px] font-semibold text-fg">{currentCycleStep.label}</Text>
-              {nextCycleStep && (
-                <Text className="mt-[6px] text-[12px] text-sub">다음 차례: {nextCycleStep.label}</Text>
-              )}
-            </View>
-          ) : (
-            <Pressable
-              className="mt-[24px] flex-row items-center justify-between rounded-[16px] bg-card p-[16px]"
-              onPress={() => setIsCycleModalOpen(true)}
-            >
-              <Text className="text-[13px] text-sub">운동 싸이클을 등록해보세요</Text>
-              <Ionicons name="chevron-forward" size={16} color={Colors.gray2Color} />
-            </Pressable>
-          )}
+        )}
+
+        <View className="mt-[16px] flex-row gap-[12px]">
+          <GoalTile goalProgress={goalProgress} onPress={() => setIsGoalModalOpen(true)} />
+          <PartBalanceCard partStats={weekPartStats} />
         </View>
 
-        {/* 주간 목표 */}
-        {goalProgress ? (
-          <View className="mt-[24px] rounded-[16px] bg-card p-[16px]">
-            <View className="flex-row justify-between">
-              <Text className="text-[13px] text-sub">
-                주간 목표{goalProgress.recurring ? ' · 매주 반복' : ''}
-              </Text>
-              <TouchableOpacity
-                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                onPress={() => setIsGoalModalOpen(true)}
-              >
-                <Ionicons name="pencil" size={16} color={Colors.gray2Color} />
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row items-center justify-between">
-
-              <Text className="text-[13px] text-sub">
-                {goalProgress.achievedCount}/{goalProgress.targetCount}회
-              </Text>
-            </View>
-            <Text className="mt-[6px] text-[28px] font-semibold text-fg">{goalProgress.percent}%</Text>
-            <View className="mt-[10px] h-[6px] overflow-hidden rounded-full bg-line">
-              <View className="h-full rounded-full bg-accent" style={{ width: `${goalProgress.percent}%` }} />
-            </View>
-
-          </View>
-        ) : (
-          <Pressable
-            className="mt-[24px] flex-row items-center justify-between rounded-[16px] bg-card p-[16px]"
-            onPress={() => setIsGoalModalOpen(true)}
-          >
-            <Text className="text-[13px] text-sub">주간 목표를 설정해보세요</Text>
-            <Ionicons name="chevron-forward" size={16} color={Colors.gray2Color} />
-          </Pressable>
-        )}
-
-
-
-        {/* 이번 주 */}
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">이번 주</Text>
+        <Text className="mb-[8px] mt-[20px] text-[13px] text-sub">이번 주</Text>
         <View className="rounded-[16px] bg-card p-[16px]">
-          <WeekGrass days={weekDays} />
+          <WeekGrass days={weekDays} onPressDay={handlePressDay} />
           <Text className="mt-[12px] text-[13px] text-sub">
             {weekLogs.length > 0
               ? `${weekLogs.length}회 · 총 ${formatDuration(weekMin)}`
               : '아직 기록이 없어요'}
           </Text>
         </View>
+
+        {/* 탭하면 캘린더 통계로 이동 */}
+        <Text className="mb-[8px] mt-[20px] text-[13px] text-sub">이번 달</Text>
+        <MonthlyReportTeaser
+          analytics={monthAnalytics}
+          onPress={() => router.push({ pathname: '/calendar', params: { tab: 'stats' } })}
+        />
       </ScrollView>
       <CycleModal
         visible={isCycleModalOpen}
         onClose={() => setIsCycleModalOpen(false)}
+      />
+      <DayLogModal
+        visible={selectedDate !== null}
+        date={selectedDate}
+        log={selectedDate ? logsByDate.get(selectedDate) : undefined}
+        onClose={() => setSelectedDate(null)}
       />
       <GoalModal
         visible={isGoalModalOpen}
@@ -145,7 +119,7 @@ export default function HomeScreen() {
           className="items-center rounded-[14px] bg-accent py-[15px]"
           onPress={() => router.push('/record')}
         >
-          <Text className="text-[16px] font-medium text-on-accent">운동 기록하기</Text>
+          <Text className="text-[16px] font-medium text-black">운동 기록하기</Text>
         </Pressable>
       </View>
     </View>

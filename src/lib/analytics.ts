@@ -29,6 +29,38 @@ export interface MonthlyAnalytics {
   hasData: boolean;
 }
 
+/** 로그 배열에서 부위별 시간/횟수/비중을 계산  */
+export function getPartStatsForLogs(
+  logs: WorkoutLog[],
+  partNamesById: Record<string, string>,
+): PartStat[] {
+  const partMap = new Map<string, { minutes: number; count: number }>();
+  let totalMinutes = 0;
+
+  for (const log of logs) {
+    for (const part of log.parts) {
+      if (!partNamesById[part.id]) continue;
+
+      const existing = partMap.get(part.id) ?? { minutes: 0, count: 0 };
+      existing.minutes += part.durationMin;
+      existing.count += 1;
+      partMap.set(part.id, existing);
+      totalMinutes += part.durationMin;
+    }
+  }
+
+  return Array.from(partMap.entries())
+    .map(([id, data]) => {
+      const name = partNamesById[id] || '기타';
+      const roundedMin = Math.round(data.minutes);
+      const percentage =
+        totalMinutes > 0 ? Math.round((data.minutes / totalMinutes) * 100) : 0;
+      return { id, name, minutes: roundedMin, percentage, count: data.count, color: '' };
+    })
+    .sort((a, b) => b.minutes - a.minutes)
+    .map((item, idx) => ({ ...item, color: PART_PALETTE[idx % PART_PALETTE.length] }));
+}
+
 /** 특정 연도/월의 통계 데이터 계산 */
 export function getMonthlyAnalytics(
   logs: WorkoutLog[],
@@ -37,7 +69,7 @@ export function getMonthlyAnalytics(
   month: number,
 ): MonthlyAnalytics {
   const currentPrefix = `${year}-${String(month).padStart(2, '0')}`;
-  
+
   // 이전 달 연산
   const prevDate = new Date(year, month - 2, 1);
   const prevYear = prevDate.getFullYear();
@@ -81,45 +113,7 @@ export function getMonthlyAnalytics(
     (currentLogs.reduce((acc, l) => acc + l.condition, 0) / totalCount).toFixed(1),
   );
 
-  // 부위별 운동 시간 및 횟수 집계
-  const partMap = new Map<string, { minutes: number; count: number }>();
-  let totalDistributedMinutes = 0;
-
-  for (const log of currentLogs) {
-    for (const part of log.parts) {
-      if (!partNamesById[part.id]) continue;
-
-      const existing = partMap.get(part.id) ?? { minutes: 0, count: 0 };
-      existing.minutes += part.durationMin;
-      existing.count += 1;
-      partMap.set(part.id, existing);
-      totalDistributedMinutes += part.durationMin;
-    }
-  }
-
-  // 부위 통계 정렬 및 백분율 산출
-  const partStats: PartStat[] = Array.from(partMap.entries())
-    .map(([id, data], index) => {
-      const name = partNamesById[id] || '기타';
-      const roundedMin = Math.round(data.minutes);
-      const percentage =
-        totalDistributedMinutes > 0
-          ? Math.round((data.minutes / totalDistributedMinutes) * 100)
-          : 0;
-      return {
-        id,
-        name,
-        minutes: roundedMin,
-        percentage,
-        count: data.count,
-        color: PART_PALETTE[index % PART_PALETTE.length],
-      };
-    })
-    .sort((a, b) => b.minutes - a.minutes)
-    .map((item, idx) => ({
-      ...item,
-      color: PART_PALETTE[idx % PART_PALETTE.length],
-    }));
+  const partStats = getPartStatsForLogs(currentLogs, partNamesById);
 
   // 이 달 안에서의 최대 연속 운동 일수 계산
   const sortedDates = currentLogs

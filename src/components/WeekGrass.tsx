@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/colors';
 import { heatColor } from '@/lib/heatmap';
 import { useEffect, useRef } from 'react';
-import { Animated, Text, View } from 'react-native';
+import { Animated, Pressable, Text, View } from 'react-native';
 
 export interface WeekDay {
   date: string;
@@ -13,16 +13,28 @@ export interface WeekDay {
 const WEEKDAY = ['월', '화', '수', '목', '금', '토', '일'];
 
 /** 이번 주 잔디 7칸 */
-export function WeekGrass({ days }: { days: WeekDay[] }) {
+export function WeekGrass({
+  days,
+  onPressDay,
+}: {
+  days: WeekDay[];
+  onPressDay?: (date: string) => void;
+}) {
   return (
     <View className="flex-row gap-[8px]">
       {days.map((d, i) => (
-        <View key={d.date} className="flex-1 items-center gap-[6px]">
+        <Pressable
+          key={d.date}
+          className="flex-1 items-center gap-[6px]"
+          disabled={!onPressDay}
+          onPress={() => onPressDay?.(d.date)}
+          hitSlop={4}
+        >
           <Cell level={d.level} isToday={d.isToday} />
           <Text className={`text-[12px] ${d.isToday ? 'font-medium text-fg' : 'text-sub'}`}>
             {WEEKDAY[i]}
           </Text>
-        </View>
+        </Pressable>
       ))}
     </View>
   );

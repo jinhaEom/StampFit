@@ -4,19 +4,31 @@ import { formatDuration, todayStr } from '@/lib/date';
 import { heatColor, heatLevel, yearGrid } from '@/lib/heatmap';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
+const COL_WIDTH = 14;
 
 /* 히트맵  */
 export default function HeatmapView() {
   const today = todayStr();
   const logs = useWorkoutStore((s) => s.logs);
   const [year, setYear] = useState(Number(today.slice(0, 4)));
+  const { width: screenWidth } = useWindowDimensions();
+  const hScrollRef = useRef<ScrollView>(null);
   const SCROLL_BOTTOM = 'pb-[24px] ios:pb-[74px] android:pb-[104px]';
 
   const logsByDate = useMemo(() => new Map(logs.map((l) => [l.logDate, l])), [logs]);
   const { weeks, monthLabels } = useMemo(() => yearGrid(year), [year]);
+
+  // 히트맵을 열면 오늘이 속한 달이 보이도록 
+  useEffect(() => {
+    const todayIndex = weeks.findIndex((week) => week.includes(today));
+    if (todayIndex < 0) return;
+    const viewportWidth = screenWidth - 32;
+    const targetX = Math.max(0, (todayIndex + 1) * COL_WIDTH - viewportWidth + COL_WIDTH);
+    hScrollRef.current?.scrollTo({ x: targetX, y: 0, animated: false });
+  }, [weeks, today, screenWidth]);
 
   const monthly = useMemo(() => {
     return Array.from({ length: 12 }, (_, i) => {
@@ -45,7 +57,7 @@ export default function HeatmapView() {
         </Pressable>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView ref={hScrollRef} horizontal showsHorizontalScrollIndicator={false}>
         <View>
           <View className="mb-[4px] flex-row">
             {monthLabels.map((label, i) => (
