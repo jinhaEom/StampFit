@@ -186,16 +186,36 @@ export function getGoal(): Goal | null {
   return { targetCount: row.target_count, recurring: row.recurring === 1, weekStart: row.week_start };
 }
 
-/** 목표 설정/수정 — 매번 이번 주를 기준 주로 다시 잡음 */
+/** 목표 변경 이력, 오래된 주부터 — 지난 주를 그 주의 목표로 판정할 때 씀 */
+export function getGoalHistory(): Goal[] {
+  return getDb()
+    .getAllSync<GoalRow>('SELECT target_count, recurring, week_start FROM goal_history ORDER BY week_start')
+    .map((r) => ({ targetCount: r.target_count, recurring: r.recurring === 1, weekStart: r.week_start }));
+}
+
+/** 목표 설정/수정 — 매번 이번 주를 기준 주로 다시 잡고, 이력에도 남긴다 */
 export function setGoal(targetCount: number, recurring: boolean) {
-  getDb().runSync(
-    `INSERT INTO goals (id, target_count, recurring, week_start, updated_at)
-     VALUES (1, ?, ?, ?, ?)
-     ON CONFLICT (id) DO UPDATE SET
-       target_count = excluded.target_count, recurring = excluded.recurring,
-       week_start = excluded.week_start, updated_at = excluded.updated_at`,
-    targetCount, recurring ? 1 : 0, weekStart(todayStr()), nowIso(),
-  );
+  const db = getDb();
+  const ws = weekStart(todayStr());
+  const now = nowIso();
+  db.withTransactionSync(() => {
+    db.runSync(
+      `INSERT INTO goals (id, target_count, recurring, week_start, updated_at)
+       VALUES (1, ?, ?, ?, ?)
+       ON CONFLICT (id) DO UPDATE SET
+         target_count = excluded.target_count, recurring = excluded.recurring,
+         week_start = excluded.week_start, updated_at = excluded.updated_at`,
+      targetCount, recurring ? 1 : 0, ws, now,
+    );
+    db.runSync(
+      `INSERT INTO goal_history (week_start, target_count, recurring, updated_at)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT (week_start) DO UPDATE SET
+         target_count = excluded.target_count, recurring = excluded.recurring,
+         updated_at = excluded.updated_at`,
+      ws, targetCount, recurring ? 1 : 0, now,
+    );
+  });
 }
 
 interface CycleRow { steps_json: string; current_index: number }

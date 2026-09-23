@@ -10,7 +10,6 @@ import {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { runOnJS } from 'react-native-worklets';
 
 const H_PADDING = 16;
 export const PAGE_WIDTH = Dimensions.get('window').width - H_PADDING * 2;
@@ -83,7 +82,6 @@ export function useCalendar() {
 
   const progress = useSharedValue(0);
   const dragStart = useSharedValue(0);
-  const [expanded, setExpanded] = useState(false);
 
   const expandGesture = Gesture.Pan()
     .activeOffsetY([-10, 10]) // 세로로 10px 넘게 움직여야 시작
@@ -99,7 +97,6 @@ export function useCalendar() {
       // 절반을 넘겼거나 아래로 충분히 튕겼으면 펼침, 아니면 접힘
       const next = progress.value > 0.5 || e.velocityY > 600;
       progress.value = withTiming(next ? 1 : 0, { duration: 220 });
-      runOnJS(setExpanded)(next);
     });
 
   const rows = months[index].weeks.length;
@@ -125,5 +122,5 @@ export function useCalendar() {
     useRowOffset(progress, 5),
   ];
 
-  return { pager, expandGesture, gridHeightStyle, rowStyles, pillStyle, expanded };
+  return { pager, expandGesture, gridHeightStyle, rowStyles, pillStyle };
 }

@@ -21,8 +21,10 @@ export default function MonthView() {
   const today = todayStr();
   const logs = useWorkoutStore((s) => s.logs);
   const partNamesById = useWorkoutStore((s) => s.partNamesById);
+  const stampingDate = useWorkoutStore((s) => s.stampingDate);
+  const clearStamping = useWorkoutStore((s) => s.clearStamping);
   const [selected, setSelected] = useState(today);
-  const { pager, expandGesture, gridHeightStyle, rowStyles, pillStyle, expanded } = useCalendar();
+  const { pager, expandGesture, gridHeightStyle, rowStyles, pillStyle } = useCalendar();
 
   const logsByDate = useMemo(() => new Map(logs.map((l) => [l.logDate, l])), [logs]);
   const partNames = useMemo(() => new Map(Object.entries(partNamesById)), [partNamesById]);
@@ -45,7 +47,8 @@ export default function MonthView() {
                 partNames={partNames}
                 isToday={date === today}
                 isSelected={date === selected}
-                expanded={expanded}
+                stampAnimate={date === stampingDate}
+                onStampPlayed={clearStamping}
                 onSelect={setSelected}
                 pillStyle={pillStyle}
               />

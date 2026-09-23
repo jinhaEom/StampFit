@@ -69,6 +69,16 @@ function migrate(db: SQLiteDatabase) {
       updated_at TEXT NOT NULL
     );
 
+    -- 주간 목표 변경 이력 (goals와 같이 기기 로컬 전용).
+    -- 지난 주의 목표 달성 여부를 '그 주에 설정돼 있던 목표'로 판정하려고 남긴다.
+    -- 설정한 주(월요일)당 한 행 — 같은 주에 여러 번 바꾸면 마지막 값만 남는다.
+    CREATE TABLE IF NOT EXISTS goal_history (
+      week_start TEXT PRIMARY KEY NOT NULL,
+      target_count INTEGER NOT NULL,
+      recurring INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL
+    );
+
     -- 운동 싸이클
     CREATE TABLE IF NOT EXISTS workout_cycle (
       id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -82,6 +92,12 @@ function migrate(db: SQLiteDatabase) {
   ensureColumn(db, 'body_parts', 'deleted_at', 'TEXT');
   // 부위별 시간 기록 이전 버전 기기에는 duration_min 컬럼이 없을 수 있다.
   ensureColumn(db, 'workout_log_parts', 'duration_min', 'INTEGER NOT NULL DEFAULT 0');
+
+  // 이력 테이블이 생기기 전에 설정해 둔 목표를 첫 이력으로 옮긴다 (이미 있으면 무시)
+  db.execSync(`
+    INSERT OR IGNORE INTO goal_history (week_start, target_count, recurring, updated_at)
+    SELECT week_start, target_count, recurring, updated_at FROM goals WHERE id = 1;
+  `);
 }
 
 function ensureColumn(db: SQLiteDatabase, table: string, column: string, ddl: string) {
@@ -106,7 +122,7 @@ export function setSyncOwner(userId: string | null) {
 /** 계정 전환·로그아웃 시 이전 계정의 흔적을 지운다 (기본 부위 재시딩은 호출부 책임) */
 export function wipeLocalData(db: SQLiteDatabase) {
   db.withTransactionSync(() => {
-    db.execSync('DELETE FROM workout_log_parts; DELETE FROM workout_logs; DELETE FROM body_parts; DELETE FROM goals; DELETE FROM workout_cycle;');
+    db.execSync('DELETE FROM workout_log_parts; DELETE FROM workout_logs; DELETE FROM body_parts; DELETE FROM goals; DELETE FROM goal_history; DELETE FROM workout_cycle;');
   });
 }
 

@@ -47,7 +47,7 @@
             {
               "name": "MyHealthWidget",
               "displayName": "오늘의 운동",
-              "description": "연속 기록일수와 오늘 할 운동을 한눈에 확인하세요",
+              "description": "주간 목표 연속 달성과 오늘 할 운동을 한눈에 확인하세요",
               "ios": {
                 "supportedFamilies": [
                   "systemSmall",

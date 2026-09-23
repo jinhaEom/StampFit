@@ -1,24 +1,25 @@
 import { Colors } from '@/constants/colors';
-import { heatColor } from '@/lib/heatmap';
-import { useEffect, useRef } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { StampRing } from './StampRing';
 
 export interface WeekDay {
   date: string;
-  /** 0 = 기록 없음, 1~4 = 히트맵 농도 */
-  level: number;
+  stamped: boolean;
   isToday: boolean;
+  stampAnimate: boolean;
 }
 
 const WEEKDAY = ['월', '화', '수', '목', '금', '토', '일'];
 
-/** 이번 주 잔디 7칸 */
+/** 이번 주 도장판 7칸 */
 export function WeekGrass({
   days,
   onPressDay,
+  onStampPlayed,
 }: {
   days: WeekDay[];
   onPressDay?: (date: string) => void;
+  onStampPlayed?: () => void;
 }) {
   return (
     <View className="flex-row gap-[8px]">
@@ -30,7 +31,7 @@ export function WeekGrass({
           onPress={() => onPressDay?.(d.date)}
           hitSlop={4}
         >
-          <Cell level={d.level} isToday={d.isToday} />
+          <Cell day={d} onStampPlayed={onStampPlayed} />
           <Text className={`text-[12px] ${d.isToday ? 'font-medium text-fg' : 'text-sub'}`}>
             {WEEKDAY[i]}
           </Text>
@@ -40,30 +41,23 @@ export function WeekGrass({
   );
 }
 
-function Cell({ level, isToday }: { level: number; isToday: boolean }) {
-  const scale = useRef(new Animated.Value(1)).current;
-  const prev = useRef(level);
-
-  useEffect(() => {
-    if (prev.current === 0 && level > 0) {
-      scale.setValue(0.4);
-      Animated.spring(scale, { toValue: 1, friction: 4, useNativeDriver: true }).start();
-    }
-    prev.current = level;
-  }, [level, scale]);
-
+function Cell({ day, onStampPlayed }: { day: WeekDay; onStampPlayed?: () => void }) {
+  const highlight = day.stamped || day.isToday;
   return (
-    <Animated.View
-      style={[
-        {
-          width: '100%',
-          aspectRatio: 1,
-          borderRadius: 6,
-          backgroundColor: heatColor(level),
-          transform: [{ scale }],
-        },
-        isToday && { borderWidth: 1, borderColor: Colors.gray2Color },
-      ]}
-    />
+    <View className="w-full items-center justify-center" style={{ aspectRatio: 1 }}>
+      <View
+        className="rounded-full bg-line"
+        style={[
+          { position: 'absolute', top: 2, right: 2, bottom: 2, left: 2 },
+          day.isToday && !day.stamped && { borderWidth: 1, borderColor: Colors.gray2Color },
+        ]}
+      />
+      {day.stamped && <StampRing animate={day.stampAnimate} inset={3} onPlayed={onStampPlayed} />}
+      <Text
+        className={`text-[14px] ${highlight ? 'text-fg' : 'text-sub'} ${day.isToday ? 'font-semibold' : ''}`}
+      >
+        {Number(day.date.slice(8, 10))}
+      </Text>
+    </View>
   );
 }

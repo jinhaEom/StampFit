@@ -18,7 +18,7 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
   const [text, setText] = React.useState(String(durationMin));
   const [removing, setRemoving] = React.useState(false);
 
-  // 홈 화면 잔디 칸이 채워질 때와 같은 등장 애니메이션 (WeekGrass 참고)
+  // 카드가 추가될 때  애니메이션
   const scale = React.useRef(new Animated.Value(0.4)).current;
   const opacity = React.useRef(new Animated.Value(1)).current;
   React.useEffect(() => {

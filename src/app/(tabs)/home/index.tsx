@@ -21,15 +21,14 @@ export default function HomeScreen() {
     router,
     today,
     logsByDate,
-    hasAnyLogs,
     weekDays,
+    clearStamping,
     weekLogs,
     weekMin,
     weekPartStats,
     monthAnalytics,
     goalProgress,
-    consecutiveDays,
-    hasLoggedToday,
+    weeklyStreak,
     quoteOfDay,
     currentCycleStep,
     nextCycleStep,
@@ -53,11 +52,7 @@ export default function HomeScreen() {
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
       <ScrollView contentContainerClassName="px-[16px] pb-[24px]" showsVerticalScrollIndicator={false}>
 
-        <StreakHero
-          consecutiveDays={consecutiveDays}
-          hasLoggedToday={hasLoggedToday}
-          hasAnyLogs={hasAnyLogs}
-        />
+        <StreakHero streak={weeklyStreak} onPressSetGoal={() => setIsGoalModalOpen(true)} />
 
         <TodayCycleHeader
           currentCycleStep={currentCycleStep}
@@ -81,7 +76,7 @@ export default function HomeScreen() {
 
         <Text className="mb-[8px] mt-[20px] text-[13px] text-sub">이번 주</Text>
         <View className="rounded-[16px] bg-card p-[16px]">
-          <WeekGrass days={weekDays} onPressDay={handlePressDay} />
+          <WeekGrass days={weekDays} onPressDay={handlePressDay} onStampPlayed={clearStamping} />
           <Text className="mt-[12px] text-[13px] text-sub">
             {weekLogs.length > 0
               ? `${weekLogs.length}회 · 총 ${formatDuration(weekMin)}`

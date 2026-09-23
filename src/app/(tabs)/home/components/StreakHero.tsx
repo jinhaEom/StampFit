@@ -1,39 +1,46 @@
 import { Colors } from '@/constants/colors';
-import { Text, View } from 'react-native';
+import type { WeeklyStreak } from '@/lib/streak';
+import { Pressable, Text, View } from 'react-native';
 
 interface Props {
-  consecutiveDays: number;
-  hasLoggedToday: boolean;
-  /** 과거에 기록한 적이 있는지 (연속 기록이 끊긴 건지, 아예 처음인지 구분용) */
-  hasAnyLogs: boolean;
+  streak: WeeklyStreak;
+  onPressSetGoal: () => void;
 }
-export function StreakHero({ consecutiveDays, hasLoggedToday, hasAnyLogs }: Props) {
-  const hasStreak = consecutiveDays > 0;
-  const streakBroken = !hasStreak && hasAnyLogs;
 
-  const emptyHeadline = streakBroken ? '연속 기록이 끊겼어요, 다시 시작해봐요' : '연속 도전을 시작해보세요!';
+export function StreakHero({ streak, onPressSetGoal }: Props) {
+  const { weeks, target, count } = streak;
 
-  const streakSub = hasStreak
-    ? hasLoggedToday
-      ? '오늘 도장 완료! 내일도 이어가봐요'
-      : '오늘 기록하면 도장이 계속 이어져요'
-    : streakBroken
-      ? '오늘 기록하면 다시 연속 기록이 시작돼요'
-      : '오늘 첫 도장을 찍어보세요';
+  // 목표를 정하기 전엔 연속을 세지 않는다
+  if (target === null) {
+    return (
+      <Pressable className="mt-[8px]" onPress={onPressSetGoal}>
+        <Text className="mt-[6px] text-[20px] font-semibold text-fg">
+          주간 목표를 정하면 연속 기록이 시작돼요
+        </Text>
+        <Text className="mt-[6px] text-[13px] text-sub">주간 목표 정하기 ›</Text>
+      </Pressable>
+    );
+  }
+
+  const remaining = target - count;
 
   return (
     <View className="mt-[8px]">
-      {hasStreak ? (
+      {weeks > 0 ? (
         <View className="mt-[6px] flex-row items-end gap-[6px]">
           <Text style={{ fontSize: 64, lineHeight: 64, fontWeight: '700', color: Colors.mainColor }}>
-            {consecutiveDays}
+            {weeks}
           </Text>
-          <Text className="pb-[8px] text-[20px] font-semibold text-fg">일째 연속 기록</Text>
+          <Text className="pb-[8px] text-[20px] font-semibold text-fg">주 연속 목표 달성</Text>
         </View>
       ) : (
-        <Text className="mt-[6px] text-[20px] font-semibold text-fg">{emptyHeadline}</Text>
+        <Text className="mt-[6px] text-[20px] font-semibold text-fg">연속 도전을 시작해보세요!</Text>
       )}
-      <Text className="mt-[6px] text-[13px] text-sub">{streakSub}</Text>
+      <Text className="mt-[6px] text-[13px] text-sub">
+        {remaining > 0
+          ? `이번 주 도장 ${remaining}개 더 찍으면 목표 달성이에요`
+          : '이번 주 목표 달성! 다음 주도 이어가봐요'}
+      </Text>
     </View>
   );
 }

@@ -10,7 +10,11 @@ interface WorkoutState {
   partNamesById: Record<string, string>;
   logs: WorkoutLog[];
   goal: Goal | null;
+  /** 목표 변경 이력 (오래된 주부터) — 주 단위 연속 달성 계산용 */
+  goalHistory: Goal[];
   cycle: WorkoutCycle | null;
+  /** 방금 새로 기록한 날짜. 기록 화면이 닫히고 돌아온 화면의 그 날짜 칸에서 도장 애니메이션을 한 번 보여주고 비운다 */
+  stampingDate: string | null;
   loadAll: () => void;
   saveLog: (input: repo.UpsertLogInput) => void;
   removeLog: (logDate: string) => void;
@@ -22,15 +26,17 @@ interface WorkoutState {
   setGoal: (targetCount: number, recurring: boolean) => void;
   setCycle: (steps: WorkoutCycleStep[]) => void;
   resetAll: () => void;
+  clearStamping: () => void;
 }
 
-export const useWorkoutStore = create<WorkoutState>((set) => {
+export const useWorkoutStore = create<WorkoutState>((set, get) => {
   const refresh = () => {
     set({
       parts: repo.getBodyParts(),
       partNamesById: repo.getBodyPartNamesById(),
       logs: repo.getLogs(),
       goal: repo.getGoal(),
+      goalHistory: repo.getGoalHistory(),
       cycle: repo.getCycle(),
     });
     pushAfterWrite();
@@ -41,7 +47,9 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
     partNamesById: {},
     logs: [],
     goal: null,
+    goalHistory: [],
     cycle: null,
+    stampingDate: null,
     loadAll: () => {
       try {
         set({
@@ -49,6 +57,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
           partNamesById: repo.getBodyPartNamesById(),
           logs: repo.getLogs(),
           goal: repo.getGoal(),
+          goalHistory: repo.getGoalHistory(),
           cycle: repo.getCycle(),
           hydrated: true,
         });
@@ -57,7 +66,10 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
       }
     },
     saveLog: (input) => {
+
+      const isNew = !get().logs.some((l) => l.logDate === input.logDate);
       repo.upsertLog(input);
+      if (isNew) set({ stampingDate: input.logDate });
       refresh();
     },
     removeLog: (logDate) => {
@@ -97,8 +109,10 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
         partNamesById: repo.getBodyPartNamesById(),
         logs: repo.getLogs(),
         goal: repo.getGoal(),
+        goalHistory: repo.getGoalHistory(),
         cycle: repo.getCycle(),
       });
     },
+    clearStamping: () => set({ stampingDate: null }),
   };
 });

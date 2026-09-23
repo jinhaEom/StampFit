@@ -10,6 +10,7 @@ import {
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
 
 export type MyHealthWidgetProps = {
+  /** 주간 목표 연속 달성 주 수 */
   streak: number;
   doneToday: boolean;
   todayLabel?: string;
@@ -69,7 +70,7 @@ const MyHealthWidget = (props: MyHealthWidgetProps, environment: WidgetEnvironme
         <VStack alignment="leading" spacing={0}>
           <HStack spacing={4}>
             <Image systemName="flame.fill" size={12} color={ACCENT} />
-            <Text modifiers={[font({ size: 12 }), foregroundStyle(SUB)]}>연속 기록</Text>
+            <Text modifiers={[font({ size: 12 }), foregroundStyle(SUB)]}>연속 달성</Text>
           </HStack>
           <HStack alignment="lastTextBaseline" spacing={2}>
             <Text
@@ -77,7 +78,7 @@ const MyHealthWidget = (props: MyHealthWidgetProps, environment: WidgetEnvironme
             >
               {`${streak}`}
             </Text>
-            <Text modifiers={[font({ size: 15, weight: 'medium' }), foregroundStyle(SUB)]}>일</Text>
+            <Text modifiers={[font({ size: 15, weight: 'medium' }), foregroundStyle(SUB)]}>주</Text>
           </HStack>
           <Spacer minLength={0} />
           <HStack spacing={4}>
@@ -105,7 +106,7 @@ const MyHealthWidget = (props: MyHealthWidgetProps, environment: WidgetEnvironme
         <VStack alignment="leading" spacing={2}>
           <HStack spacing={4}>
             <Image systemName="flame.fill" size={12} color={ACCENT} />
-            <Text modifiers={[font({ size: 12 }), foregroundStyle(SUB)]}>연속 기록</Text>
+            <Text modifiers={[font({ size: 12 }), foregroundStyle(SUB)]}>연속 달성</Text>
           </HStack>
           <HStack alignment="lastTextBaseline" spacing={2}>
             <Text
@@ -113,7 +114,7 @@ const MyHealthWidget = (props: MyHealthWidgetProps, environment: WidgetEnvironme
             >
               {`${streak}`}
             </Text>
-            <Text modifiers={[font({ size: 14, weight: 'medium' }), foregroundStyle(SUB)]}>일</Text>
+            <Text modifiers={[font({ size: 14, weight: 'medium' }), foregroundStyle(SUB)]}>주</Text>
           </HStack>
         </VStack>
         <VStack alignment="leading" spacing={2}>

@@ -96,7 +96,7 @@ private fun cycleViewOf(entry: WidgetEntry?): CycleView {
 private fun SmallContent(entry: WidgetEntry?, modifier: GlanceModifier) {
   val cycle = cycleViewOf(entry)
   Column(modifier = modifier) {
-    IconLabel(R.drawable.ic_widget_flame, Accent, "연속 기록", size = 12)
+    IconLabel(R.drawable.ic_widget_flame, Accent, "연속 달성", size = 12)
     StreakValue(entry?.streak ?: 0, valueSize = 42, unitSize = 15)
     Spacer(GlanceModifier.defaultWeight())
     IconLabel(cycle.icon, cycle.iconColor, cycle.caption, size = 11)
@@ -118,7 +118,7 @@ private fun MediumContent(entry: WidgetEntry?, modifier: GlanceModifier) {
   Column(modifier = modifier) {
     Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
       Column {
-        IconLabel(R.drawable.ic_widget_flame, Accent, "연속 기록", size = 12)
+        IconLabel(R.drawable.ic_widget_flame, Accent, "연속 달성", size = 12)
         StreakValue(entry?.streak ?: 0, valueSize = 34, unitSize = 14)
       }
       Spacer(GlanceModifier.width(20.dp))
@@ -165,7 +165,7 @@ private fun StreakValue(streak: Int, valueSize: Int, unitSize: Int) {
     )
     Spacer(GlanceModifier.width(2.dp))
     Text(
-      text = "일",
+      text = "주",
       modifier = GlanceModifier.padding(bottom = (valueSize / 7).dp),
       style = TextStyle(color = ColorProvider(Sub), fontSize = unitSize.sp, fontWeight = FontWeight.Medium),
     )

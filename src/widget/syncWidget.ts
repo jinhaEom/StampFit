@@ -1,6 +1,7 @@
 import { addDays, daysBetween, parseDateStr, todayStr, weekStart } from '@/lib/date';
 import { heatLevel } from '@/lib/heatmap';
-import type { WorkoutCycle, WorkoutLog } from '@/lib/types';
+import { computeWeeklyStreak } from '@/lib/streak';
+import type { Goal, WorkoutCycle, WorkoutLog } from '@/lib/types';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import MyHealthWidget, { type MyHealthWidgetProps } from './MyHealthWidget';
 import WorkoutWidget from '../../modules/workout-widget/src/WorkoutWidgetModule';
@@ -11,14 +12,10 @@ const TIMELINE_DAYS = 3;
 function buildProps(
   logsByDate: Map<string, WorkoutLog>,
   cycle: WorkoutCycle | null,
+  goalHistory: Goal[],
   date: string,
 ): MyHealthWidgetProps {
-  let streak = 0;
-  let cursor = logsByDate.has(date) ? date : addDays(date, -1);
-  while (logsByDate.has(cursor)) {
-    streak++;
-    cursor = addDays(cursor, -1);
-  }
+  const streak = computeWeeklyStreak([...logsByDate.keys()], goalHistory, date).weeks;
 
   const ws = weekStart(date);
   const current = cycle && cycle.steps.length > 0 ? cycle.steps[cycle.currentIndex] : null;
@@ -35,14 +32,14 @@ function buildProps(
   };
 }
 
-function pushTimeline(logs: WorkoutLog[], cycle: WorkoutCycle | null) {
+function pushTimeline(logs: WorkoutLog[], cycle: WorkoutCycle | null, goalHistory: Goal[]) {
   const logsByDate = new Map(logs.map((l) => [l.logDate, l]));
   const today = todayStr();
   const entries = Array.from({ length: TIMELINE_DAYS }, (_, i) => {
     const date = addDays(today, i);
     return {
       date: i === 0 ? new Date() : parseDateStr(date),
-      props: buildProps(logsByDate, cycle, date),
+      props: buildProps(logsByDate, cycle, goalHistory, date),
     };
   });
 
@@ -52,11 +49,14 @@ function pushTimeline(logs: WorkoutLog[], cycle: WorkoutCycle | null) {
   ).catch((e) => console.warn('Android 위젯 갱신 실패', e));
 }
 
-// 운동 기록·싸이클이 바뀔 때마다 위젯 갱신
+// 운동 기록·싸이클·목표가 바뀔 때마다 위젯 갱신
 export function startWidgetSync() {
   return useWorkoutStore.subscribe((state, prev) => {
-    if (state.hydrated && (state.logs !== prev.logs || state.cycle !== prev.cycle)) {
-      pushTimeline(state.logs, state.cycle);
+    if (
+      state.hydrated &&
+      (state.logs !== prev.logs || state.cycle !== prev.cycle || state.goalHistory !== prev.goalHistory)
+    ) {
+      pushTimeline(state.logs, state.cycle, state.goalHistory);
     }
   });
 }

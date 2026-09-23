@@ -1,8 +1,9 @@
+import type { WeekDay } from '@/components/WeekGrass';
 import { getMonthlyAnalytics, getPartStatsForLogs } from '@/lib/analytics';
 import { quotes } from '@/constants/quotes';
 import { addDays, todayStr, weekStart } from '@/lib/date';
 import { computeGoalProgress } from '@/lib/goal';
-import { heatLevel } from '@/lib/heatmap';
+import { computeWeeklyStreak } from '@/lib/streak';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -13,6 +14,7 @@ export const useHome = () => {
   const router = useRouter();
   const logs = useWorkoutStore((s) => s.logs);
   const goal = useWorkoutStore((s) => s.goal);
+  const goalHistory = useWorkoutStore((s) => s.goalHistory);
   const cycle = useWorkoutStore((s) => s.cycle);
   const partNamesById = useWorkoutStore((s) => s.partNamesById);
 
@@ -21,13 +23,22 @@ export const useHome = () => {
   const ws = weekStart(today);
   const [isCycleModalOpen, setIsCycleModalOpen] = useState(false)
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false)
-  const weekDays = useMemo(
+
+  // 방금 기록한 날은 도장이 찍히는 애니메이션
+  const stampingDate = useWorkoutStore((s) => s.stampingDate);
+  const clearStamping = useWorkoutStore((s) => s.clearStamping);
+  const weekDays = useMemo<WeekDay[]>(
     () =>
       Array.from({ length: 7 }, (_, i) => {
         const date = addDays(ws, i);
-        return { date, level: heatLevel(logsByDate.get(date)), isToday: date === today };
+        return {
+          date,
+          stamped: logsByDate.has(date),
+          isToday: date === today,
+          stampAnimate: date === stampingDate,
+        };
       }),
-    [ws, logsByDate, today],
+    [ws, logsByDate, today, stampingDate],
   );
   const weekLogs = logs.filter((l) => l.logDate >= ws && l.logDate < addDays(ws, 7));
   const weekMin = weekLogs.reduce((sum, l) => sum + l.durationMin, 0);
@@ -50,17 +61,11 @@ export const useHome = () => {
     [logs, partNamesById, currentYear, currentMonth],
   );
 
-  //연속 기록 일수 (오늘 기록 전이어도 어제까지의 운동일자는 유지)
-  const hasLoggedToday = logsByDate.has(today);
-  const consecutiveDays = useMemo(() => {
-    let count = 0;
-    let date = hasLoggedToday ? today : addDays(today, -1);
-    while (logsByDate.has(date)) {
-      count++;
-      date = addDays(date, -1);
-    }
-    return count;
-  }, [logsByDate, today, hasLoggedToday]);
+  // 주간 목표 연속 달성 (이번 주를 아직 못 채웠어도 지난주까지의 연속은 유지)
+  const weeklyStreak = useMemo(
+    () => computeWeeklyStreak(logs.map((l) => l.logDate), goalHistory, today),
+    [logs, goalHistory, today],
+  );
 
   // 오늘의 한마디 
   const quoteOfDay = useMemo(() => {
@@ -73,22 +78,19 @@ export const useHome = () => {
   const nextCycleStep =
     cycle && cycle.steps.length > 1 ? cycle.steps[(cycle.currentIndex + 1) % cycle.steps.length] : null;
 
-  const hasAnyLogs = logs.length > 0;
-
   return {
     insets,
     router,
     today,
     logsByDate,
-    hasAnyLogs,
     weekDays,
+    clearStamping,
     weekLogs,
     weekMin,
     weekPartStats,
     monthAnalytics,
     goalProgress,
-    consecutiveDays,
-    hasLoggedToday,
+    weeklyStreak,
     quoteOfDay,
     currentCycleStep,
     nextCycleStep,
