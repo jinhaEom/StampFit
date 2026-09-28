@@ -74,6 +74,10 @@ export const useHome = () => {
     return quotes[seed % quotes.length];
   }, [today]);
 
+  // 하단 바용 오늘 기록
+  const todayLog = logsByDate.get(today);
+  const todayPartNames = todayLog?.parts.flatMap((p) => partNamesById[p.id] ?? []) ?? [];
+
   const currentCycleStep = cycle && cycle.steps.length > 0 ? cycle.steps[cycle.currentIndex] : null;
   const nextCycleStep =
     cycle && cycle.steps.length > 1 ? cycle.steps[(cycle.currentIndex + 1) % cycle.steps.length] : null;
@@ -94,6 +98,8 @@ export const useHome = () => {
     quoteOfDay,
     currentCycleStep,
     nextCycleStep,
+    todayLog,
+    todayPartNames,
     isCycleModalOpen,
     setIsCycleModalOpen,
     isGoalModalOpen,

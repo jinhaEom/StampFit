@@ -20,6 +20,7 @@ export const Colors = {
   whiteColor: '#ECECEC',
   disabledColor: '#4a4c4fff',
   onAccent: '#111214',
+  stampRed: '#E5484D',
 
 
 } as const;

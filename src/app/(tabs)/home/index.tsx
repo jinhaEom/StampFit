@@ -3,13 +3,14 @@ import { WeekGrass } from '@/components/WeekGrass';
 import { BottomTabInset } from '@/constants/constant';
 import { formatDuration } from '@/lib/date';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Platform, ScrollView, Text, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import { GoalTile } from './components/GoalTile';
 import { MonthlyReportTeaser } from './components/MonthlyReportTeaser';
 import { PartBalanceCard } from './components/PartBalanceCard';
 import { StreakHero } from './components/StreakHero';
 import { TodayCycleHeader } from './components/TodayCycleHeader';
+import { TodayRecordBar } from './components/TodayRecordBar';
 import { CycleModal } from './detail/CycleModal';
 import { DayLogModal } from './detail/DayLogModal';
 import { GoalModal } from './detail/GoalModal';
@@ -32,6 +33,8 @@ export default function HomeScreen() {
     quoteOfDay,
     currentCycleStep,
     nextCycleStep,
+    todayLog,
+    todayPartNames,
     isCycleModalOpen,
     setIsCycleModalOpen,
     isGoalModalOpen,
@@ -90,6 +93,10 @@ export default function HomeScreen() {
           analytics={monthAnalytics}
           onPress={() => router.push({ pathname: '/calendar', params: { tab: 'stats' } })}
         />
+
+        <View className="mt-[20px]">
+          <AdBanner />
+        </View>
       </ScrollView>
       <CycleModal
         visible={isCycleModalOpen}
@@ -105,17 +112,16 @@ export default function HomeScreen() {
         visible={isGoalModalOpen}
         onClose={() => setIsGoalModalOpen(false)}
       />
-      <AdBanner />
       <View
         className="px-[16px] pt-[8px]"
         style={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + BottomTabInset : 16 }}
       >
-        <Pressable
-          className="items-center rounded-[14px] bg-accent py-[15px]"
+        <TodayRecordBar
+          todayLog={todayLog}
+          todayPartNames={todayPartNames}
+          cycleLabel={currentCycleStep?.label}
           onPress={() => router.push('/record')}
-        >
-          <Text className="text-[16px] font-medium text-black">운동 기록하기</Text>
-        </Pressable>
+        />
       </View>
     </View>
   );

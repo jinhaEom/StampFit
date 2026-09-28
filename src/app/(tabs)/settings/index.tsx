@@ -1,4 +1,3 @@
-import { AlertModal } from '@/components/AlertModal';
 import { Colors, PART_PALETTE } from '@/constants/colors';
 import { useAdsStore } from '@/store/useAdsStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -100,17 +99,6 @@ export default function SettingScreen() {
           )}
         </View>
 
-
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">데이터 관리</Text>
-        <TouchableOpacity
-          className="rounded-[16px] bg-card p-[16px]"
-          activeOpacity={0.8}
-          onPress={() => setResetConfirmVisible(true)}
-        >
-          <Text className="text-[15px] text-danger">모든 기록 초기화</Text>
-        </TouchableOpacity>
-
-
         <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">앱 정보</Text>
         <View className="rounded-[16px] bg-card p-[16px]">
           <View className="flex-row items-center justify-between">
@@ -120,23 +108,11 @@ export default function SettingScreen() {
         </View>
 
         <TouchableOpacity onPress={onLogout} className="items-end  mt-[24px]">
-          <Text className="text-[15px] text-dim">로그아웃</Text>
+          <Text className="text-[13px] text-dim">로그아웃</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      <AlertModal
-        visible={resetConfirmVisible}
-        title="데이터 초기화"
-        contents="모든 기록과 부위 설정이 삭제돼요. 되돌릴 수 없어요."
-        okLabel="초기화"
-        cancelLabel="취소"
-        danger
-        onOk={() => {
-          setResetConfirmVisible(false);
-          resetAll();
-        }}
-        onCancel={() => setResetConfirmVisible(false)}
-      />
+
     </View>
   );
 }
