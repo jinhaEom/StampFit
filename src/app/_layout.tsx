@@ -59,7 +59,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="login" />
-        <Stack.Screen name="signup" />
+        <Stack.Screen name="email" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="record" options={{ presentation: 'modal' }} />
       </Stack>
