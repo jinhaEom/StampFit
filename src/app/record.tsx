@@ -1,4 +1,5 @@
 import { AlertModal } from '@/components/AlertModal';
+import { DoneStamp } from '@/components/DoneStamp';
 import { Chip } from '@/components/Chip';
 import { PartDurationCard } from '@/components/PartDurationCard';
 import { ScaleSelector } from '@/components/ScaleSelector';
@@ -35,6 +36,7 @@ export default function RecordScreen() {
 
   const parts = useWorkoutStore((s) => s.parts);
   const saveLog = useWorkoutStore((s) => s.saveLog);
+  const stampDate = useWorkoutStore((s) => s.stampDate);
   const addPart = useWorkoutStore((s) => s.addPart);
   const existing = useWorkoutStore((s) => s.logs.find((l) => l.logDate === logDate));
 
@@ -50,6 +52,7 @@ export default function RecordScreen() {
   const [adding, setAdding] = React.useState(false);
   const [newName, setNewName] = React.useState('');
   const [dupAlertVisible, setDupAlertVisible] = React.useState(false);
+  const [stamping, setStamping] = React.useState(false);
 
   const selectedIds = entries.map((e) => e.id);
 
@@ -96,9 +99,26 @@ export default function RecordScreen() {
       memo: memo.trim() || null,
       parts: entries,
     });
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.back();
+
+    // 수정은 바로 닫기
+    if (existing) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.back();
+      return;
+    }
+    // 새 기록은 CLEAR 도장을 찍은 뒤 닫는다
+    setStamping(true);
   };
+
+  // 도장을 잠깐 보여주고 닫은 뒤, 돌아간 화면의 날짜 칸에 점이 찍히게 한다
+  React.useEffect(() => {
+    if (!stamping) return;
+    const timer = setTimeout(() => {
+      stampDate(logDate);
+      router.back();
+    }, 900);
+    return () => clearTimeout(timer);
+  }, [stamping, logDate, stampDate, router]);
 
   return (
     <KeyboardAvoidingView
@@ -234,6 +254,8 @@ export default function RecordScreen() {
           </Pressable>
         </View>
       </View>
+
+      {stamping && <DoneStamp />}
 
       <AlertModal
         visible={dupAlertVisible}

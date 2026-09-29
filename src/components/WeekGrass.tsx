@@ -1,10 +1,12 @@
 import { Colors } from '@/constants/colors';
 import { Pressable, Text, View } from 'react-native';
-import { StampRing } from './StampRing';
+import { StampDot } from './StampDot';
 
 export interface WeekDay {
   date: string;
   stamped: boolean;
+  /** 히트맵 농도 단계 (0 = 기록 없음) */
+  level: number;
   isToday: boolean;
   stampAnimate: boolean;
 }
@@ -43,6 +45,7 @@ export function WeekGrass({
 
 function Cell({ day, onStampPlayed }: { day: WeekDay; onStampPlayed?: () => void }) {
   const highlight = day.stamped || day.isToday;
+  const darkText = day.level >= 3 && !day.stampAnimate;
   return (
     <View className="w-full items-center justify-center" style={{ aspectRatio: 1 }}>
       <View
@@ -52,9 +55,11 @@ function Cell({ day, onStampPlayed }: { day: WeekDay; onStampPlayed?: () => void
           day.isToday && !day.stamped && { borderWidth: 1, borderColor: Colors.gray2Color },
         ]}
       />
-      {day.stamped && <StampRing animate={day.stampAnimate} inset={3} onPlayed={onStampPlayed} />}
+      {day.stamped && (
+        <StampDot level={day.level} animate={day.stampAnimate} inset={2} onPlayed={onStampPlayed} />
+      )}
       <Text
-        className={`text-[14px] ${highlight ? 'text-fg' : 'text-sub'} ${day.isToday ? 'font-semibold' : ''}`}
+        className={`text-[14px] ${darkText ? 'text-on-accent' : highlight ? 'text-fg' : 'text-sub'} ${day.isToday ? 'font-semibold' : ''}`}
       >
         {Number(day.date.slice(8, 10))}
       </Text>

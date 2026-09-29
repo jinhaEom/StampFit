@@ -1,5 +1,6 @@
-import { StampRing } from '@/components/StampRing';
+import { StampDot } from '@/components/StampDot';
 import { CONDITION_EMOJI, INTENSITY_LABELS } from '@/constants/recovery';
+import { heatLevel } from '@/lib/heatmap';
 import type { WorkoutLog } from '@/lib/types';
 import type { ComponentProps } from 'react';
 import { memo } from 'react';
@@ -34,6 +35,8 @@ function DayCell({
   pillStyle,
 }: Props) {
   const parts = log?.parts.flatMap((p) => partNames.get(p.id) ?? []) ?? [];
+  const level = heatLevel(log);
+  const darkText = level >= 3 && !stampAnimate;
 
   return (
     <Pressable className="flex-1 items-center py-[3px]" onPress={() => onSelect(date)}>
@@ -46,8 +49,10 @@ function DayCell({
         )}
 
         <View className="h-[30px] w-[30px] items-center justify-center">
-          {log && <StampRing animate={stampAnimate} onPlayed={onStampPlayed} />}
-          <Text className={`text-[15px] text-fg ${isToday ? 'font-bold' : ''}`}>
+          {log && <StampDot level={level} animate={stampAnimate} onPlayed={onStampPlayed} />}
+          <Text
+            className={`text-[15px] ${darkText ? 'text-on-accent' : 'text-fg'} ${isToday ? 'font-bold' : ''}`}
+          >
             {Number(date.slice(8, 10))}
           </Text>
         </View>

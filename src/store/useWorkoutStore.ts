@@ -13,7 +13,7 @@ interface WorkoutState {
   /** 목표 변경 이력 (오래된 주부터) — 주 단위 연속 달성 계산용 */
   goalHistory: Goal[];
   cycle: WorkoutCycle | null;
-  /** 방금 새로 기록한 날짜. 기록 화면이 닫히고 돌아온 화면의 그 날짜 칸에서 도장 애니메이션을 한 번 보여주고 비운다 */
+  /** 방금 새로 기록한 날짜. 기록 화면이 닫히고 돌아온 화면의 그 날짜 칸에서 도장 애니메이션을 한 번 보여주고 비운다 (기록 화면이 CLEAR 연출 후 stampDate로 채운다) */
   stampingDate: string | null;
   loadAll: () => void;
   saveLog: (input: repo.UpsertLogInput) => void;
@@ -26,10 +26,11 @@ interface WorkoutState {
   setGoal: (targetCount: number, recurring: boolean) => void;
   setCycle: (steps: WorkoutCycleStep[]) => void;
   resetAll: () => void;
+  stampDate: (date: string) => void;
   clearStamping: () => void;
 }
 
-export const useWorkoutStore = create<WorkoutState>((set, get) => {
+export const useWorkoutStore = create<WorkoutState>((set) => {
   const refresh = () => {
     set({
       parts: repo.getBodyParts(),
@@ -66,10 +67,7 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => {
       }
     },
     saveLog: (input) => {
-
-      const isNew = !get().logs.some((l) => l.logDate === input.logDate);
       repo.upsertLog(input);
-      if (isNew) set({ stampingDate: input.logDate });
       refresh();
     },
     removeLog: (logDate) => {
@@ -113,6 +111,7 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => {
         cycle: repo.getCycle(),
       });
     },
+    stampDate: (date) => set({ stampingDate: date }),
     clearStamping: () => set({ stampingDate: null }),
   };
 });

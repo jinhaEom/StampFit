@@ -3,6 +3,7 @@ import { getMonthlyAnalytics, getPartStatsForLogs } from '@/lib/analytics';
 import { quotes } from '@/constants/quotes';
 import { addDays, todayStr, weekStart } from '@/lib/date';
 import { computeGoalProgress } from '@/lib/goal';
+import { heatLevel } from '@/lib/heatmap';
 import { computeWeeklyStreak } from '@/lib/streak';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { useRouter } from 'expo-router';
@@ -34,6 +35,7 @@ export const useHome = () => {
         return {
           date,
           stamped: logsByDate.has(date),
+          level: heatLevel(logsByDate.get(date)),
           isToday: date === today,
           stampAnimate: date === stampingDate,
         };

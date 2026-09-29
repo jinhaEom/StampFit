@@ -1,4 +1,3 @@
-import { ClearStampSvg } from '@/components/StampRing';
 import { Colors } from '@/constants/colors';
 import { formatDuration } from '@/lib/date';
 import type { WorkoutLog } from '@/lib/types';
@@ -29,8 +28,8 @@ export function TodayRecordBar({ todayLog, todayPartNames, cycleLabel, onPress }
     >
       <View className="flex-1 flex-row items-center gap-[10px]">
         {done ? (
-          <View style={{ width: 44, transform: [{ rotate: '-12deg' }] }}>
-            <ClearStampSvg />
+          <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-accent">
+            <Ionicons name="checkmark" size={18} color={Colors.onAccent} />
           </View>
         ) : (
           <View className="h-[34px] w-[34px] items-center justify-center rounded-full border-[1.5px] border-dashed border-dim">

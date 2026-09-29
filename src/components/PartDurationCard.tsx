@@ -3,7 +3,7 @@ import { DURATION_MAX, DURATION_QUICK_PICKS, DURATION_STEP } from '@/constants/r
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as React from 'react';
-import { Animated, Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 interface Props {
   name: string;
@@ -12,31 +12,10 @@ interface Props {
   onRemove: () => void;
 }
 
-/** 부위 하나의 시간을 정하는 카드 — 스텝퍼 + 빠른 선택 칩 + 직접입력 */
+/** 부위 하나의 시간을 정하는 카드 */
 export function PartDurationCard({ name, durationMin, onChange, onRemove }: Props) {
   const [editing, setEditing] = React.useState(false);
   const [text, setText] = React.useState(String(durationMin));
-  const [removing, setRemoving] = React.useState(false);
-
-  // 카드가 추가될 때  애니메이션
-  const scale = React.useRef(new Animated.Value(0.4)).current;
-  const opacity = React.useRef(new Animated.Value(1)).current;
-  React.useEffect(() => {
-    Animated.spring(scale, { toValue: 1, friction: 4, useNativeDriver: true }).start();
-  }, [scale]);
-
-  // 삭제할 때는 반대로 줄어들면서 사라진 뒤에 실제로 목록에서 제거한다
-  const handleRemove = () => {
-    if (removing) return;
-    setRemoving(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Animated.parallel([
-      Animated.timing(opacity, { toValue: 0, duration: 160, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 0.8, duration: 160, useNativeDriver: true }),
-    ]).start(({ finished }) => {
-      if (finished) onRemove();
-    });
-  };
 
   const clamp = (v: number) => Math.max(0, Math.min(DURATION_MAX, Math.round(v)));
 
@@ -62,13 +41,10 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
   };
 
   return (
-    <Animated.View
-      className="rounded-[14px] bg-card p-[14px]"
-      style={{ opacity, transform: [{ scale }] }}
-    >
+    <View className="rounded-[14px] bg-card p-[14px]">
       <View className="flex-row items-center justify-between">
         <Text className="text-[15px] font-medium text-fg">{name}</Text>
-        <Pressable onPress={handleRemove} disabled={removing} hitSlop={8}>
+        <Pressable onPress={onRemove} hitSlop={8}>
           <Ionicons name="close" size={18} color={Colors.gray2Color} />
         </Pressable>
       </View>
@@ -118,9 +94,8 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
             <Pressable
               key={m}
               onPress={() => setQuick(m)}
-              className={`rounded-full border px-[12px] py-[6px] ${
-                selected ? 'border-accent bg-accent' : 'border-line bg-transparent'
-              }`}
+              className={`rounded-full border px-[12px] py-[6px] ${selected ? 'border-accent bg-accent' : 'border-line bg-transparent'
+                }`}
             >
               <Text
                 className={`text-[13px] ${selected ? 'font-medium text-on-accent' : 'text-sub'}`}
@@ -131,6 +106,6 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
           );
         })}
       </View>
-    </Animated.View>
+    </View>
   );
 }
