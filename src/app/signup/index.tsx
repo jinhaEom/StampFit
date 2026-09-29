@@ -157,14 +157,6 @@ export default function SignupScreen() {
           )}
         </Pressable>
 
-        <View className="my-[24px] flex-row items-center gap-[10px]">
-          <View className="h-[1px] flex-1 bg-line" />
-          <Text className="text-[12px] text-dim">또는</Text>
-          <View className="h-[1px] flex-1 bg-line" />
-        </View>
-
-        <SocialAuthButtons mode="signup" onSuccess={() => router.replace('/home')} />
-
         <View className="mt-[28px] flex-row justify-center gap-[6px]">
           <Text className="text-[13px] text-sub">이미 계정이 있으신가요?</Text>
           <Link href="/login" replace asChild>

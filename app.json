@@ -11,6 +11,7 @@
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.jinhaeom.stampfit",
       "appleTeamId": "DNPA47GWF6",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다.",
         "NSPhotoLibraryAddUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다."
@@ -32,6 +33,9 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-apple-authentication"
+      ],
       [
         "expo-splash-screen",
         {

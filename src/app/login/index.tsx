@@ -160,7 +160,7 @@ export default function LoginScreen() {
                     <View className="h-[1px] flex-1 bg-line" />
                 </View>
 
-                <SocialAuthButtons mode="login" onSuccess={() => router.replace('/home')} />
+                <SocialAuthButtons onSuccess={() => router.replace('/home')} />
 
                 <View className="mt-[32px] flex-row justify-center gap-[6px]">
                     <Text className="text-[13px] text-sub">계정이 없으신가요?</Text>
