@@ -15,7 +15,6 @@ type Props = {
   partNames: Map<string, string>;
   isToday: boolean;
   isSelected: boolean;
-  /** 방금 기록한 날이면 도장이 찍히는 애니메이션 */
   stampAnimate: boolean;
   onStampPlayed: () => void;
   onSelect: (date: string) => void;

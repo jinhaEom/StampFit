@@ -45,10 +45,7 @@ export function formatDuration(min: number): string {
   return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
 }
 
-/**
- * 월간 캘린더 그리드 (월요일 시작).
- * 주 단위 배열, 해당 월 밖의 칸은 null.
- */
+/** 월간 캘린더 격자 (월요일 시작, 달 밖 칸은 null) */
 export function monthMatrix(year: number, month: number): (string | null)[][] {
   const first = new Date(year, month - 1, 1);
   const daysInMonth = new Date(year, month, 0).getDate();

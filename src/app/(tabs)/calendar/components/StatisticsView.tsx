@@ -8,10 +8,11 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { MonthlyCardModal } from './MonthlyCardModal';
+import { MonthlyCardModal } from '../modals/MonthlyCardModal';
 
 const SCROLL_BOTTOM = 'pb-[24px] ios:pb-[74px] android:pb-[104px]';
 
+/* 캘린더 탭 -> 통계 View*/
 export default function StatisticsView() {
   const router = useRouter();
   const today = todayStr();
@@ -95,7 +96,7 @@ export default function StatisticsView() {
       </View>
 
       {!analytics.hasData ? (
-        /* 기록 없음*/
+        /* 기록 없음 */
         <View className="mt-[24px] items-center rounded-[20px] bg-card p-[28px]">
           <Text className="text-[32px]">🏃‍♂️</Text>
           <Text className="mt-[12px] text-[16px] font-medium text-fg">
@@ -140,7 +141,7 @@ export default function StatisticsView() {
             </View>
           </View>
 
-          {/* 핵심 요약 View */}
+          {/* 핵심 요약 */}
           <View className="mt-[12px] flex-row gap-[10px]">
             <View className="flex-1 rounded-[16px] bg-card p-[16px]">
               <Text className="text-[12px] text-sub">총 운동 시간</Text>
@@ -207,7 +208,7 @@ export default function StatisticsView() {
               </View>
             )}
 
-            {/* 부위별 리스트 */}
+            {/* 부위별 목록 */}
             <View className="mt-[16px] gap-[12px]">
               {analytics.partStats.map((part) => (
                 <View key={part.id} className="gap-[6px]">
@@ -228,7 +229,7 @@ export default function StatisticsView() {
                       </Text>
                     </View>
                   </View>
-                  {/* 개별 게이지 바 */}
+                  {/* 부위 게이지 */}
                   <View className="h-[4px] w-full overflow-hidden rounded-full bg-white/5">
                     <View
                       className="h-full rounded-full"
@@ -243,7 +244,7 @@ export default function StatisticsView() {
             </View>
           </View>
 
-          {/* 이달의 운동 카드 만들기 SNS 공유 */}
+          {/* 이달의 카드 만들기 (SNS 공유) */}
           <TouchableOpacity
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -269,7 +270,7 @@ export default function StatisticsView() {
         </>
       )}
 
-      {/* 이달의 운동 카드 모달 */}
+      {/* 이달의 카드 모달 */}
       <MonthlyCardModal
         visible={cardModalVisible}
         onClose={() => setCardModalVisible(false)}

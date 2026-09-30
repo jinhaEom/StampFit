@@ -4,14 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 
 interface Props {
-  /** 싸이클의 현재 단계 — 오늘 기록하면 다음 단계로 넘어간다 */
-  currentStep: WorkoutCycleStep | null;
+  currentStep: WorkoutCycleStep | null; // 지금 차례 (기록하면 다음으로 넘어감)
   nextStep: WorkoutCycleStep | null;
   doneToday: boolean;
   onEditCycle: () => void;
 }
 
-/** 오늘 할 운동과 그다음. 싸이클이 없으면 정하기 버튼 */
+/** 오늘 할 운동·그다음 (싸이클 없으면 정하기 버튼) */
 export function TodayCycleHeader({ currentStep, nextStep, doneToday, onEditCycle }: Props) {
   if (!currentStep) {
     return (

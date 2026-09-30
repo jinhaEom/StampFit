@@ -1,8 +1,5 @@
 import { AlertModal } from '@/components/AlertModal';
-import { DoneStamp } from '@/components/DoneStamp';
 import { Chip } from '@/components/Chip';
-import { PartDurationCard } from '@/components/PartDurationCard';
-import { ScaleSelector } from '@/components/ScaleSelector';
 import { Colors } from '@/constants/colors';
 import {
   CONDITION_EMOJI,
@@ -27,6 +24,9 @@ import {
   View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DoneStamp } from './components/DoneStamp';
+import { PartDurationCard } from './components/PartDurationCard';
+import { ScaleSelector } from './components/ScaleSelector';
 
 export default function RecordScreen() {
   const insets = useSafeAreaInsets();
@@ -42,7 +42,7 @@ export default function RecordScreen() {
 
   const existingPartIds = React.useMemo(() => existing?.parts.map((p) => p.id) ?? [], [existing]);
 
-  // 비활성 부위여도 기존 기록에 포함돼 있으면 보여준다 (과거 기록 유지 원칙)
+  // 보여줄 부위 (꺼둔 부위도 이 기록에 있으면 포함)
   const visibleParts = parts.filter((p) => p.isActive || existingPartIds.includes(p.id));
 
   const [entries, setEntries] = React.useState<WorkoutLogPart[]>(existing?.parts ?? []);
@@ -65,7 +65,7 @@ export default function RecordScreen() {
     );
   };
 
-  // 카드의 삭제 버튼 전용 — 사라지는 애니메이션이 끝난 뒤 호출되므로 햅틱은 카드 쪽에서 즉시 준다
+  // 카드 삭제 버튼용 (사라진 뒤 호출, 햅틱은 카드에서)
   const removeEntry = (id: string) => {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   };
@@ -100,17 +100,17 @@ export default function RecordScreen() {
       parts: entries,
     });
 
-    // 수정은 바로 닫기
+    /* 수정은 바로 닫기 */
     if (existing) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
       return;
     }
-    // 새 기록은 CLEAR 도장을 찍은 뒤 닫는다
+    /* 새 기록은 CLEAR 도장 후 닫기 */
     setStamping(true);
   };
 
-  // 도장을 잠깐 보여주고 닫은 뒤, 돌아간 화면의 날짜 칸에 점이 찍히게 한다
+  /* 도장 잠깐 보여주고 닫은 뒤 날짜 칸에 점 찍기 */
   React.useEffect(() => {
     if (!stamping) return;
     const timer = setTimeout(() => {
@@ -210,11 +210,11 @@ export default function RecordScreen() {
             </>
           )}
 
-          {/* 강도 */}
+          {/* 3. 강도 */}
           <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">강도</Text>
           <ScaleSelector value={intensity} onChange={setIntensity} labels={INTENSITY_LABELS} />
 
-          {/* 컨디션 */}
+          {/* 4. 컨디션 */}
           <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">컨디션</Text>
           <ScaleSelector
             value={condition}

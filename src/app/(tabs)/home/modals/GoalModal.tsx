@@ -1,9 +1,9 @@
-import { useSettings } from "@/app/(tabs)/settings/hooks/useSettings";
 import { AlertModal } from "@/components/AlertModal";
 import { Colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Modal, Pressable, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-simple-toast";
+import { useGoalForm } from "../hooks/useGoalForm";
 
 interface GoalModalProps {
   visible: boolean;
@@ -20,7 +20,7 @@ export const GoalModal = ({ visible, onClose }: GoalModalProps) => {
     saveGoal,
     invalidGoalAlertVisible,
     setInvalidGoalAlertVisible,
-  } = useSettings();
+  } = useGoalForm();
 
   const handleSave = () => {
     if (!saveGoal()) {

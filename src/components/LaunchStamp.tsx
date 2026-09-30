@@ -10,26 +10,23 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-// 네이티브 스플래시(app.json: splash-mark.png를 imageWidth만큼, 배경 #0E0F11)와 같은 자리·크기로 점을 그린다
+// 네이티브 스플래시와 같은 자리·크기 (app.json 기준)
 export const SPLASH_IMAGE_WIDTH = 110; // app.json의 imageWidth와 같게
 const S = SPLASH_IMAGE_WIDTH / 512; // 원본 이미지는 512px
-const CENTERS = [128, 256, 384];
+const CENTERS = [128, 256, 384]; // 원본 기준 점 중심 좌표 (가로·세로 공통)
 const DOT = 102 * S; // 바깥 점 지름
 const CENTER_DOT = 120 * S; // 가운데 점 지름
-const FAINT = 'rgba(79, 209, 179, 0.3)';
+const FAINT = 'rgba(79, 209, 179, 0.3)'; // 찍히기 전 흐린 점 색
 const SPLASH_BG = '#0E0F11';
 
-/** 바깥 점이 찍히는 순서 (모서리 → 변). 왼쪽 위부터 0~8 */
+// 바깥 점 찍는 순서 (모서리 → 변, 왼쪽 위부터 0~8)
 const ORDER = [0, 2, 6, 8, 1, 3, 5, 7];
-// 전체 약 1초 = 점 8개 × STEP_MS(480) + PAUSE_MS(170) + EXIT_MS(350)
+// 전체 시간 = 점 8개 × STEP_MS + PAUSE_MS + EXIT_MS
 const STEP_MS = 110; // 점 하나씩 찍히는 간격
 const PAUSE_MS = 250; // 다 찍고 잠깐 멈춤
 const EXIT_MS = 250; // 로고가 커지며 사라지는 시간
 
-/**
- * 앱을 켤 때 한 번 — 스플래시 로고의 점이 도장 찍히듯 하나씩 채워진 뒤,
- * 로고는 커지며 사라지고 첫 화면은 살짝 줌인되며 자리를 잡는다. ready(로그인 상태 확인 끝) 후 약 1초.
- */
+/** 앱 시작 시 로고 전환 (점 채우기 → 로고 확대·사라짐 + 첫 화면 줌인) */
 export function LaunchStamp({ ready, children }: { ready: boolean; children: ReactNode }) {
   const [filled, setFilled] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -73,7 +70,7 @@ export function LaunchStamp({ ready, children }: { ready: boolean; children: Rea
   );
 }
 
-/** 점 하나 — 찍히는 순간 민트로 바뀌며 톡 커졌다가 탄력 있게 제자리로 */
+/** 로고 점 하나 (찍힐 때 톡 커졌다 제자리) */
 function StampDot({ index, on }: { index: number; on: boolean }) {
   const isCenter = index === 4;
   const d = isCenter ? CENTER_DOT : DOT;

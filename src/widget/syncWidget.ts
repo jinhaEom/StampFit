@@ -6,8 +6,7 @@ import { useWorkoutStore } from '@/store/useWorkoutStore';
 import MyHealthWidget, { type MyHealthWidgetProps } from './MyHealthWidget';
 import WorkoutWidget from '../../modules/workout-widget/src/WorkoutWidgetModule';
 
-// 앱을 열지 않아도 자정마다 연속 기록·오늘 완료 여부가 넘어가도록 며칠치를 미리 예약
-const TIMELINE_DAYS = 3;
+const TIMELINE_DAYS = 3; // 미리 예약하는 날 수 (앱을 안 열어도 자정마다 갱신)
 
 function buildProps(
   logsByDate: Map<string, WorkoutLog>,
@@ -49,7 +48,7 @@ function pushTimeline(logs: WorkoutLog[], cycle: WorkoutCycle | null, goalHistor
   ).catch((e) => console.warn('Android 위젯 갱신 실패', e));
 }
 
-// 운동 기록·싸이클·목표가 바뀔 때마다 위젯 갱신
+/** 기록·싸이클·목표 바뀔 때마다 위젯 갱신 */
 export function startWidgetSync() {
   return useWorkoutStore.subscribe((state, prev) => {
     if (

@@ -7,9 +7,8 @@ import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-/** 날짜 탭 시 상세  */
 
-
+/** 날짜 탭 시 상세 */
 export default function DayDetail({
   date,
   log,

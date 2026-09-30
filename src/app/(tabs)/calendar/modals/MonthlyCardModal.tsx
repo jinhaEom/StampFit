@@ -27,6 +27,7 @@ interface Props {
   analytics: MonthlyAnalytics;
 }
 
+/* 이달의 운동 카드 모달 */
 export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
   const insets = useSafeAreaInsets();
   const cardRef = useRef<View>(null);
@@ -35,7 +36,7 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
 
   const conditionIndex = Math.max(0, Math.min(4, Math.round(analytics.avgCondition) - 1));
 
-  // 1. 사진첩에 저장\
+  // 1. 사진첩에 저장
   const onSaveToGallery = async () => {
     if (!cardRef.current || saving) return;
     try {
@@ -64,7 +65,7 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
     }
   };
 
-  // 2. SNS 공유하기
+  // 2. SNS 공유
   const onShareSNS = async () => {
     if (!cardRef.current || sharing) return;
     try {

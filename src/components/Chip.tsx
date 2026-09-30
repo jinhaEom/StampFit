@@ -4,12 +4,11 @@ interface Props {
   label: string;
   selected?: boolean;
   onPress?: () => void;
-  /** [+] 추가 칩처럼 점선 테두리 스타일 */
-  dashed?: boolean;
+  dashed?: boolean; // 점선 테두리 ([+] 추가 칩)
   small?: boolean;
 }
 
-/** 부위 선택 칩. 선택 상태는 무채색 반전으로 표현 (포인트 컬러 사용처 아님 — §6) */
+/** 부위 선택 칩 (선택 시 무채색 반전) */
 export function Chip({ label, selected, onPress, dashed, small }: Props) {
   const box = selected
     ? 'border-fg bg-fg'

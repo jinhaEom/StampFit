@@ -8,7 +8,7 @@ interface Props {
   onPressGoal: () => void;
 }
 
-/** 홈 맨 위 — 몇 주 연속 달성(큰 숫자) + 이번 주 목표 칸 */
+/** 홈 상단 (연속 달성 숫자 + 이번 주 목표 칸) */
 export function StreakHero({ streak, onPressGoal }: Props) {
   const { weeks, target, count } = streak;
   const achieved = target !== null && count >= target;
@@ -37,7 +37,7 @@ export function StreakHero({ streak, onPressGoal }: Props) {
         </Pressable>
       </View>
 
-      {/* 이번 주 목표 — 목표 횟수만큼 칸을 나눠 채운다 */}
+      {/* 이번 주 목표 칸 (목표 횟수만큼) */}
       {target !== null && (
         <View className="mt-[12px] flex-row items-center gap-[10px]">
           <View className="flex-1 flex-row gap-[4px]">

@@ -1,5 +1,4 @@
 import { AdBanner } from '@/components/AdBanner';
-import { Segmented } from '@/components/Segmented';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -7,6 +6,7 @@ import { Animated, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HeatmapView from './components/HeatmapView';
 import MonthView from './components/MonthView';
+import { Segmented } from './components/Segmented';
 import StatisticsView from './components/StatisticsView';
 
 const TAB_OPTIONS = ['캘린더', '히트맵', '통계'];

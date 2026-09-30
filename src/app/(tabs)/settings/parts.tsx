@@ -12,7 +12,7 @@ import {
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSettings } from './hooks/useSettings';
+import { usePartsEditor } from './hooks/usePartsEditor';
 
 export default function PartsScreen() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function PartsScreen() {
     parts,
     addPart,
     setPartActive,
-    setParts,
+    reorderParts,
     newName,
     setNewName,
     duplicateAlertVisible,
@@ -30,7 +30,7 @@ export default function PartsScreen() {
     requestDeletePart,
     cancelDeletePart,
     confirmDeletePart,
-  } = useSettings();
+  } = usePartsEditor();
 
   const [editMode, setEditMode] = useState(false);
 
@@ -62,7 +62,7 @@ export default function PartsScreen() {
         <View className="mt-[16px] rounded-[16px] bg-card p-[16px]">
           <NestableDraggableFlatList
             data={parts}
-            onDragEnd={({ data }) => setParts(data)}
+            onDragEnd={({ data }) => reorderParts(data)}
             keyExtractor={(item) => item.id}
             renderItem={({ item, drag, isActive, getIndex }: RenderItemParams<BodyPart>) => {
               const index = getIndex?.() ?? 0;

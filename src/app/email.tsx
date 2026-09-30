@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-/** Supabase 에러 문구(영어)를 화면에 보여줄 말로 */
+/** Supabase 에러 문구 → 화면 문구 */
 function toMessage(message: string) {
   if (message.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 맞지 않아요';
   if (message.includes('already registered')) return '이미 가입된 이메일이에요';

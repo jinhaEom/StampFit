@@ -1,3 +1,4 @@
+import { GRID_MAX_HEIGHT } from '../../constants';
 import { Colors } from '@/constants/colors';
 import { SCROLL_BOTTOM, WEEKDAY } from '@/constants/constant';
 import { todayStr } from '@/lib/date';
@@ -7,15 +8,11 @@ import { useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
-import {
-  GRID_MAX_HEIGHT,
-  MonthPage,
-  PAGE_WIDTH,
-  ROW_HEIGHT,
-  useCalendar,
-} from '../../hooks/useCalendar';
-import DayDetail from '../DayDetail';
+import { useExpandableGrid } from '../../hooks/useExpandableGrid';
+import { type MonthPage, useMonthPager } from '../../hooks/useMonthPager';
+import DayDetail from '@/components/DayDetail';
 import DayCell from './DayCell';
+import { WeekRow } from './WeekRow';
 
 export default function MonthView() {
   const today = todayStr();
@@ -24,19 +21,16 @@ export default function MonthView() {
   const stampingDate = useWorkoutStore((s) => s.stampingDate);
   const clearStamping = useWorkoutStore((s) => s.clearStamping);
   const [selected, setSelected] = useState(today);
-  const { pager, expandGesture, gridHeightStyle, rowStyles, pillStyle } = useCalendar();
+  const pager = useMonthPager();
+  const grid = useExpandableGrid(pager.current.weeks.length);
 
   const logsByDate = useMemo(() => new Map(logs.map((l) => [l.logDate, l])), [logs]);
   const partNames = useMemo(() => new Map(Object.entries(partNamesById)), [partNamesById]);
 
   const renderMonth = ({ item }: { item: MonthPage }) => (
-    <View style={{ width: PAGE_WIDTH }}>
+    <View style={{ width: pager.pageWidth }}>
       {item.weeks.map((week, wi) => (
-        <Animated.View
-          key={wi}
-          className="flex-row bg-bg"
-          style={[{ height: ROW_HEIGHT }, rowStyles[wi]]}
-        >
+        <WeekRow key={wi} index={wi} expandProgress={grid.expandProgress}>
           {week.map((date, di) => {
             if (!date) return <View key={di} className="flex-1 py-[3px]" />;
             return (
@@ -50,11 +44,11 @@ export default function MonthView() {
                 stampAnimate={date === stampingDate}
                 onStampPlayed={clearStamping}
                 onSelect={setSelected}
-                pillStyle={pillStyle}
+                pillStyle={grid.pillStyle}
               />
             );
           })}
-        </Animated.View>
+        </WeekRow>
       ))}
     </View>
   );
@@ -94,8 +88,8 @@ export default function MonthView() {
           ))}
         </View>
 
-        <GestureDetector gesture={expandGesture}>
-          <Animated.View style={[gridHeightStyle, { overflow: 'hidden' }]}>
+        <GestureDetector gesture={grid.expandGesture}>
+          <Animated.View style={[grid.gridHeightStyle, { overflow: 'hidden' }]}>
             <FlatList
               style={{ height: GRID_MAX_HEIGHT }}
               ref={pager.listRef}

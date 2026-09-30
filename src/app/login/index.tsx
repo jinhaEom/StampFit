@@ -1,10 +1,10 @@
-import { SocialAuthButtons } from '@/components/SocialAuthButtons';
-import { StampGridHero } from '@/components/StampGridHero';
 import { useRouter } from 'expo-router';
 import { Image, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SocialAuthButtons } from './components/SocialAuthButtons';
+import { StampGridHero } from './components/StampGridHero';
 
-/** 시작 화면 — 로그인과 가입을 나누지 않고 "계속하기" 하나로 */
+/** 시작 화면 (로그인·가입 구분 없이 계속하기) */
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

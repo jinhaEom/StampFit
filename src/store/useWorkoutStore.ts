@@ -6,23 +6,19 @@ import { create } from 'zustand';
 interface WorkoutState {
   hydrated: boolean;
   parts: BodyPart[];
-  /** 부위 ID로 부위명을 찾는 사전 (삭제된 부위도 과거 기록 조회를 위해 포함) */
-  partNamesById: Record<string, string>;
+  partNamesById: Record<string, string>; // 부위 id → 이름 (삭제된 부위 포함)
   logs: WorkoutLog[];
   goal: Goal | null;
-  /** 목표 변경 이력 (오래된 주부터) — 주 단위 연속 달성 계산용 */
-  goalHistory: Goal[];
+  goalHistory: Goal[]; // 목표 변경 이력 (연속 달성 계산용)
   cycle: WorkoutCycle | null;
-  /** 방금 새로 기록한 날짜. 기록 화면이 닫히고 돌아온 화면의 그 날짜 칸에서 도장 애니메이션을 한 번 보여주고 비운다 (기록 화면이 CLEAR 연출 후 stampDate로 채운다) */
-  stampingDate: string | null;
+  stampingDate: string | null; // 방금 새로 기록한 날짜 (돌아간 화면에서 도장 1회)
   loadAll: () => void;
   saveLog: (input: repo.UpsertLogInput) => void;
   removeLog: (logDate: string) => void;
   addPart: (name: string) => string | null;
   setPartActive: (id: string, active: boolean) => void;
   removePart: (id: string) => void;
-  movePart: (id: string, dir: -1 | 1) => void;
-  setParts: (parts: BodyPart[]) => void;
+  reorderParts: (parts: BodyPart[]) => void;
   setGoal: (targetCount: number, recurring: boolean) => void;
   setCycle: (steps: WorkoutCycleStep[]) => void;
   resetAll: () => void;
@@ -30,16 +26,20 @@ interface WorkoutState {
   clearStamping: () => void;
 }
 
+// 로컬 DB 전체 읽기 (화면 상태 한 벌)
+const readSnapshot = () => ({
+  parts: repo.getBodyParts(),
+  partNamesById: repo.getBodyPartNamesById(),
+  logs: repo.getLogs(),
+  goal: repo.getGoal(),
+  goalHistory: repo.getGoalHistory(),
+  cycle: repo.getCycle(),
+});
+
 export const useWorkoutStore = create<WorkoutState>((set) => {
+  // 쓰기 후 화면 갱신 + 서버 반영
   const refresh = () => {
-    set({
-      parts: repo.getBodyParts(),
-      partNamesById: repo.getBodyPartNamesById(),
-      logs: repo.getLogs(),
-      goal: repo.getGoal(),
-      goalHistory: repo.getGoalHistory(),
-      cycle: repo.getCycle(),
-    });
+    set(readSnapshot());
     pushAfterWrite();
   };
   return {
@@ -53,15 +53,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
     stampingDate: null,
     loadAll: () => {
       try {
-        set({
-          parts: repo.getBodyParts(),
-          partNamesById: repo.getBodyPartNamesById(),
-          logs: repo.getLogs(),
-          goal: repo.getGoal(),
-          goalHistory: repo.getGoalHistory(),
-          cycle: repo.getCycle(),
-          hydrated: true,
-        });
+        set({ ...readSnapshot(), hydrated: true });
       } catch (e) {
         console.warn('로컬 DB 초기화 실패', e);
       }
@@ -87,11 +79,10 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
       repo.deleteBodyPart(id);
       refresh();
     },
-    movePart: (id, dir) => {
-      repo.moveBodyPart(id, dir);
+    reorderParts: (parts) => {
+      repo.reorderBodyParts(parts.map((p) => p.id));
       refresh();
     },
-    setParts: (parts) => set({ parts }),
     setGoal: (targetCount, recurring) => {
       repo.setGoal(targetCount, recurring);
       refresh();
@@ -102,14 +93,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
     },
     resetAll: () => {
       repo.resetAllData();
-      set({
-        parts: repo.getBodyParts(),
-        partNamesById: repo.getBodyPartNamesById(),
-        logs: repo.getLogs(),
-        goal: repo.getGoal(),
-        goalHistory: repo.getGoalHistory(),
-        cycle: repo.getCycle(),
-      });
+      set(readSnapshot());
     },
     stampDate: (date) => set({ stampingDate: date }),
     clearStamping: () => set({ stampingDate: null }),

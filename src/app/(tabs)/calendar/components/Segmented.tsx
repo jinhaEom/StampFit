@@ -13,7 +13,7 @@ interface Props {
   onChange: (index: number) => void;
 }
 
-/** 상단 세그먼트 컨트롤 (슬라이딩 애니메이션 인디케이터 포함) */
+/** 상단 세그먼트 탭 (선택 표시 미끄러짐) */
 export function Segmented({ options, value, onChange }: Props) {
   const [containerWidth, setContainerWidth] = useState(0);
   const translateX = useSharedValue(0);
@@ -47,7 +47,7 @@ export function Segmented({ options, value, onChange }: Props) {
       onLayout={onLayout}
       className="relative flex-row rounded-[12px] bg-card p-[3px] overflow-hidden"
     >
-      {/* 슬라이딩 백그라운드 인디케이터 */}
+      {/* 선택 표시 배경 */}
       {itemWidth > 0 && (
         <Animated.View
           style={[

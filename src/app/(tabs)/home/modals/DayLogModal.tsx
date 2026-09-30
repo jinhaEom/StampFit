@@ -1,4 +1,4 @@
-import DayDetail from '@/app/(tabs)/calendar/components/DayDetail';
+import DayDetail from '@/components/DayDetail';
 import { Colors } from '@/constants/colors';
 import type { WorkoutLog } from '@/lib/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void;
 }
 
-/** 이번 주 잔디 칸을 탭했을 때, 해당 날짜 기록을 추가/수정할 수 있는 모달 */
+/** 이번 주 칸 탭 시 그날 기록 모달 */
 export function DayLogModal({ visible, date, log, onClose }: Props) {
   if (!date) return null;
 

@@ -33,7 +33,7 @@ export function SocialAuthButtons({ onSuccess }: Props) {
       if (session) onSuccess();
     } catch (e) {
       const error = e as { code?: string; message?: string };
-      // 사용자가 직접 닫은 경우는 조용히 넘어간다
+      /* 사용자가 닫은 경우는 무시 */
       if (error.code !== 'ERR_REQUEST_CANCELED') {
         Alert.alert('Apple 로그인 실패', error.message ?? '잠시 후 다시 시도해 주세요');
       }
@@ -66,7 +66,7 @@ export function SocialAuthButtons({ onSuccess }: Props) {
           <ActivityIndicator color={GOOGLE_DARK.text} />
         ) : (
           <>
-            {/* TODO: 출시 전 구글 공식 컬러 G 이미지로 교체 (브랜딩 가이드상 흑백 G는 금지) */}
+            {/* TODO: 출시 전 구글 공식 컬러 G 이미지로 교체 (흑백 G 금지) */}
             <AntDesign name="google" size={18} color={GOOGLE_DARK.text} />
             <Text className="text-[16px] font-semibold" style={{ color: GOOGLE_DARK.text }}>
               Google로 계속하기

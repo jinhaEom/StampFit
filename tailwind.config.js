@@ -4,7 +4,7 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      // src/constants/theme.ts 의 Colors 와 동기화해서 관리한다
+      // src/constants/colors.ts의 Colors와 맞춰 관리
       colors: {
         bg: '#0E0F11',
         card: '#181A1D',

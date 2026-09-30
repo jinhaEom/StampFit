@@ -9,7 +9,7 @@ import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-na
 
 const COL_WIDTH = 14;
 
-/* 히트맵  */
+/** 연간 히트맵 */
 export default function HeatmapView() {
   const today = todayStr();
   const logs = useWorkoutStore((s) => s.logs);
@@ -21,7 +21,7 @@ export default function HeatmapView() {
   const logsByDate = useMemo(() => new Map(logs.map((l) => [l.logDate, l])), [logs]);
   const { weeks, monthLabels } = useMemo(() => yearGrid(year), [year]);
 
-  // 히트맵을 열면 오늘이 속한 달이 보이도록 
+  /* 열 때 오늘이 속한 달로 스크롤 */
   useEffect(() => {
     const todayIndex = weeks.findIndex((week) => week.includes(today));
     if (todayIndex < 0) return;

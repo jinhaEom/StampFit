@@ -1,12 +1,11 @@
 import { Colors } from '@/constants/colors';
 import { Pressable, Text, View } from 'react-native';
-import { StampDot } from './StampDot';
+import { StampDot } from '@/components/StampDot';
 
 export interface WeekDay {
   date: string;
   stamped: boolean;
-  /** 히트맵 농도 단계 (0 = 기록 없음) */
-  level: number;
+  level: number; // 히트맵 단계 (0 기록 없음)
   isToday: boolean;
   stampAnimate: boolean;
 }

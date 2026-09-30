@@ -1,41 +1,36 @@
 import { AdBanner } from '@/components/AdBanner';
 import { BottomTabInset } from '@/constants/constant';
+import { todayStr } from '@/lib/date';
+import { useWorkoutStore } from '@/store/useWorkoutStore';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-simple-toast';
 import { StreakHero } from './components/StreakHero';
 import { TodayCycleHeader } from './components/TodayCycleHeader';
 import { TodayRecordBar } from './components/TodayRecordBar';
 import { WeekCard } from './components/WeekCard';
-import { CycleModal } from './detail/CycleModal';
-import { DayLogModal } from './detail/DayLogModal';
-import { GoalModal } from './detail/GoalModal';
-import { useHome } from './hooks/useHome';
+import { useTodayPlan } from './hooks/useTodayPlan';
+import { useWeekSummary } from './hooks/useWeekSummary';
+import { CycleModal } from './modals/CycleModal';
+import { DayLogModal } from './modals/DayLogModal';
+import { GoalModal } from './modals/GoalModal';
 
 export default function HomeScreen() {
-  const {
-    insets,
-    router,
-    today,
-    logsByDate,
-    weekDays,
-    clearStamping,
-    weekMin,
-    weeklyStreak,
-    quoteOfDay,
-    currentCycleStep,
-    nextCycleStep,
-    todayLog,
-    isCycleModalOpen,
-    setIsCycleModalOpen,
-    isGoalModalOpen,
-    setIsGoalModalOpen,
-  } = useHome();
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const { weekDays, weekMin, weeklyStreak, onStampPlayed } = useWeekSummary();
+  const { todayLog, currentStep, nextStep, quoteOfDay } = useTodayPlan();
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isCycleModalOpen, setIsCycleModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null); // 7칸에서 누른 날짜
+  const selectedLog = useWorkoutStore((s) => s.logs.find((l) => l.logDate === selectedDate));
 
+  // 미래 날짜는 열지 않음
   const handlePressDay = (date: string) => {
-    if (date > today) {
+    if (date > todayStr()) {
       Toast.show('미래 날짜예요', Toast.SHORT);
       return;
     }
@@ -50,28 +45,26 @@ export default function HomeScreen() {
         </View>
 
         <View className="mt-[20px]">
-          <WeekCard days={weekDays} weekMin={weekMin} onPressDay={handlePressDay} onStampPlayed={clearStamping} />
+          <WeekCard days={weekDays} weekMin={weekMin} onPressDay={handlePressDay} onStampPlayed={onStampPlayed} />
         </View>
 
         <View className="mt-[12px]">
           <TodayCycleHeader
-            currentStep={currentCycleStep}
-            nextStep={nextCycleStep}
+            currentStep={currentStep}
+            nextStep={nextStep}
             doneToday={!!todayLog}
             onEditCycle={() => setIsCycleModalOpen(true)}
           />
         </View>
 
-        {/* <View className="mt-[20px]">
-          <AdBanner />
-        </View> */}
+      
       </ScrollView>
 
       <CycleModal visible={isCycleModalOpen} onClose={() => setIsCycleModalOpen(false)} />
       <DayLogModal
         visible={selectedDate !== null}
         date={selectedDate}
-        log={selectedDate ? logsByDate.get(selectedDate) : undefined}
+        log={selectedLog}
         onClose={() => setSelectedDate(null)}
       />
       <GoalModal visible={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} />
@@ -84,7 +77,7 @@ export default function HomeScreen() {
           <Text className="mt-[2px] text-[11px] text-dim">{quoteOfDay.author}</Text>
         </View>
       )}
-
+          <AdBanner />
       <View
         className="px-[16px] pt-[8px]"
         style={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + BottomTabInset : 16 }}

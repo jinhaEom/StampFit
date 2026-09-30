@@ -2,11 +2,7 @@ import { DEFAULT_BODY_PARTS } from '@/constants/recovery';
 import * as Crypto from 'expo-crypto';
 import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 
-/**
- * 로컬 SQLite
- */
-
-let db: SQLiteDatabase | null = null;
+let db: SQLiteDatabase | null = null; // 로컬 SQLite
 
 export function getDb(): SQLiteDatabase {
   if (db) return db;
@@ -30,8 +26,8 @@ function migrate(db: SQLiteDatabase) {
       synced INTEGER NOT NULL DEFAULT 0
     );
 
-    -- 서버는 UNIQUE(user_id, log_date), 로컬은 단일 사용자라 log_date만 UNIQUE.
-    -- 소프트 삭제(deleted_at) 행도 UNIQUE에 걸리므로 upsert 시 기존 행을 재사용한다.
+    -- 날짜당 1건 (log_date UNIQUE)
+    -- 소프트 삭제 행도 UNIQUE라 upsert 시 기존 행 재사용
     CREATE TABLE IF NOT EXISTS workout_logs (
       id TEXT PRIMARY KEY NOT NULL,
       log_date TEXT NOT NULL UNIQUE,
@@ -51,16 +47,15 @@ function migrate(db: SQLiteDatabase) {
       PRIMARY KEY (log_id, body_part_id)
     );
 
-    -- 이 로컬 캐시가 현재 어느 Supabase 계정 소유인지 기록한다.
-    -- 계정이 바뀌면(다른 user_id) sync.ts가 이 표를 보고 로컬 데이터를 지운 뒤 다시 받는다.
+    -- 로컬 캐시 소유 계정 (바뀌면 sync.ts가 비우고 다시 받음)
     CREATE TABLE IF NOT EXISTS sync_owner (
       id INTEGER PRIMARY KEY CHECK (id = 1),
       user_id TEXT
     );
 
-    -- 주간 운동 횟수 목표. 기기 로컬 전용(서버 동기화 안 함) — 로그아웃하면 사라지는 게 의도된 동작이다.
-    -- 단일 사용자 설정이라 싱글턴(id=1) 행 하나만 둔다.
-    -- recurring=0이면 week_start가 속한 주에만 유효 — 주가 지나면 목표 없음으로 취급한다.
+    -- 주간 운동 횟수 목표 (기기 전용, 로그아웃 시 삭제)
+    -- 싱글턴 행 (id=1)
+    -- recurring=0이면 week_start 주에만 유효
     CREATE TABLE IF NOT EXISTS goals (
       id INTEGER PRIMARY KEY CHECK (id = 1),
       target_count INTEGER NOT NULL,
@@ -69,9 +64,9 @@ function migrate(db: SQLiteDatabase) {
       updated_at TEXT NOT NULL
     );
 
-    -- 주간 목표 변경 이력 (goals와 같이 기기 로컬 전용).
-    -- 지난 주의 목표 달성 여부를 '그 주에 설정돼 있던 목표'로 판정하려고 남긴다.
-    -- 설정한 주(월요일)당 한 행 — 같은 주에 여러 번 바꾸면 마지막 값만 남는다.
+    -- 주간 목표 변경 이력 (기기 전용)
+    -- 지난주 달성 여부를 그 주 목표로 판정하는 데 사용
+    -- 주(월요일)당 한 행, 같은 주 재설정 시 마지막 값만
     CREATE TABLE IF NOT EXISTS goal_history (
       week_start TEXT PRIMARY KEY NOT NULL,
       target_count INTEGER NOT NULL,
@@ -88,12 +83,11 @@ function migrate(db: SQLiteDatabase) {
     );
   `);
 
-  // 이미 설치된 기기의 body_parts 테이블에는 deleted_at 컬럼이 없을 수 있어 있는지 확인 후 추가한다.
+  /* 예전 버전 기기에 없을 수 있는 컬럼 추가 */
   ensureColumn(db, 'body_parts', 'deleted_at', 'TEXT');
-  // 부위별 시간 기록 이전 버전 기기에는 duration_min 컬럼이 없을 수 있다.
   ensureColumn(db, 'workout_log_parts', 'duration_min', 'INTEGER NOT NULL DEFAULT 0');
 
-  // 이력 테이블이 생기기 전에 설정해 둔 목표를 첫 이력으로 옮긴다 (이미 있으면 무시)
+  /* 이력 테이블 이전 목표를 첫 이력으로 옮김 (있으면 무시) */
   db.execSync(`
     INSERT OR IGNORE INTO goal_history (week_start, target_count, recurring, updated_at)
     SELECT week_start, target_count, recurring, updated_at FROM goals WHERE id = 1;
@@ -119,18 +113,18 @@ export function setSyncOwner(userId: string | null) {
   );
 }
 
-/** 계정 전환·로그아웃 시 이전 계정의 흔적을 지운다 (기본 부위 재시딩은 호출부 책임) */
+/** 로컬 데이터 전체 삭제 (기본 부위 재삽입은 호출부 몫) */
 export function wipeLocalData(db: SQLiteDatabase) {
   db.withTransactionSync(() => {
     db.execSync('DELETE FROM workout_log_parts; DELETE FROM workout_logs; DELETE FROM body_parts; DELETE FROM goals; DELETE FROM goal_history; DELETE FROM workout_cycle;');
   });
 }
 
-/** 최초 실행 시 기본 부위 7개 */
+/** 부위가 없으면 기본 부위 7개 삽입 */
 export function seedDefaultPartsIfEmpty(db: SQLiteDatabase) {
   const row = db.getFirstSync<{ n: number }>('SELECT COUNT(*) AS n FROM body_parts');
   if ((row?.n ?? 0) > 0) return;
-  const seededAt = new Date(0).toISOString();
+  const seededAt = new Date(0).toISOString(); // 가장 옛날 시각 (동기화 시 서버 값이 이기도록)
   db.withTransactionSync(() => {
     DEFAULT_BODY_PARTS.forEach((name, i) => {
       db.runSync(

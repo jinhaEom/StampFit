@@ -10,18 +10,15 @@ import {
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
 
 export type MyHealthWidgetProps = {
-  /** 주간 목표 연속 달성 주 수 */
-  streak: number;
+  streak: number; // 연속 달성 주 수
   doneToday: boolean;
   todayLabel?: string;
   nextLabel?: string;
-  /** 이번 주 월~일 히트맵 단계 (0 = 기록 없음) */
-  weekLevels: number[];
-  /** 0 = 월 … 6 = 일 */
-  todayIndex: number;
+  weekLevels: number[]; // 이번 주 월~일 히트맵 단계 (0 기록 없음)
+  todayIndex: number; // 0 월 ~ 6 일
 };
 
-// 'widget' 함수는 별도 런타임에서 실행되므로 상수·헬퍼를 전부 함수 안에 둬야 함
+/** 홈 화면 위젯 (별도 런타임 실행이라 상수·헬퍼 전부 함수 안에) */
 const MyHealthWidget = (props: MyHealthWidgetProps, environment: WidgetEnvironment) => {
   'widget';
   const ACCENT = '#4FD1B3';

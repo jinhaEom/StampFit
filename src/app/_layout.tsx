@@ -53,7 +53,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="light" />
-      {/* 네이티브 스플래시가 내려간 직후 한 번 — 로고 점이 채워지며 첫 화면으로 넘어간다 */}
+      {/* 스플래시 직후 로고 전환 (앱 시작 시 한 번) */}
       <LaunchStamp ready={hydrated}>
         <Stack
           screenOptions={{
@@ -61,10 +61,10 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: Colors.tabBarColor },
           }}
         >
-          <Stack.Screen name="login" />
+          <Stack.Screen name="login/index" />
           <Stack.Screen name="email" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="record" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="record/index" options={{ presentation: 'modal' }} />
         </Stack>
       </LaunchStamp>
     </GestureHandlerRootView>

@@ -25,9 +25,9 @@ interface ServerLog {
 
 const later = (a: string, b: string) => new Date(a).getTime() > new Date(b).getTime();
 
-let inFlight: Promise<void> | null = null;
+let inFlight: Promise<void> | null = null; // 진행 중인 동기화 (중복 실행 방지)
 
-/** 로그인 직후 앱 시작 시 호출하는 전체 동기화 */
+/** 전체 동기화 (진행 중이면 그 작업을 같이 기다림) */
 export function syncAll(userId: string): Promise<void> {
   if (!inFlight) {
     inFlight = runSync(userId).finally(() => {
@@ -51,7 +51,7 @@ async function runSync(userId: string) {
   await pushUnsynced(userId);
 }
 
-/** 아직 서버에 안 올라간 운동 기록 수 — 로그아웃하면 사라질 기록 */
+/** 서버에 안 올라간 기록 수 (로그아웃 시 사라질 기록) */
 export function countUnsyncedLogs(): number {
   const row = getDb().getFirstSync<{ n: number }>(
     'SELECT COUNT(*) AS n FROM workout_logs WHERE synced = 0 AND deleted_at IS NULL',
@@ -59,20 +59,19 @@ export function countUnsyncedLogs(): number {
   return row?.n ?? 0;
 }
 
-/** 쓰기 직후 호출 , 비로그인이면 건너뛰고, 실패해도 synced=0이 남아 다음 동기화에서 재시도 */
+/** 쓰기 직후 서버 반영 (실패분은 다음 동기화에서 재시도) */
 export function pushAfterWrite() {
   const userId = useAuthStore.getState().user?.id;
   if (!userId) return;
   pushUnsynced(userId).catch((e) => {
     console.warn('서버 반영 실패(다음 동기화에서 재시도)', e);
-    // 저장이 서버에 안 올라갔다는 걸 바로 알 수 있게 — 원인(에러 문구)도 같이 보여준다
+    /* 실패 원인 바로 표시 */
     Toast.show(`서버 저장 실패: ${e?.message ?? e}`, Toast.LONG);
   });
 }
 
 async function pullMerge() {
-  // RLS가 내 행만 돌려주므로 user_id 필터는 생략
-  // 목표(goals)는 기기 로컬 전용이라 여기서 다루지 않는다 — 로그아웃하면 사라짐
+  // 내 행만 옴 (RLS라 user_id 필터 생략, 목표는 기기 전용이라 제외)
   const [partsRes, logsRes, logPartsRes] = await Promise.all([
     supabase.from('body_parts').select('id, name, sort_order, is_active, updated_at, deleted_at'),
     supabase
@@ -99,7 +98,7 @@ async function pullMerge() {
         'SELECT id, updated_at FROM body_parts WHERE id = ?', sp.id,
       );
       if (!local) {
-        // 같은 이름의 로컬 부위는 서버 id로 통일 — 기본 부위가 기기마다 다른 id로 시드되기 때문
+        // 같은 이름 로컬 부위 (기기마다 id가 달라 서버 id로 통일)
         const byName = db.getFirstSync<{ id: string; updated_at: string }>(
           'SELECT id, updated_at FROM body_parts WHERE name = ?', sp.name,
         );
@@ -125,7 +124,7 @@ async function pullMerge() {
           sp.name, sp.sort_order, sp.is_active ? 1 : 0, sp.updated_at, sp.deleted_at, sp.id,
         );
       }
-      // 로컬이 더 최신이면 그대로 두고 push에서 서버로 반영한다
+      /* 로컬이 더 최신이면 그대로 (push에서 반영) */
     }
 
     for (const sl of serverLogs) {
@@ -133,7 +132,7 @@ async function pullMerge() {
         'SELECT id, updated_at FROM workout_logs WHERE log_date = ?', sl.log_date,
       );
       if (local && local.id !== sl.id) {
-        // 같은 날짜는 서버 id로 통일 — push 시 UNIQUE(user_id, log_date) 충돌을 막는다
+        /* 같은 날짜는 서버 id로 통일 (push 시 UNIQUE 충돌 방지) */
         db.runSync('UPDATE OR REPLACE workout_log_parts SET log_id = ? WHERE log_id = ?', sl.id, local.id);
         db.runSync('UPDATE workout_logs SET id = ? WHERE id = ?', sl.id, local.id);
       }
@@ -184,7 +183,7 @@ async function pushUnsynced(userId: string) {
     if (error) throw error;
     db.withTransactionSync(() => {
       for (const p of parts) {
-        // push 도중 다시 수정된 행은 synced=0을 유지해야 하므로 updated_at까지 일치할 때만 마킹
+        /* updated_at까지 같을 때만 완료 표시 (push 중 수정된 행 보호) */
         db.runSync('UPDATE body_parts SET synced = 1 WHERE id = ? AND updated_at = ?', p.id, p.updated_at);
       }
     });
@@ -213,7 +212,7 @@ async function pushUnsynced(userId: string) {
   );
   if (logError) throw logError;
 
-  // 부위 연결은 기록 단위로 서버 것을 지우고 로컬 것으로 갈아끼운다
+  /* 부위 연결은 기록 단위로 통째 교체 (서버 삭제 후 로컬 삽입) */
   const logIds = logs.map((l) => l.id);
   const junction = db.getAllSync<{ log_id: string; body_part_id: string; duration_min: number }>(
     `SELECT log_id, body_part_id, duration_min FROM workout_log_parts WHERE log_id IN (${logIds.map(() => '?').join(', ')})`,

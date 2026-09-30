@@ -29,7 +29,7 @@ export interface MonthlyAnalytics {
   hasData: boolean;
 }
 
-/** 로그 배열에서 부위별 시간/횟수/비중을 계산  */
+/** 부위별 시간·횟수·비중 */
 export function getPartStatsForLogs(
   logs: WorkoutLog[],
   partNamesById: Record<string, string>,
@@ -61,7 +61,7 @@ export function getPartStatsForLogs(
     .map((item, idx) => ({ ...item, color: PART_PALETTE[idx % PART_PALETTE.length] }));
 }
 
-/** 특정 연도/월의 통계 데이터 계산 */
+/** 월간 통계 */
 export function getMonthlyAnalytics(
   logs: WorkoutLog[],
   partNamesById: Record<string, string>,
@@ -70,7 +70,7 @@ export function getMonthlyAnalytics(
 ): MonthlyAnalytics {
   const currentPrefix = `${year}-${String(month).padStart(2, '0')}`;
 
-  // 이전 달 연산
+  // 지난달 (전월 대비용)
   const prevDate = new Date(year, month - 2, 1);
   const prevYear = prevDate.getFullYear();
   const prevMonth = prevDate.getMonth() + 1;
@@ -115,7 +115,7 @@ export function getMonthlyAnalytics(
 
   const partStats = getPartStatsForLogs(currentLogs, partNamesById);
 
-  // 이 달 안에서의 최대 연속 운동 일수 계산
+  /* 이번 달 최대 연속 운동 일수 */
   const sortedDates = currentLogs
     .map((l) => l.logDate)
     .sort();
@@ -164,7 +164,7 @@ export function getMonthlyAnalytics(
   };
 }
 
-/** 증감 텍스트 및 부호 포맷터 */
+/** 전월 대비 증감 문구 */
 export function formatDiffText(diffMinutes: number, diffCount: number): {
   timeText: string;
   countText: string;

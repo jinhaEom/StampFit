@@ -11,8 +11,7 @@ import {
 import { create } from 'zustand';
 
 interface AdsState {
-  /** true면 배너 광고를 숨김 */
-  adsRemoved: boolean;
+  adsRemoved: boolean; // true면 배너 광고 숨김
   iapReady: boolean;
   purchasing: boolean;
   init: () => Promise<void>;

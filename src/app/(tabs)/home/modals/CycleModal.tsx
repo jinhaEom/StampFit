@@ -1,10 +1,10 @@
-import { useSettings } from '@/app/(tabs)/settings/hooks/useSettings';
 import { AlertModal } from '@/components/AlertModal';
 import { Chip } from '@/components/Chip';
 import { Colors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
+import { useCycleEditor } from '../hooks/useCycleEditor';
 
 interface CycleModalProps {
   visible: boolean;
@@ -23,7 +23,7 @@ export const CycleModal = ({ visible, onClose }: CycleModalProps) => {
     invalidCycleAlertVisible,
     setInvalidCycleAlertVisible,
     parts,
-  } = useSettings();
+  } = useCycleEditor();
 
   const handleSaveCycle = () => {
     if (!saveCycle()) {

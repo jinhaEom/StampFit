@@ -12,7 +12,7 @@ interface Props {
   onRemove: () => void;
 }
 
-/** 부위 하나의 시간을 정하는 카드 */
+/** 부위별 시간 입력 카드 */
 export function PartDurationCard({ name, durationMin, onChange, onRemove }: Props) {
   const [editing, setEditing] = React.useState(false);
   const [text, setText] = React.useState(String(durationMin));

@@ -9,7 +9,7 @@ interface Props {
   onPress: () => void;
 }
 
-/** 홈 하단 — 오늘 기록 상태 + 기록/수정 버튼 */
+/** 홈 하단 바 (오늘 기록 상태 + 기록·수정 버튼) */
 export function TodayRecordBar({ todayLog, onPress }: Props) {
   const done = !!todayLog;
   const title = done ? `오늘 ${formatDuration(todayLog.durationMin)} 완료` : '아직 기록 전이에요';

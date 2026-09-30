@@ -1,4 +1,4 @@
-import { WeekGrass, type WeekDay } from '@/components/WeekGrass';
+import { WeekGrass, type WeekDay } from './WeekGrass';
 import { formatDuration } from '@/lib/date';
 import { Text, View } from 'react-native';
 
@@ -9,7 +9,7 @@ interface Props {
   onStampPlayed: () => void;
 }
 
-/** 이번 주 — 요일별 7칸 도장 */
+/** 이번 주 요일별 7칸 도장 */
 export function WeekCard({ days, weekMin, onPressDay, onStampPlayed }: Props) {
   return (
     <View className="rounded-[20px] bg-card p-[16px]">

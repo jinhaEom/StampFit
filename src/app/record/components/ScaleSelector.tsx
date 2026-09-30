@@ -2,13 +2,10 @@ import * as Haptics from 'expo-haptics';
 import { Pressable, Text, View } from 'react-native';
 
 interface Props {
-  /** 1~5 */
-  value: number;
+  value: number; // 1~5
   onChange: (v: number) => void;
-  /** 각 단계에 보여줄 문자. 없으면 숫자 (강도), 이모지 배열이면 컨디션 */
-  display?: string[];
-  /** 선택된 단계 설명 라벨 */
-  labels: string[];
+  display?: string[]; // 단계별 표시 문자 (없으면 숫자)
+  labels: string[]; // 단계별 설명 (선택 단계 아래 표시)
 }
 
 export function ScaleSelector({ value, onChange, display, labels }: Props) {

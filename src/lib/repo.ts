@@ -3,9 +3,7 @@ import { todayStr, weekStart } from './date';
 import { getDb, seedDefaultPartsIfEmpty, wipeLocalData } from './db';
 import type { BodyPart, Goal, WorkoutCycle, WorkoutCycleStep, WorkoutLog, WorkoutLogPart } from './types';
 
-/**
- * 로컬 DB CRUD.
- */
+/* 로컬 DB 읽기·쓰기 */
 
 const nowIso = () => new Date().toISOString();
 
@@ -24,7 +22,7 @@ export function getBodyParts(): BodyPart[] {
     .map((r) => ({ id: r.id, name: r.name, sortOrder: r.sort_order, isActive: r.is_active === 1 }));
 }
 
-/** 삭제 여부와 무관하게 id ,이름. 지난 기록에 연결된 (삭제된) 부위명을 복원할 때 씀 */
+/** 부위 id → 이름 (삭제된 부위 포함, 지난 기록 표시용) */
 export function getBodyPartNamesById(): Record<string, string> {
   const rows = getDb().getAllSync<{ id: string; name: string }>('SELECT id, name FROM body_parts');
   return Object.fromEntries(rows.map((r) => [r.id, r.name]));
@@ -39,7 +37,7 @@ interface LogRow {
   memo: string | null;
 }
 
-/** 삭제되지 않은 기록 전체, 날짜 오름차순 */
+/** 기록 전체 (삭제 제외, 날짜 오름차순) */
 export function getLogs(): WorkoutLog[] {
   const db = getDb();
   const rows = db.getAllSync<LogRow>(
@@ -104,12 +102,12 @@ export function upsertLog(input: UpsertLogInput) {
         id, part.id, part.durationMin,
       );
     }
-    // 새 기록일 때만 싸이클을 다음 단계로 넘긴다 (기존 기록 수정 시에는 넘기지 않음)
+    /* 새 기록일 때만 싸이클 다음 단계로 (수정 시 제외) */
     if (!existing) advanceCycleStep(db);
   });
 }
 
-/** 소프트 삭제 — 동기화 시 삭제도 전파 */
+/** 기록 소프트 삭제 (동기화로 삭제도 전파) */
 export function softDeleteLog(logDate: string) {
   const now = nowIso();
   getDb().runSync(
@@ -118,7 +116,7 @@ export function softDeleteLog(logDate: string) {
   );
 }
 
-/** 추가 성공 시 부위 id 반환, 이미 있는(삭제되지 않은) 이름이면 null. 삭제됐던 동명 부위는 복구 */
+/** 부위 추가 (성공 시 id, 중복이면 null, 삭제된 같은 이름은 복구) */
 export function addBodyPart(name: string): string | null {
   const db = getDb();
   const dup = db.getFirstSync<{ id: string; deleted_at: string | null }>(
@@ -148,7 +146,7 @@ export function setBodyPartActive(id: string, active: boolean) {
   );
 }
 
-/** 소프트 삭제 — 지난 기록과의 연결은 유지하고 목록에서만 제외. 동일 이름으로 재추가하면 복구됨 */
+/** 부위 소프트 삭제 (지난 기록 연결 유지, 목록에서만 제외) */
 export function deleteBodyPart(id: string) {
   const now = nowIso();
   getDb().runSync(
@@ -157,21 +155,16 @@ export function deleteBodyPart(id: string) {
   );
 }
 
-/** 정렬 순서 한 칸 이동 (dir: -1 위 / +1 아래) */
-export function moveBodyPart(id: string, dir: -1 | 1) {
-  const parts = getBodyParts();
-  const idx = parts.findIndex((p) => p.id === id);
-  const other = parts[idx + dir];
-  if (idx < 0 || !other) return;
-  const reordered = [...parts];
-  reordered[idx] = other;
-  reordered[idx + dir] = parts[idx];
+/** 부위 순서 저장 (받은 순서대로 재번호, 바뀐 행만) */
+export function reorderBodyParts(ids: string[]) {
   const db = getDb();
   const now = nowIso();
   db.withTransactionSync(() => {
-    // 현재 표시 순서 기준으로 전체 재번호
-    reordered.forEach((p, i) => {
-      db.runSync('UPDATE body_parts SET sort_order = ?, updated_at = ?, synced = 0 WHERE id = ?', i, now, p.id);
+    ids.forEach((id, i) => {
+      db.runSync(
+        'UPDATE body_parts SET sort_order = ?, updated_at = ?, synced = 0 WHERE id = ? AND sort_order != ?',
+        i, now, id, i,
+      );
     });
   });
 }
@@ -186,14 +179,14 @@ export function getGoal(): Goal | null {
   return { targetCount: row.target_count, recurring: row.recurring === 1, weekStart: row.week_start };
 }
 
-/** 목표 변경 이력, 오래된 주부터 — 지난 주를 그 주의 목표로 판정할 때 씀 */
+/** 목표 변경 이력 (오래된 주부터, 주별 달성 판정용) */
 export function getGoalHistory(): Goal[] {
   return getDb()
     .getAllSync<GoalRow>('SELECT target_count, recurring, week_start FROM goal_history ORDER BY week_start')
     .map((r) => ({ targetCount: r.target_count, recurring: r.recurring === 1, weekStart: r.week_start }));
 }
 
-/** 목표 설정/수정 — 매번 이번 주를 기준 주로 다시 잡고, 이력에도 남긴다 */
+/** 목표 저장 (이번 주 기준으로 다시 잡고 이력에도 기록) */
 export function setGoal(targetCount: number, recurring: boolean) {
   const db = getDb();
   const ws = weekStart(todayStr());
@@ -228,7 +221,7 @@ export function getCycle(): WorkoutCycle | null {
   return { steps, currentIndex: row.current_index % steps.length };
 }
 
-/** 싸이클 단계 등록/수정 */
+/** 싸이클 단계 저장 */
 export function setCycleSteps(steps: WorkoutCycleStep[]) {
   const db = getDb();
   const existing = db.getFirstSync<{ current_index: number }>(
@@ -244,7 +237,7 @@ export function setCycleSteps(steps: WorkoutCycleStep[]) {
   );
 }
 
-/** 새 운동 기록이 저장될 때 싸이클을 다음 단계로  */
+/** 싸이클 다음 단계로 (새 기록 저장 시) */
 function advanceCycleStep(db: ReturnType<typeof getDb>) {
   const row = db.getFirstSync<CycleRow>('SELECT steps_json, current_index FROM workout_cycle WHERE id = 1');
   if (!row) return;
@@ -254,7 +247,7 @@ function advanceCycleStep(db: ReturnType<typeof getDb>) {
   db.runSync('UPDATE workout_cycle SET current_index = ?, updated_at = ? WHERE id = 1', nextIndex, nowIso());
 }
 
-/** 데이터 초기화 — 전부 지우고 기본 부위 재삽입 */
+/** 데이터 초기화 (전부 삭제 후 기본 부위 재삽입) */
 export function resetAllData() {
   const db = getDb();
   wipeLocalData(db);
