@@ -31,6 +31,8 @@ create table if not exists public.workout_log_parts (
 
 -- 이미 생성된 프로젝트에도 안전하게 적용되는 컬럼 추가 (부위별 시간 기록 지원)
 alter table public.workout_log_parts add column if not exists duration_min integer not null default 0;
+-- 부위 소프트 삭제 — 앱(sync.ts)이 이 컬럼을 읽고 쓴다. 없으면 동기화 전체가 실패한다.
+alter table public.body_parts add column if not exists deleted_at timestamptz;
 alter table public.body_parts enable row level security;
 alter table public.workout_logs enable row level security;
 alter table public.workout_log_parts enable row level security;

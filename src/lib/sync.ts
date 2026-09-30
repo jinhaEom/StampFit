@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/store/useAuthStore';
 import { getDb, getSyncOwner, seedDefaultPartsIfEmpty, setSyncOwner, wipeLocalData } from './db';
+import Toast from 'react-native-simple-toast';
 import { supabase } from './supabase';
 
 interface ServerPart {
@@ -24,32 +25,49 @@ interface ServerLog {
 
 const later = (a: string, b: string) => new Date(a).getTime() > new Date(b).getTime();
 
-let running = false;
+let inFlight: Promise<void> | null = null;
 
 /** 로그인 직후 앱 시작 시 호출하는 전체 동기화 */
-export async function syncAll(userId: string) {
-  if (running) return;
-  running = true;
-  try {
-    const db = getDb();
-    if (getSyncOwner() !== userId) {
-      wipeLocalData(db);
-      setSyncOwner(userId);
-    }
-    await pullMerge();
-    const { n } = db.getFirstSync<{ n: number }>('SELECT COUNT(*) AS n FROM body_parts')!;
-    if (n === 0) seedDefaultPartsIfEmpty(db); // 서버에도 없으면 신규 계정 — 기본 부위로 시작
-    await pushUnsynced(userId);
-  } finally {
-    running = false;
+export function syncAll(userId: string): Promise<void> {
+  if (!inFlight) {
+    inFlight = runSync(userId).finally(() => {
+      inFlight = null;
+    });
   }
+  return inFlight;
+}
+
+async function runSync(userId: string) {
+  const db = getDb();
+  if (getSyncOwner() !== userId) {
+    wipeLocalData(db);
+    setSyncOwner(userId);
+  }
+  try {
+    await pullMerge();
+  } finally {
+    seedDefaultPartsIfEmpty(db);
+  }
+  await pushUnsynced(userId);
+}
+
+/** 아직 서버에 안 올라간 운동 기록 수 — 로그아웃하면 사라질 기록 */
+export function countUnsyncedLogs(): number {
+  const row = getDb().getFirstSync<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM workout_logs WHERE synced = 0 AND deleted_at IS NULL',
+  );
+  return row?.n ?? 0;
 }
 
 /** 쓰기 직후 호출 , 비로그인이면 건너뛰고, 실패해도 synced=0이 남아 다음 동기화에서 재시도 */
 export function pushAfterWrite() {
   const userId = useAuthStore.getState().user?.id;
   if (!userId) return;
-  pushUnsynced(userId).catch((e) => console.warn('서버 반영 실패(다음 동기화에서 재시도)', e));
+  pushUnsynced(userId).catch((e) => {
+    console.warn('서버 반영 실패(다음 동기화에서 재시도)', e);
+    // 저장이 서버에 안 올라갔다는 걸 바로 알 수 있게 — 원인(에러 문구)도 같이 보여준다
+    Toast.show(`서버 저장 실패: ${e?.message ?? e}`, Toast.LONG);
+  });
 }
 
 async function pullMerge() {

@@ -40,8 +40,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (!userId) return;
     syncAll(userId)
-      .then(loadAll)
-      .catch((e) => console.warn('서버 동기화 실패', e));
+      .catch((e) => console.warn('서버 동기화 실패', e))
+      .finally(loadAll);
   }, [userId, loadAll]);
 
   const url = Linking.useLinkingURL();

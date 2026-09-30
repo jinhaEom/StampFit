@@ -130,12 +130,12 @@ export function wipeLocalData(db: SQLiteDatabase) {
 export function seedDefaultPartsIfEmpty(db: SQLiteDatabase) {
   const row = db.getFirstSync<{ n: number }>('SELECT COUNT(*) AS n FROM body_parts');
   if ((row?.n ?? 0) > 0) return;
-  const now = new Date().toISOString();
+  const seededAt = new Date(0).toISOString();
   db.withTransactionSync(() => {
     DEFAULT_BODY_PARTS.forEach((name, i) => {
       db.runSync(
         'INSERT INTO body_parts (id, name, sort_order, is_active, updated_at, synced) VALUES (?, ?, ?, 1, ?, 0)',
-        Crypto.randomUUID(), name, i, now,
+        Crypto.randomUUID(), name, i, seededAt,
       );
     });
   });
