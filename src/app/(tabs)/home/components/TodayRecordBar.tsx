@@ -1,25 +1,18 @@
 import { Colors } from '@/constants/colors';
-import { formatDuration } from '@/lib/date';
+import { formatDuration, formatKorean, todayStr } from '@/lib/date';
 import type { WorkoutLog } from '@/lib/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 
 interface Props {
   todayLog: WorkoutLog | undefined;
-  todayPartNames: string[];
-  cycleLabel: string | undefined;
   onPress: () => void;
 }
 
-export function TodayRecordBar({ todayLog, todayPartNames, cycleLabel, onPress }: Props) {
+/** 홈 하단 — 오늘 기록 상태 + 기록/수정 버튼 */
+export function TodayRecordBar({ todayLog, onPress }: Props) {
   const done = !!todayLog;
-
-  const caption = done
-    ? ['오늘', ...todayPartNames].join(' · ')
-    : cycleLabel
-      ? `오늘 · ${cycleLabel}`
-      : '오늘';
-  const title = done ? `${formatDuration(todayLog.durationMin)} 완료` : '아직 기록 전이에요';
+  const title = done ? `오늘 ${formatDuration(todayLog.durationMin)} 완료` : '아직 기록 전이에요';
 
   return (
     <Pressable
@@ -37,9 +30,7 @@ export function TodayRecordBar({ todayLog, todayPartNames, cycleLabel, onPress }
           </View>
         )}
         <View className="flex-1">
-          <Text className="text-[11px] text-sub" numberOfLines={1}>
-            {caption}
-          </Text>
+          <Text className="text-[12px] text-sub">{formatKorean(todayStr())}</Text>
           <Text className="mt-[1px] text-[15px] font-semibold text-fg">{title}</Text>
         </View>
       </View>

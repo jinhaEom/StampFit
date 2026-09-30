@@ -144,16 +144,16 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
             </View>
 
             <View className="mt-[18px] rounded-[18px] bg-card p-[16px]">
-              <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center ">
                 <View>
                   <Text className="text-[11px] text-sub">총 운동 시간</Text>
                   <Text className="mt-[4px] text-[22px] font-bold text-fg">
                     {formatDuration(analytics.totalMinutes)}
                   </Text>
                 </View>
-                <View className="h-[36px] w-[1px] bg-white/10" />
-                <View className='items-start'>
-                  <Text className="text-[11px] text-sub">총 출석 일수</Text>
+                <View className="h-[36px] w-[1px] bg-white/10 ml-[30px]" />
+                <View className='items-start px-[20px]'>
+                  <Text className="text-[11px] text-sub">총 운동 일수</Text>
                   <Text className="mt-[4px] text-[22px] font-bold text-accent ">
                     {analytics.totalCount}일
                   </Text>

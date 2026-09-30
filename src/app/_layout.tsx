@@ -1,5 +1,6 @@
 import '@/global.css';
 
+import { LaunchStamp } from '@/components/LaunchStamp';
 import { Colors } from '@/constants/colors';
 import { createSessionFromUrl } from '@/lib/socialAuth';
 import { syncAll } from '@/lib/sync';
@@ -52,17 +53,20 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: Colors.tabBarColor },
-        }}
-      >
-        <Stack.Screen name="login" />
-        <Stack.Screen name="email" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="record" options={{ presentation: 'modal' }} />
-      </Stack>
+      {/* 네이티브 스플래시가 내려간 직후 한 번 — 로고 점이 채워지며 첫 화면으로 넘어간다 */}
+      <LaunchStamp ready={hydrated}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: Colors.tabBarColor },
+          }}
+        >
+          <Stack.Screen name="login" />
+          <Stack.Screen name="email" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="record" options={{ presentation: 'modal' }} />
+        </Stack>
+      </LaunchStamp>
     </GestureHandlerRootView>
   );
 }
