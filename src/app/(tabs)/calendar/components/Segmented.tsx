@@ -45,7 +45,7 @@ export function Segmented({ options, value, onChange }: Props) {
   return (
     <View
       onLayout={onLayout}
-      className="relative flex-row rounded-[12px] bg-card p-[3px] overflow-hidden"
+      className="relative flex-row rounded-[12px] bg-cardBackground p-[3px] overflow-hidden"
     >
       {/* 선택 표시 배경 */}
       {itemWidth > 0 && (
@@ -60,7 +60,7 @@ export function Segmented({ options, value, onChange }: Props) {
             },
             indicatorStyle,
           ]}
-          className="rounded-[9px] bg-card-sel"
+          className="rounded-[9px] bg-cardSelected"
         />
       )}
 
@@ -71,7 +71,7 @@ export function Segmented({ options, value, onChange }: Props) {
           className="flex-1 items-center justify-center rounded-[9px] py-[7px]"
         >
           <Text
-            className={`text-[13px] ${i === value ? 'font-semibold text-fg' : 'font-normal text-sub'
+            className={`text-[13px] ${i === value ? 'font-semibold text-mainText' : 'font-normal text-subText1'
               }`}
           >
             {opt}

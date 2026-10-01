@@ -40,7 +40,7 @@ export default function CalendarScreen() {
   };
 
   return (
-    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top + 8 }}>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8 }}>
       <View className="px-[16px] pb-[6px]">
         <Segmented
           options={TAB_OPTIONS}

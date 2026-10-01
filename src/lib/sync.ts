@@ -59,11 +59,12 @@ export function countUnsyncedLogs(): number {
   return row?.n ?? 0;
 }
 
-/** 쓰기 직후 서버 반영 (실패분은 다음 동기화에서 재시도) */
-export function pushAfterWrite() {
+/** 쓰기 직후 서버 반영 (pull 먼저 해서 같은 이름 부위 id 통일, 실패분은 다음 동기화에서 재시도) */
+export function pushAfterWrite(): Promise<void> {
   const userId = useAuthStore.getState().user?.id;
-  if (!userId) return;
-  pushUnsynced(userId).catch((e) => {
+  if (!userId) return Promise.resolve();
+  /* 진행 중이던 동기화에 묻힌 변경분까지 한 번 더 push */
+  return syncAll(userId).then(() => pushUnsynced(userId)).catch((e) => {
     console.warn('서버 반영 실패(다음 동기화에서 재시도)', e);
     /* 실패 원인 바로 표시 */
     Toast.show(`서버 저장 실패: ${e?.message ?? e}`, Toast.LONG);

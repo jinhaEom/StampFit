@@ -8,8 +8,10 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { MonthlyCardModal } from '../modals/MonthlyCardModal';
 
+const EMPTY_GRID = [12, 36, 60]; // 빈 도장판 점 좌표 (3x3)
 const SCROLL_BOTTOM = 'pb-[24px] ios:pb-[74px] android:pb-[104px]';
 
 /* 캘린더 탭 -> 통계 View*/
@@ -74,42 +76,65 @@ export default function StatisticsView() {
     >
       <View className="mb-[10px] mt-[18px] flex-row items-center justify-between px-[4px]">
         <Pressable onPress={goToPrevMonth} hitSlop={10}>
-          <Ionicons name="chevron-back" size={20} color={Colors.gray2Color} />
+          <Ionicons name="chevron-back" size={20} color={Colors.subText1} />
         </Pressable>
         <View className="flex-row items-center gap-[8px]">
-          <Text className="text-[17px] font-medium text-fg">
+          <Text className="text-[17px] font-medium text-mainText">
             {year}년 {month}월
           </Text>
           {!isCurrentMonth && (
             <Pressable
-              className="rounded-full bg-card px-[10px] py-[4px]"
+              className="rounded-full bg-cardBackground px-[10px] py-[4px]"
               onPress={goToToday}
               hitSlop={8}
             >
-              <Text className="text-[12px] text-sub">이번 달</Text>
+              <Text className="text-[12px] text-subText1">이번 달</Text>
             </Pressable>
           )}
         </View>
         <Pressable onPress={goToNextMonth} hitSlop={10}>
-          <Ionicons name="chevron-forward" size={20} color={Colors.gray2Color} />
+          <Ionicons name="chevron-forward" size={20} color={Colors.subText1} />
         </Pressable>
       </View>
 
       {!analytics.hasData ? (
-        /* 기록 없음 */
-        <View className="mt-[24px] items-center rounded-[20px] bg-card p-[28px]">
-          <Text className="text-[32px]">🏃‍♂️</Text>
-          <Text className="mt-[12px] text-[16px] font-medium text-fg">
-            이 달에는 아직 기록이 없어요
-          </Text>
-          <Text className="mt-[4px] text-[13px] text-sub">
-            운동을 기록하면 통계와 리포트가 생성돼요.
-          </Text>
+        /* 기록 없음 (빈 도장판) */
+        <View className="mt-[24px] items-center rounded-[20px] bg-cardBackground px-[20px] py-[28px]">
+          <Svg width={72} height={72} viewBox="0 0 72 72">
+            {EMPTY_GRID.map((cy) =>
+              EMPTY_GRID.map((cx) =>
+                cx === 36 && cy === 36 ? (
+                  <Circle
+                    key="center"
+                    cx={36}
+                    cy={36}
+                    r={9.5}
+                    fill="none"
+                    stroke={Colors.main}
+                    strokeWidth={1.5}
+                    strokeDasharray="3 3"
+                  />
+                ) : (
+                  <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={8} fill={Colors.main} opacity={0.18} />
+                ),
+              ),
+            )}
+          </Svg>
+          <Text className="mt-[16px] text-[16px] font-medium text-mainText">이 달은 아직 비어 있어요</Text>
+          <Text className="mt-[4px] text-[13px] text-subText1">첫 도장을 찍으면 통계가 채워져요</Text>
+          {isCurrentMonth ? (
+            <Pressable
+              onPress={() => router.push('/record')}
+              className="mt-[18px] rounded-[12px] bg-main px-[18px] py-[10px]"
+            >
+              <Text className="text-[14px] font-medium text-textOnMain">오늘 기록하기</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : (
         <>
           {/* 전월 대비 성장 */}
-          <View className="mt-[12px] rounded-[16px] bg-card p-[16px]">
+          <View className="mt-[12px] rounded-[16px] bg-cardBackground p-[16px]">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-[6px]">
                 <View className="flex-row items-center">
@@ -121,21 +146,21 @@ export default function StatisticsView() {
                     <Ionicons name="trending-down-outline" size={16} color="#007AFF" />
                   )}
                 </View>
-                <Text className="text-[13px] font-medium text-sub">전월 대비 성장</Text>
+                <Text className="text-[13px] font-medium text-subText1">전월 대비 성장</Text>
               </View>
               <View className="rounded-full bg-white/5 px-[8px] py-[2px]">
-                <Text className="text-[11px] text-dim">지난달 비교</Text>
+                <Text className="text-[11px] text-subText2">지난달 비교</Text>
               </View>
             </View>
 
             <View className="mt-[10px] flex-row items-baseline gap-[8px]">
               <Text
-                className={`text-[20px] font-bold ${diff.isSame ? 'text-fg' : diff.isIncrease ? 'text-accent' : 'text-sub'
+                className={`text-[20px] font-bold ${diff.isSame ? 'text-mainText' : diff.isIncrease ? 'text-main' : 'text-subText1'
                   }`}
               >
                 {diff.timeText}
               </Text>
-              <Text className="text-[14px] text-sub">
+              <Text className="text-[14px] text-subText1">
                 (횟수 {diff.countText})
               </Text>
             </View>
@@ -143,22 +168,22 @@ export default function StatisticsView() {
 
           {/* 핵심 요약 */}
           <View className="mt-[12px] flex-row gap-[10px]">
-            <View className="flex-1 rounded-[16px] bg-card p-[16px]">
-              <Text className="text-[12px] text-sub">총 운동 시간</Text>
-              <Text className="mt-[6px] text-[20px] font-bold text-fg">
+            <View className="flex-1 rounded-[16px] bg-cardBackground p-[16px]">
+              <Text className="text-[12px] text-subText1">총 운동 시간</Text>
+              <Text className="mt-[6px] text-[20px] font-bold text-mainText">
                 {formatDuration(analytics.totalMinutes)}
               </Text>
-              <Text className="mt-[4px] text-[11px] text-dim">
+              <Text className="mt-[4px] text-[11px] text-subText2">
                 회당 평균 {analytics.avgMinutesPerWorkout}분
               </Text>
             </View>
 
-            <View className="flex-1 rounded-[16px] bg-card p-[16px]">
-              <Text className="text-[12px] text-sub">총 출석 일수</Text>
-              <Text className="mt-[6px] text-[20px] font-bold text-accent">
+            <View className="flex-1 rounded-[16px] bg-cardBackground p-[16px]">
+              <Text className="text-[12px] text-subText1">총 출석 일수</Text>
+              <Text className="mt-[6px] text-[20px] font-bold text-main">
                 {analytics.totalCount}일
               </Text>
-              <Text className="mt-[4px] text-[11px] text-dim">
+              <Text className="mt-[4px] text-[11px] text-subText2">
                 {analytics.maxStreak > 0
                   ? `최대 연속 ${analytics.maxStreak}일`
                   : '꾸준히 진행 중'}
@@ -167,20 +192,20 @@ export default function StatisticsView() {
           </View>
 
           <View className="mt-[10px] flex-row gap-[10px]">
-            <View className="flex-1 flex-row items-center justify-between rounded-[16px] bg-card p-[14px]">
+            <View className="flex-1 flex-row items-center justify-between rounded-[16px] bg-cardBackground p-[14px]">
               <View>
-                <Text className="text-[11px] text-sub">평균 강도</Text>
-                <Text className="mt-[2px] text-[16px] font-bold text-fg">
+                <Text className="text-[11px] text-subText1">평균 강도</Text>
+                <Text className="mt-[2px] text-[16px] font-bold text-mainText">
                   {analytics.avgIntensity} / 5.0
                 </Text>
               </View>
               <Text className="text-[20px]">💪</Text>
             </View>
 
-            <View className="flex-1 flex-row items-center justify-between rounded-[16px] bg-card p-[14px]">
+            <View className="flex-1 flex-row items-center justify-between rounded-[16px] bg-cardBackground p-[14px]">
               <View>
-                <Text className="text-[11px] text-sub">평균 컨디션</Text>
-                <Text className="mt-[2px] text-[16px] font-bold text-fg">
+                <Text className="text-[11px] text-subText1">평균 컨디션</Text>
+                <Text className="mt-[2px] text-[16px] font-bold text-mainText">
                   {analytics.avgCondition} / 5.0
                 </Text>
               </View>
@@ -191,8 +216,8 @@ export default function StatisticsView() {
           </View>
 
           {/* 부위별 비중 */}
-          <View className="mt-[18px] rounded-[16px] bg-card p-[16px]">
-            <Text className="text-[14px] font-medium text-fg">부위별 비중</Text>
+          <View className="mt-[18px] rounded-[16px] bg-cardBackground p-[16px]">
+            <Text className="text-[14px] font-medium text-mainText">부위별 비중</Text>
 
             {analytics.partStats.length > 0 && (
               <View className="mt-[12px] h-[8px] w-full flex-row overflow-hidden rounded-full bg-white/5">
@@ -218,13 +243,13 @@ export default function StatisticsView() {
                         className="h-[10px] w-[10px] rounded-full"
                         style={{ backgroundColor: part.color }}
                       />
-                      <Text className="text-[14px] font-medium text-fg">{part.name}</Text>
+                      <Text className="text-[14px] font-medium text-mainText">{part.name}</Text>
                     </View>
                     <View className="flex-row items-center gap-[8px]">
-                      <Text className="text-[13px] text-sub">
+                      <Text className="text-[13px] text-subText1">
                         {part.count}회 · {formatDuration(part.minutes)}
                       </Text>
-                      <Text className="w-[36px] text-right text-[13px] font-bold text-fg">
+                      <Text className="w-[36px] text-right text-[13px] font-bold text-mainText">
                         {part.percentage}%
                       </Text>
                     </View>
@@ -255,16 +280,16 @@ export default function StatisticsView() {
           >
             <View className="flex-1 pr-[12px]">
               <View className="flex-row items-center gap-[6px]">
-                <Text className="text-[15px] font-bold text-accent">
+                <Text className="text-[15px] font-bold text-main">
                   이달의 운동 카드 만들기
                 </Text>
               </View>
-              <Text className="mt-[4px] text-[12px] text-sub leading-4">
+              <Text className="mt-[4px] text-[12px] text-subText1 leading-4">
                 인스타그램 스토리에 공유하기 좋은 요약 카드를 생성해요
               </Text>
             </View>
-            <View className="h-[36px] w-[36px] items-center justify-center rounded-full bg-accent">
-              <Ionicons name="arrow-forward" size={18} color={Colors.onAccent} />
+            <View className="h-[36px] w-[36px] items-center justify-center rounded-full bg-main">
+              <Ionicons name="arrow-forward" size={18} color={Colors.textOnMain} />
             </View>
           </TouchableOpacity>
         </>

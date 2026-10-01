@@ -17,7 +17,7 @@ export function AdBanner() {
   if (adsRemoved) return null;
 
   return (
-    <View className="items-center bg-bg">
+    <View className="items-center bg-background">
       <BannerAd unitId={BANNER_UNIT_ID} size={BannerAdSize.BANNER} />
     </View>
   );

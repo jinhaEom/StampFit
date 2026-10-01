@@ -40,11 +40,11 @@ function AndroidTabs() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.whiteColor,
-        tabBarInactiveTintColor: Colors.disabledColor,
+        tabBarActiveTintColor: Colors.mainText,
+        tabBarInactiveTintColor: Colors.disabledText,
         tabBarStyle: {
-          backgroundColor: Colors.tabBarColor,
-          borderTopColor: Colors.gray1Color,
+          backgroundColor: Colors.background,
+          borderTopColor: Colors.border,
         },
         tabBarLabelStyle: { fontSize: 12 },
       }}

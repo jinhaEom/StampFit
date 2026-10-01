@@ -42,7 +42,7 @@ function DayCell({
       <View className="h-[46px] w-[40px] items-center justify-start gap-[2px]">
         {isSelected && (
           <Animated.View
-            className="absolute left-0 right-0 top-0 rounded-[24px] bg-card-sel"
+            className="absolute left-0 right-0 top-0 rounded-[24px] bg-cardSelected"
             style={pillStyle}
           />
         )}
@@ -50,13 +50,13 @@ function DayCell({
         <View className="h-[30px] w-[30px] items-center justify-center">
           {log && <StampDot level={level} animate={stampAnimate} onPlayed={onStampPlayed} />}
           <Text
-            className={`text-[15px] ${darkText ? 'text-on-accent' : 'text-fg'} ${isToday ? 'font-bold' : ''}`}
+            className={`text-[15px] ${darkText ? 'text-textOnMain' : 'text-mainText'} ${isToday ? 'font-bold' : ''}`}
           >
             {Number(date.slice(8, 10))}
           </Text>
         </View>
 
-        <Text className="h-[12px] text-[12px] leading-[12px] text-sub" numberOfLines={1}>
+        <Text className="h-[12px] text-[12px] leading-[12px] text-subText1" numberOfLines={1}>
           {parts.length ? `${parts[0]}${parts.length > 1 ? ` +${parts.length - 1}` : ''}` : ''}
         </Text>
 
@@ -65,7 +65,7 @@ function DayCell({
             pointerEvents="none"
             className="absolute top-[49px] items-center"
           >
-            <Text className="mb-[1px] text-[10px] leading-[11px] text-sub" numberOfLines={1}>
+            <Text className="mb-[1px] text-[10px] leading-[11px] text-subText1" numberOfLines={1}>
               {INTENSITY_LABELS[log.intensity - 1]}
             </Text>
             <Text className="text-[12px] leading-[14px] mt-[2px]">

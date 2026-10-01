@@ -131,31 +131,31 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
               </View>
 
               <View className='h-[24px] w-[24px]'>
-                <Ionicons name='close' size={24} color={Colors.whiteColor} onPress={onClose} />
+                <Ionicons name='close' size={24} color={Colors.mainText} onPress={onClose} />
               </View>
             </View>
 
             <View className="mt-[12px]">
-              <Text className="text-[12px] font-medium tracking-wider text-accent uppercase">
+              <Text className="text-[12px] font-medium tracking-wider text-main uppercase">
                 Monthly Workout Report
               </Text>
-              <Text className="mt-[4px] text-[24px] font-bold text-fg">
+              <Text className="mt-[4px] text-[24px] font-bold text-mainText">
                 {analytics.month}월의 운동 기록
               </Text>
             </View>
 
-            <View className="mt-[18px] rounded-[18px] bg-card p-[16px]">
+            <View className="mt-[18px] rounded-[18px] bg-cardBackground p-[16px]">
               <View className="flex-row items-center ">
                 <View>
-                  <Text className="text-[11px] text-sub">총 운동 시간</Text>
-                  <Text className="mt-[4px] text-[22px] font-bold text-fg">
+                  <Text className="text-[11px] text-subText1">총 운동 시간</Text>
+                  <Text className="mt-[4px] text-[22px] font-bold text-mainText">
                     {formatDuration(analytics.totalMinutes)}
                   </Text>
                 </View>
                 <View className="h-[36px] w-[1px] bg-white/10 ml-[30px]" />
                 <View className='items-start px-[20px]'>
-                  <Text className="text-[11px] text-sub">총 운동 일수</Text>
-                  <Text className="mt-[4px] text-[22px] font-bold text-accent ">
+                  <Text className="text-[11px] text-subText1">총 운동 일수</Text>
+                  <Text className="mt-[4px] text-[22px] font-bold text-main ">
                     {analytics.totalCount}일
                   </Text>
                 </View>
@@ -164,23 +164,23 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
 
             <View className="mt-[12px] flex-row gap-[10px]">
               {analytics.maxStreak > 0 && (
-                <View className="flex-1 flex-row items-center gap-[6px] rounded-[12px] bg-card px-[12px] py-[10px]">
+                <View className="flex-1 flex-row items-center gap-[6px] rounded-[12px] bg-cardBackground px-[12px] py-[10px]">
                   <Text className="text-[16px]">🔥</Text>
                   <View>
-                    <Text className="text-[10px] text-sub">최대 연속</Text>
-                    <Text className="text-[13px] font-bold text-fg">
+                    <Text className="text-[10px] text-subText1">최대 연속</Text>
+                    <Text className="text-[13px] font-bold text-mainText">
                       {analytics.maxStreak}일 달성
                     </Text>
                   </View>
                 </View>
               )}
-              <View className="flex-1 flex-row items-center gap-[6px] rounded-[12px] bg-card px-[12px] py-[10px]">
+              <View className="flex-1 flex-row items-center gap-[6px] rounded-[12px] bg-cardBackground px-[12px] py-[10px]">
                 <Text className="text-[16px]">
                   {CONDITION_EMOJI[conditionIndex]}
                 </Text>
                 <View>
-                  <Text className="text-[10px] text-sub">평균 강도</Text>
-                  <Text className="text-[13px] font-bold text-fg">
+                  <Text className="text-[10px] text-subText1">평균 강도</Text>
+                  <Text className="text-[13px] font-bold text-mainText">
                     {analytics.avgIntensity} / 5.0
                   </Text>
                 </View>
@@ -189,7 +189,7 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
 
             {analytics.topParts.length > 0 && (
               <View className="mt-[20px]">
-                <Text className="text-[11px] font-medium tracking-wider text-sub uppercase">
+                <Text className="text-[11px] font-medium tracking-wider text-subText1 uppercase">
                   Top Focus Parts
                 </Text>
                 <View className="mt-[10px] gap-[8px]">
@@ -201,11 +201,11 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
                             className="h-[8px] w-[8px] rounded-full"
                             style={{ backgroundColor: part.color }}
                           />
-                          <Text className="text-[13px] font-medium text-fg">
+                          <Text className="text-[13px] font-medium text-mainText">
                             {idx + 1}위 {part.name}
                           </Text>
                         </View>
-                        <Text className="text-[12px] font-semibold text-sub">
+                        <Text className="text-[12px] font-semibold text-subText1">
                           {part.percentage}% ({formatDuration(part.minutes)})
                         </Text>
                       </View>
@@ -225,7 +225,7 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
             )}
 
             <View className="mt-[24px] items-center border-t border-white/5 pt-[14px]">
-              <Text className="text-[10px] italic tracking-wide text-dim">
+              <Text className="text-[10px] italic tracking-wide text-subText2">
                 “Slow and steady wins the race.”
               </Text>
             </View>
@@ -236,14 +236,14 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
               <TouchableOpacity
                 onPress={onSaveToGallery}
                 disabled={saving || sharing}
-                className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[16px] bg-accent py-[15px]"
+                className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[16px] bg-main py-[15px]"
               >
                 {saving ? (
-                  <ActivityIndicator size="small" color={Colors.onAccent} />
+                  <ActivityIndicator size="small" color={Colors.textOnMain} />
                 ) : (
                   <>
-                    <Ionicons name="download-outline" size={18} color={Colors.onAccent} />
-                    <Text className="text-[15px] font-bold text-on-accent">
+                    <Ionicons name="download-outline" size={18} color={Colors.textOnMain} />
+                    <Text className="text-[15px] font-bold text-textOnMain">
                       사진첩 저장
                     </Text>
                   </>
@@ -253,15 +253,15 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
               <TouchableOpacity
                 onPress={onShareSNS}
                 disabled={saving || sharing}
-                className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[16px] bg-card border border-white/10 py-[15px]"
+                className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[16px] bg-cardBackground border border-white/10 py-[15px]"
                 activeOpacity={0.8}
               >
                 {sharing ? (
-                  <ActivityIndicator size="small" color={Colors.whiteColor} />
+                  <ActivityIndicator size="small" color={Colors.mainText} />
                 ) : (
                   <>
-                    <Ionicons name="share-social-outline" size={18} color={Colors.whiteColor} />
-                    <Text className="text-[15px] font-bold text-fg">
+                    <Ionicons name="share-social-outline" size={18} color={Colors.mainText} />
+                    <Text className="text-[15px] font-bold text-mainText">
                       SNS 공유
                     </Text>
                   </>
@@ -273,7 +273,7 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
               onPress={onClose}
               className="items-center py-[10px]"
             >
-              <Text className="text-[14px] font-medium text-sub">닫기</Text>
+              <Text className="text-[14px] font-medium text-subText1">닫기</Text>
             </Pressable>
           </View>
         </ScrollView>

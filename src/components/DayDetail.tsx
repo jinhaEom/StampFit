@@ -1,9 +1,10 @@
 import { AlertModal } from '@/components/AlertModal';
-import { Chip } from '@/components/Chip';
-import { CONDITION_EMOJI, INTENSITY_LABELS } from '@/constants/recovery';
+import { Colors } from '@/constants/colors';
+import { CONDITION_EMOJI, CONDITION_LABELS, INTENSITY_LABELS } from '@/constants/recovery';
 import { formatDuration, formatKorean, todayStr } from '@/lib/date';
 import type { WorkoutLog } from '@/lib/types';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -26,48 +27,96 @@ export default function DayDetail({
   const removeLog = useWorkoutStore((s) => s.removeLog);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
+  const maxMin = Math.max(1, ...(log?.parts.map((p) => p.durationMin) ?? [])); 
+
   const goRecord = () => {
     onBeforeNavigate?.();
     router.push({ pathname: '/record', params: { date } });
   };
 
   return (
-    <View className="rounded-[16px] bg-card p-[16px]">
-      <Text className="text-[15px] font-medium text-fg">{formatKorean(date)}</Text>
+    <View className="rounded-[16px] bg-cardBackground p-[16px]">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-[13px] text-subText1">{formatKorean(date)}</Text>
+        {log ? (
+          <View className="flex-row items-center gap-[16px]">
+            <Pressable onPress={goRecord} hitSlop={8}>
+              <Ionicons name="pencil" size={18} color={Colors.subText1} />
+            </Pressable>
+            <Pressable onPress={() => setConfirmVisible(true)} hitSlop={8}>
+              <Ionicons name="trash-outline" size={18} color={Colors.subText1} />
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
       {!log ? (
         date > today ? (
-          <Text className="mt-[8px] text-[13px] text-sub">미래 날짜예요</Text>
+          <Text className="mt-[8px] text-[13px] text-subText1">미래 날짜예요</Text>
         ) : (
           <Pressable
-            className="mt-[12px] items-center rounded-[14px] border border-line py-[12px]"
+            className="mt-[12px] items-center rounded-[14px] border border-border py-[12px]"
             onPress={goRecord}
           >
-            <Text className="text-[15px] font-medium text-fg">이 날짜에 기록하기</Text>
+            <Text className="text-[15px] font-medium text-mainText">이 날짜에 기록하기</Text>
           </Pressable>
         )
       ) : (
         <>
-          <View className="mt-[10px] flex-row flex-wrap gap-[6px]">
+          {/* 총 시간 */}
+          <Text className="mt-[6px] text-[26px] font-semibold text-mainText">{formatDuration(log.durationMin)}</Text>
+
+          {/* 부위별 시간 막대 */}
+          <View className="mt-[14px] gap-[10px]">
             {log.parts.map((p) => {
               const name = partNamesById[p.id];
-              return name ? (
-                <Chip key={p.id} label={`${name} ${p.durationMin}분`} small />
-              ) : null;
+              if (!name) return null;
+              return (
+                <View key={p.id} className="flex-row items-center gap-[10px]">
+                  <Text className="w-[72px] text-[14px] text-mainText" numberOfLines={1}>
+                    {name}
+                  </Text>
+                  <View className="h-[6px] flex-1 rounded-full bg-border">
+                    <View
+                      className="h-[6px] rounded-full bg-main"
+                      style={{ width: `${(p.durationMin / maxMin) * 100}%` }}
+                    />
+                  </View>
+                  <Text className="w-[44px] text-right text-[13px] text-subText1">{p.durationMin}분</Text>
+                </View>
+              );
             })}
           </View>
-          <Text className="mt-[10px] text-[14px] text-fg">
-            {formatDuration(log.durationMin)} · 강도 {log.intensity} (
-            {INTENSITY_LABELS[log.intensity - 1]}) · 컨디션 {CONDITION_EMOJI[log.condition - 1]}
-          </Text>
-          {log.memo ? <Text className="mt-[6px] text-[13px] text-sub">{log.memo}</Text> : null}
-          <View className="mt-[14px] flex-row justify-end gap-[10px]">
-            <Pressable onPress={goRecord} hitSlop={8} className="rounded-[12px] border border-line py-[8px] px-[12px]">
-              <Text className="text-[16px] font-medium text-fg">수정</Text>
-            </Pressable>
-            <Pressable onPress={() => setConfirmVisible(true)} hitSlop={8} className="rounded-[12px] border border-line py-[8px] px-[12px]">
-              <Text className="text-[16px] text-danger">삭제</Text>
-            </Pressable>
+
+          {/* 강도 · 컨디션 */}
+          <View className="mt-[16px] flex-row gap-[8px]">
+            <View className="flex-1 rounded-[12px] bg-background px-[12px] py-[10px]">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-[12px] text-subText1">강도</Text>
+                <View className="flex-row gap-[3px]">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <View
+                      key={n}
+                      className={`h-[6px] w-[6px] rounded-full ${n <= log.intensity ? 'bg-main' : 'bg-border'}`}
+                    />
+                  ))}
+                </View>
+              </View>
+              <Text className="mt-[4px] text-[15px] text-mainText">{INTENSITY_LABELS[log.intensity - 1]}</Text>
+            </View>
+            <View className="flex-1 rounded-[12px] bg-background px-[12px] py-[10px]">
+              <Text className="text-[12px] text-subText1">컨디션</Text>
+              <Text className="mt-[4px] text-[15px] text-mainText">
+                {CONDITION_EMOJI[log.condition - 1]} {CONDITION_LABELS[log.condition - 1]}
+              </Text>
+            </View>
           </View>
+
+          {log.memo ? (
+            <View className="mt-[8px] rounded-[12px] bg-background px-[12px] py-[10px]">
+              <Text className="text-[13px] text-subText1">{log.memo}</Text>
+            </View>
+          ) : null}
         </>
       )}
       <AlertModal

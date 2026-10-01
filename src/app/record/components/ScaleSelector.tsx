@@ -22,12 +22,17 @@ export function ScaleSelector({ value, onChange, display, labels }: Props) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onChange(v);
               }}
-              className={`flex-1 items-center rounded-[12px] border py-[12px] ${
-                selected ? 'border-fg bg-fg' : 'border-line bg-card'
+              className={`h-[52px] flex-1 items-center justify-center rounded-[12px] border ${
+                selected ? 'border-main bg-main/15' : 'border-transparent bg-cardBackground'
               }`}
             >
+              {/* 이모지는 색을 못 바꿔서 크기·투명도로 구분 */}
               <Text
-                className={`text-[16px] ${selected ? 'font-medium text-on-accent' : 'font-normal text-sub'}`}
+                className={
+                  display
+                    ? selected ? 'text-[28px]' : 'text-[20px] opacity-35'
+                    : selected ? 'text-[18px] font-semibold text-main' : 'text-[16px] text-subText1'
+                }
               >
                 {display ? display[i] : v}
               </Text>
@@ -35,7 +40,7 @@ export function ScaleSelector({ value, onChange, display, labels }: Props) {
           );
         })}
       </View>
-      <Text className="mt-[8px] text-center text-[12px] text-sub">{labels[value - 1]}</Text>
+      <Text className="mt-[8px] text-center text-[12px] text-main">{labels[value - 1]}</Text>
     </View>
   );
 }

@@ -49,11 +49,11 @@ export default function HeatmapView() {
     >
       <View className="mb-[10px] mt-[18px] flex-row items-center justify-between px-[4px]">
         <Pressable onPress={() => setYear((y) => y - 1)} hitSlop={10}>
-          <Ionicons name="chevron-back" size={20} color={Colors.gray2Color} />
+          <Ionicons name="chevron-back" size={20} color={Colors.subText1} />
         </Pressable>
-        <Text className="text-[17px] font-medium text-fg">{year}년</Text>
+        <Text className="text-[17px] font-medium text-mainText">{year}년</Text>
         <Pressable onPress={() => setYear((y) => y + 1)} hitSlop={10}>
-          <Ionicons name="chevron-forward" size={20} color={Colors.gray2Color} />
+          <Ionicons name="chevron-forward" size={20} color={Colors.subText1} />
         </Pressable>
       </View>
 
@@ -63,7 +63,7 @@ export default function HeatmapView() {
             {monthLabels.map((label, i) => (
               <View key={i} className="w-[14px]">
                 {label ? (
-                  <Text className="w-[26px] text-[9px] text-sub" numberOfLines={1}>
+                  <Text className="w-[26px] text-[9px] text-subText1" numberOfLines={1}>
                     {label}
                   </Text>
                 ) : null}
@@ -93,14 +93,14 @@ export default function HeatmapView() {
         </View>
       </ScrollView>
 
-      <View className="mt-[18px] rounded-[16px] bg-card p-[16px]">
+      <View className="mt-[18px] rounded-[16px] bg-cardBackground p-[16px]">
         {monthly.length === 0 ? (
-          <Text className="text-[13px] text-sub">이 해에는 기록이 없어요</Text>
+          <Text className="text-[13px] text-subText1">이 해에는 기록이 없어요</Text>
         ) : (
           monthly.map((m, i) => (
             <View key={m.month} className={`flex-row justify-between ${i > 0 ? 'mt-[12px]' : ''}`}>
-              <Text className="text-[14px] text-fg">{m.month}월</Text>
-              <Text className="text-[14px] text-sub">
+              <Text className="text-[14px] text-mainText">{m.month}월</Text>
+              <Text className="text-[14px] text-subText1">
                 {m.count}회 · {formatDuration(m.min)}
               </Text>
             </View>

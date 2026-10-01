@@ -18,8 +18,8 @@ export function heatLevel(log: WorkoutLog | undefined): number {
 const LEVEL_ALPHA = ['', '40', '73', 'BF', 'FF']; // 단계별 민트 투명도 (hex)
 
 export function heatColor(level: number): string {
-  if (level <= 0) return Colors.gray1Color;
-  return `${Colors.mainColor}${LEVEL_ALPHA[Math.min(level, LEVEL_ALPHA.length - 1)]}`;
+  if (level <= 0) return Colors.border;
+  return `${Colors.main}${LEVEL_ALPHA[Math.min(level, LEVEL_ALPHA.length - 1)]}`;
 }
 
 export function yearGrid(year: number): { weeks: (string | null)[][]; monthLabels: (string | null)[] } {

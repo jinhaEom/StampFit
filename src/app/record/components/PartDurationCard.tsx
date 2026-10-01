@@ -41,11 +41,11 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
   };
 
   return (
-    <View className="rounded-[14px] bg-card p-[14px]">
+    <View className="rounded-[14px] bg-cardBackground p-[14px]">
       <View className="flex-row items-center justify-between">
-        <Text className="text-[15px] font-medium text-fg">{name}</Text>
+        <Text className="text-[15px] font-medium text-mainText">{name}</Text>
         <Pressable onPress={onRemove} hitSlop={8}>
-          <Ionicons name="close" size={18} color={Colors.gray2Color} />
+          <Ionicons name="close" size={18} color={Colors.subText1} />
         </Pressable>
       </View>
 
@@ -55,12 +55,12 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
           hitSlop={10}
           className="h-[34px] w-[34px] items-center justify-center rounded-full bg-white/5"
         >
-          <Ionicons name="remove" size={18} color={Colors.whiteColor} />
+          <Ionicons name="remove" size={18} color={Colors.mainText} />
         </Pressable>
 
         {editing ? (
           <TextInput
-            className="min-w-[80px] text-center text-[22px] font-bold text-fg"
+            className="min-w-[80px] text-center text-[22px] font-bold text-mainText"
             value={text}
             onChangeText={(t) => setText(t.replace(/[^0-9]/g, ''))}
             onEndEditing={commitText}
@@ -71,9 +71,9 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
           />
         ) : (
           <Pressable onPress={startEditing} hitSlop={6}>
-            <Text className="min-w-[80px] text-center text-[22px] font-bold text-fg">
+            <Text className="min-w-[80px] text-center text-[22px] font-bold text-mainText">
               {durationMin}
-              <Text className="text-[14px] font-normal text-sub"> 분</Text>
+              <Text className="text-[14px] font-normal text-subText1"> 분</Text>
             </Text>
           </Pressable>
         )}
@@ -83,7 +83,7 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
           hitSlop={10}
           className="h-[34px] w-[34px] items-center justify-center rounded-full bg-white/5"
         >
-          <Ionicons name="add" size={18} color={Colors.whiteColor} />
+          <Ionicons name="add" size={18} color={Colors.mainText} />
         </Pressable>
       </View>
 
@@ -94,11 +94,11 @@ export function PartDurationCard({ name, durationMin, onChange, onRemove }: Prop
             <Pressable
               key={m}
               onPress={() => setQuick(m)}
-              className={`rounded-full border px-[12px] py-[6px] ${selected ? 'border-accent bg-accent' : 'border-line bg-transparent'
+              className={`rounded-full border px-[12px] py-[6px] ${selected ? 'border-main bg-main' : 'border-border bg-transparent'
                 }`}
             >
               <Text
-                className={`text-[13px] ${selected ? 'font-medium text-on-accent' : 'text-sub'}`}
+                className={`text-[13px] ${selected ? 'font-medium text-textOnMain' : 'text-subText1'}`}
               >
                 {m}분
               </Text>

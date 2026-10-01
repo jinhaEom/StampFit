@@ -17,7 +17,6 @@ const CENTERS = [128, 256, 384]; // 원본 기준 점 중심 좌표 (가로·세
 const DOT = 102 * S; // 바깥 점 지름
 const CENTER_DOT = 120 * S; // 가운데 점 지름
 const FAINT = 'rgba(79, 209, 179, 0.3)'; // 찍히기 전 흐린 점 색
-const SPLASH_BG = '#0E0F11';
 
 // 바깥 점 찍는 순서 (모서리 → 변, 왼쪽 위부터 0~8)
 const ORDER = [0, 2, 6, 8, 1, 3, 5, 7];
@@ -96,7 +95,7 @@ function StampDot({ index, on }: { index: number; on: boolean }) {
           width: d,
           height: d,
           borderRadius: d / 2,
-          backgroundColor: on ? Colors.mainColor : FAINT,
+          backgroundColor: on ? Colors.main : FAINT,
         },
         style,
       ]}
@@ -113,6 +112,6 @@ const styles = StyleSheet.create({
     left: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: SPLASH_BG,
+    backgroundColor: Colors.background,
   },
 });

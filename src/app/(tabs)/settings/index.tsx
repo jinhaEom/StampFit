@@ -27,39 +27,39 @@ export default function SettingScreen() {
     authUser?.email ?? (provider ? (PROVIDER_LABEL[provider] ?? provider) : '알 수 없음');
 
   return (
-    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }}>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }}>
       <ScrollView
         contentContainerClassName="px-[16px] pb-[24px] ios:pb-[74px] android:pb-[104px]"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="mt-[8px] text-[26px] font-medium text-fg">설정</Text>
+        <Text className="mt-[8px] text-[26px] font-medium text-mainText">설정</Text>
 
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">부위 관리</Text>
+        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">부위 관리</Text>
         <TouchableOpacity
-          className="flex-row items-center justify-between rounded-[16px] bg-card p-[16px]"
+          className="flex-row items-center justify-between rounded-[16px] bg-cardBackground p-[16px]"
           onPress={() => router.push('/settings/parts')}
         >
-          <Text className="text-[15px] text-fg">부위 설정</Text>
-          <Ionicons name="chevron-forward" size={16} color={Colors.gray2Color} />
+          <Text className="text-[15px] text-mainText">부위 설정</Text>
+          <Ionicons name="chevron-forward" size={16} color={Colors.subText1} />
         </TouchableOpacity>
 
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">계정</Text>
-        <View className="rounded-[16px] bg-card p-[16px]">
+        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">계정</Text>
+        <View className="rounded-[16px] bg-cardBackground p-[16px]">
           <View className="flex-row items-center justify-between">
-            <Text className="text-[15px] text-dim">로그인 계정</Text>
-            <Text className="ml-[12px] flex-1 text-right text-[13px] text-sub" numberOfLines={1}>
+            <Text className="text-[15px] text-subText2">로그인 계정</Text>
+            <Text className="ml-[12px] flex-1 text-right text-[13px] text-subText1" numberOfLines={1}>
               {accountLabel}
             </Text>
           </View>
         </View>
 
 
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">광고</Text>
-        <View className="rounded-[16px] bg-card p-[16px]">
+        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">광고</Text>
+        <View className="rounded-[16px] bg-cardBackground p-[16px]">
           {adsRemoved ? (
             <View className="flex-row items-center justify-between">
-              <Text className="text-[15px] text-fg">광고가 제거됐어요</Text>
-              <Ionicons name="checkmark-circle" size={18} color={Colors.mainColor} />
+              <Text className="text-[15px] text-mainText">광고가 제거됐어요</Text>
+              <Ionicons name="checkmark-circle" size={18} color={Colors.main} />
             </View>
           ) : (
             <>
@@ -68,30 +68,30 @@ export default function SettingScreen() {
                 disabled={purchasing}
                 className="flex-row items-center justify-between"
               >
-                <Text className="text-[15px] text-fg">광고 제거</Text>
+                <Text className="text-[15px] text-mainText">광고 제거</Text>
                 {purchasing ? (
-                  <ActivityIndicator size="small" color={Colors.gray2Color} />
+                  <ActivityIndicator size="small" color={Colors.subText1} />
                 ) : (
-                  <Ionicons name="chevron-forward" size={16} color={Colors.gray2Color} />
+                  <Ionicons name="chevron-forward" size={16} color={Colors.subText1} />
                 )}
               </TouchableOpacity>
               <TouchableOpacity onPress={restorePurchases} className="mt-[12px]">
-                <Text className="text-[13px] text-sub">구매 복원</Text>
+                <Text className="text-[13px] text-subText1">구매 복원</Text>
               </TouchableOpacity>
             </>
           )}
         </View>
 
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-sub">앱 정보</Text>
-        <View className="rounded-[16px] bg-card p-[16px]">
+        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">앱 정보</Text>
+        <View className="rounded-[16px] bg-cardBackground p-[16px]">
           <View className="flex-row items-center justify-between">
-            <Text className="text-[15px] text-fg">버전</Text>
-            <Text className="text-[13px] text-sub">{'1.0.0'}</Text>
+            <Text className="text-[15px] text-mainText">버전</Text>
+            <Text className="text-[13px] text-subText1">{'1.0.0'}</Text>
           </View>
         </View>
 
         <TouchableOpacity onPress={requestLogout} disabled={loggingOut} className="items-end  mt-[24px]">
-          <Text className="text-[13px] text-dim">{loggingOut ? '로그아웃 중…' : '로그아웃'}</Text>
+          <Text className="text-[13px] text-subText2">{loggingOut ? '로그아웃 중…' : '로그아웃'}</Text>
         </TouchableOpacity>
       </ScrollView>
 

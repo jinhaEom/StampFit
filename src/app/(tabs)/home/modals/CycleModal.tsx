@@ -42,16 +42,16 @@ export const CycleModal = ({ visible, onClose }: CycleModalProps) => {
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-center bg-black/60 px-[16px]">
-        <View className="rounded-[20px] bg-card p-[20px] max-h-[85%]">
+        <View className="rounded-[20px] bg-cardBackground p-[20px] max-h-[85%]">
           <View className="flex-row items-center justify-between mb-[12px]">
-            <Text className="text-[17px] font-semibold text-fg">운동 싸이클 설정</Text>
+            <Text className="text-[17px] font-semibold text-mainText">운동 싸이클 설정</Text>
             <TouchableOpacity onPress={onClose} hitSlop={8}>
-              <Ionicons name="close" size={22} color={Colors.disabledColor} />
+              <Ionicons name="close" size={22} color={Colors.disabledText} />
             </TouchableOpacity>
           </View>
 
           {cycleSteps.length === 0 && (
-            <Text className="text-[13px] text-dim mb-[12px]">
+            <Text className="text-[13px] text-subText2 mb-[12px]">
               분할 순서를 등록하면 홈 화면에서 오늘 할 차례를 알려드려요.
             </Text>
           )}
@@ -60,12 +60,12 @@ export const CycleModal = ({ visible, onClose }: CycleModalProps) => {
             {cycleSteps.map((step, index) => (
               <View
                 key={step.id}
-                className={index > 0 ? 'mt-[16px] border-t border-line pt-[16px]' : ''}
+                className={index > 0 ? 'mt-[16px] border-t border-border pt-[16px]' : ''}
               >
                 <View className="flex-row items-center gap-[8px]">
-                  <Text className="w-[16px] text-[13px] text-dim">{index + 1}</Text>
-                  <View className="flex-1 rounded-[8px] bg-bg px-[10px] py-[8px]">
-                    <Text className={`text-[15px] ${step.label ? 'text-fg' : 'text-dim'}`}>
+                  <Text className="w-[16px] text-[13px] text-subText2">{index + 1}</Text>
+                  <View className="flex-1 rounded-[8px] bg-background px-[10px] py-[8px]">
+                    <Text className={`text-[15px] ${step.label ? 'text-mainText' : 'text-subText2'}`}>
                       {step.label || '아래에서 부위를 선택하세요'}
                     </Text>
                   </View>
@@ -77,7 +77,7 @@ export const CycleModal = ({ visible, onClose }: CycleModalProps) => {
                     <Ionicons
                       name="chevron-up"
                       size={18}
-                      color={index === 0 ? Colors.gray1Color : Colors.gray2Color}
+                      color={index === 0 ? Colors.border : Colors.subText1}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -88,11 +88,11 @@ export const CycleModal = ({ visible, onClose }: CycleModalProps) => {
                     <Ionicons
                       name="chevron-down"
                       size={18}
-                      color={index === cycleSteps.length - 1 ? Colors.gray1Color : Colors.gray2Color}
+                      color={index === cycleSteps.length - 1 ? Colors.border : Colors.subText1}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => removeCycleStep(step.id)} hitSlop={8}>
-                    <Ionicons name="close" size={18} color={Colors.disabledColor} />
+                    <Ionicons name="close" size={18} color={Colors.disabledText} />
                   </TouchableOpacity>
                 </View>
 
@@ -113,15 +113,15 @@ export const CycleModal = ({ visible, onClose }: CycleModalProps) => {
             ))}
 
             <Pressable
-              className="mt-[14px] items-center rounded-[10px] border border-dashed border-line py-[10px]"
+              className="mt-[14px] items-center rounded-[10px] border border-dashed border-border py-[10px]"
               onPress={addCycleStep}
             >
-              <Text className="text-[14px] font-medium text-sub">+ 단계 추가</Text>
+              <Text className="text-[14px] font-medium text-subText1">+ 단계 추가</Text>
             </Pressable>
           </ScrollView>
 
           <Pressable
-            className="items-center rounded-[10px] bg-accent py-[12px]"
+            className="items-center rounded-[10px] bg-main py-[12px]"
             onPress={handleSaveCycle}
           >
             <Text className="text-[15px] text-[#000000]">저장</Text>

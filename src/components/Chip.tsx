@@ -11,12 +11,12 @@ interface Props {
 /** 부위 선택 칩 (선택 시 무채색 반전) */
 export function Chip({ label, selected, onPress, dashed, small }: Props) {
   const box = selected
-    ? 'border-fg bg-fg'
+    ? 'border-mainText bg-mainText'
     : dashed
-      ? 'border-line border-dashed bg-transparent'
-      : 'border-line bg-card';
+      ? 'border-border border-dashed bg-transparent'
+      : 'border-border bg-cardBackground';
   const pad = small ? 'px-[10px] py-[5px]' : 'px-[14px] py-[9px]';
-  const text = selected ? 'font-medium text-on-accent' : 'font-normal text-fg';
+  const text = selected ? 'font-medium text-textOnMain' : 'font-normal text-mainText';
   const size = small ? 'text-[13px]' : 'text-[15px]';
 
   return (

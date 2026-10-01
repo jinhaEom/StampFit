@@ -16,33 +16,33 @@ export function TodayRecordBar({ todayLog, onPress }: Props) {
 
   return (
     <Pressable
-      className="h-[60px] flex-row items-center justify-between rounded-full border border-card-sel bg-card pl-[14px] pr-[8px]"
+      className="h-[60px] flex-row items-center justify-between rounded-full border border-cardSelected bg-cardBackground pl-[14px] pr-[8px]"
       onPress={onPress}
     >
       <View className="flex-1 flex-row items-center gap-[10px]">
         {done ? (
-          <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-accent">
-            <Ionicons name="checkmark" size={18} color={Colors.onAccent} />
+          <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-main">
+            <Ionicons name="checkmark" size={18} color={Colors.textOnMain} />
           </View>
         ) : (
-          <View className="h-[34px] w-[34px] items-center justify-center rounded-full border-[1.5px] border-dashed border-dim">
+          <View className="h-[34px] w-[34px] items-center justify-center rounded-full border-[1.5px] border-dashed border-subText2">
             <Ionicons name="barbell" size={16} color="#6E7075" />
           </View>
         )}
         <View className="flex-1">
-          <Text className="text-[12px] text-sub">{formatKorean(todayStr())}</Text>
-          <Text className="mt-[1px] text-[15px] font-semibold text-fg">{title}</Text>
+          <Text className="text-[12px] text-subText1">{formatKorean(todayStr())}</Text>
+          <Text className="mt-[1px] text-[15px] font-semibold text-mainText">{title}</Text>
         </View>
       </View>
 
       {done ? (
-        <View className="h-[44px] items-center justify-center rounded-full bg-card-sel px-[18px]">
-          <Text className="text-[14px] font-semibold text-fg">수정</Text>
+        <View className="h-[44px] items-center justify-center rounded-full bg-cardSelected px-[18px]">
+          <Text className="text-[14px] font-semibold text-mainText">수정</Text>
         </View>
       ) : (
-        <View className="h-[44px] flex-row items-center gap-[4px] rounded-full bg-accent px-[18px]">
-          <Ionicons name="add" size={16} color={Colors.onAccent} />
-          <Text className="text-[15px] font-semibold text-on-accent">기록</Text>
+        <View className="h-[44px] flex-row items-center gap-[4px] rounded-full bg-main px-[18px]">
+          <Ionicons name="add" size={16} color={Colors.textOnMain} />
+          <Text className="text-[15px] font-semibold text-textOnMain">기록</Text>
         </View>
       )}
     </Pressable>

@@ -38,7 +38,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <ScrollView contentContainerClassName="px-[16px] pb-[24px]" showsVerticalScrollIndicator={false}>
         <View className="mt-[12px]">
           <StreakHero streak={weeklyStreak} onPressGoal={() => setIsGoalModalOpen(true)} />
@@ -71,10 +71,10 @@ export default function HomeScreen() {
 
       {!todayLog && quoteOfDay && (
         <View className="px-[24px] pb-[8px] pt-[4px]">
-          <Text className="text-[13px] leading-[19px] text-sub" numberOfLines={2}>
+          <Text className="text-[13px] leading-[19px] text-subText1" numberOfLines={2}>
             {quoteOfDay.quote}
           </Text>
-          <Text className="mt-[2px] text-[11px] text-dim">{quoteOfDay.author}</Text>
+          <Text className="mt-[2px] text-[11px] text-subText2">{quoteOfDay.author}</Text>
         </View>
       )}
           <AdBanner />

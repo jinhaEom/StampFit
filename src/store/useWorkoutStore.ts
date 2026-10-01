@@ -40,7 +40,8 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
   // 쓰기 후 화면 갱신 + 서버 반영
   const refresh = () => {
     set(readSnapshot());
-    pushAfterWrite();
+    /* pull로 부위 id가 바뀔 수 있어 끝나고 다시 읽음 */
+    pushAfterWrite().then(() => set(readSnapshot()));
   };
   return {
     hydrated: false,

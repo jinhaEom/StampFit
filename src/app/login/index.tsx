@@ -11,7 +11,7 @@ export default function LoginScreen() {
 
   return (
     <View
-      className="flex-1 bg-bg px-[24px]"
+      className="flex-1 bg-background px-[24px]"
       style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 }}
     >
       <Image
@@ -24,17 +24,17 @@ export default function LoginScreen() {
         <StampGridHero />
       </View>
 
-      <Text className="text-[30px] font-bold leading-[39px] text-fg">
+      <Text className="text-[30px] font-bold leading-[39px] text-mainText">
         매일 한 칸씩,{'\n'}운동 도장을 찍어요
       </Text>
-      <Text className="mt-[10px] text-[15px] text-sub">세트·무게 없이, 부위랑 시간만 3초 기록</Text>
+      <Text className="mt-[10px] text-[15px] text-subText1">세트·무게 없이, 부위랑 시간만 3초 기록</Text>
 
       <View className="mt-[36px]">
         <SocialAuthButtons onSuccess={() => router.replace('/home')} />
       </View>
 
       <Pressable className="mt-[18px] items-center py-[6px]" onPress={() => router.push('/email')} hitSlop={8}>
-        <Text className="text-[15px] font-medium text-fg">이메일로 계속하기</Text>
+        <Text className="text-[15px] font-medium text-mainText">이메일로 계속하기</Text>
       </Pressable>
     </View>
   );

@@ -33,7 +33,7 @@ export function StampGridHero() {
       {MONTH.map((level, i) => (
         <View
           key={i}
-          style={{ width: CELL, height: CELL, borderRadius: CELL / 2, backgroundColor: Colors.gray1Color }}
+          style={{ width: CELL, height: CELL, borderRadius: CELL / 2, backgroundColor: Colors.border }}
         >
           {i < count && level > 0 && (
             <Animated.View

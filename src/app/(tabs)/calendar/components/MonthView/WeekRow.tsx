@@ -15,7 +15,7 @@ export function WeekRow({ index, expandProgress, children }: Props) {
   }));
 
   return (
-    <Animated.View className="flex-row bg-bg" style={[{ height: ROW_HEIGHT }, style]}>
+    <Animated.View className="flex-row bg-background" style={[{ height: ROW_HEIGHT }, style]}>
       {children}
     </Animated.View>
   );

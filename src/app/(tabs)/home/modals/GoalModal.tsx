@@ -34,39 +34,39 @@ export const GoalModal = ({ visible, onClose }: GoalModalProps) => {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-center bg-black/60 px-[16px]">
-        <View className="rounded-[20px] bg-card p-[20px]">
+        <View className="rounded-[20px] bg-cardBackground p-[20px]">
           <View className="flex-row items-center justify-between mb-[16px]">
-            <Text className="text-[17px] font-semibold text-fg">주간 목표 설정</Text>
+            <Text className="text-[17px] font-semibold text-mainText">주간 목표 설정</Text>
             <TouchableOpacity onPress={onClose} hitSlop={8}>
-              <Ionicons name="close" size={22} color={Colors.disabledColor} />
+              <Ionicons name="close" size={22} color={Colors.disabledText} />
             </TouchableOpacity>
           </View>
 
           <View className="flex-row items-center gap-[10px]">
             <TextInput
-              className="w-[64px] rounded-[8px] bg-bg px-[10px] py-[8px] text-center text-[15px] text-fg"
+              className="w-[64px] rounded-[8px] bg-background px-[10px] py-[8px] text-center text-[15px] text-mainText"
               value={goalCountInput}
               onChangeText={setGoalCountInput}
               placeholder="1"
-              placeholderTextColor={Colors.disabledColor}
+              placeholderTextColor={Colors.disabledText}
               keyboardType="number-pad"
               returnKeyType="done"
             />
-            <Text className="text-[15px] text-fg">회 / 주</Text>
+            <Text className="text-[15px] text-mainText">회 / 주</Text>
             <View className="flex-1" />
-            <Text className="text-[13px] text-sub">매주 반복</Text>
+            <Text className="text-[13px] text-subText1">매주 반복</Text>
             <Switch
               value={goalRecurring}
               onValueChange={setGoalRecurring}
-              trackColor={{ false: Colors.gray1Color, true: Colors.mainColor }}
-              thumbColor={Colors.whiteColor}
+              trackColor={{ false: Colors.border, true: Colors.main }}
+              thumbColor={Colors.mainText}
             />
           </View>
           <Pressable
-            className="mt-[20px] items-center rounded-[12px] bg-accent py-[12px]"
+            className="mt-[20px] items-center rounded-[12px] bg-main py-[12px]"
             onPress={handleSave}
           >
-            <Text className="text-[15px] font-semibold text-on-accent">저장</Text>
+            <Text className="text-[15px] font-semibold text-textOnMain">저장</Text>
           </Pressable>
         </View>
       </View>

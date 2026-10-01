@@ -67,22 +67,22 @@ export default function MonthView() {
       <View className="px-[16px]">
         <View className="mb-[10px] mt-[18px] flex-row items-center justify-between px-[4px]">
           <Pressable onPress={() => pager.goToMonth(-1)} hitSlop={10}>
-            <Ionicons name="chevron-back" size={20} color={Colors.gray2Color} />
+            <Ionicons name="chevron-back" size={20} color={Colors.subText1} />
           </Pressable>
           <View className="flex-row items-center gap-[8px]">
-            <Text className="text-[17px] font-medium text-fg">
+            <Text className="text-[17px] font-medium text-mainText">
               {pager.current.year}년 {pager.current.month}월
             </Text>
 
           </View>
           <Pressable onPress={() => pager.goToMonth(1)} hitSlop={10}>
-            <Ionicons name="chevron-forward" size={20} color={Colors.gray2Color} />
+            <Ionicons name="chevron-forward" size={20} color={Colors.subText1} />
           </Pressable>
         </View>
 
         <View className="mb-[4px] flex-row">
           {WEEKDAY.map((w) => (
-            <Text key={w} className="flex-1 text-center text-[13px] text-sub">
+            <Text key={w} className="flex-1 text-center text-[13px] text-subText1">
               {w}
             </Text>
           ))}
@@ -110,7 +110,7 @@ export default function MonthView() {
         </GestureDetector>
         {!isCurrentMonth && (
           <Pressable
-            className="rounded-full bg-card px-[12px] py-[4px]  items-center justify-center self-end"
+            className="rounded-full bg-cardBackground px-[12px] py-[4px]  items-center justify-center self-end"
             onPress={goToday}
             hitSlop={8}
           >

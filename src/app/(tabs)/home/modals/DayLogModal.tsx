@@ -20,11 +20,11 @@ export function DayLogModal({ visible, date, log, onClose }: Props) {
       <View className="flex-1 justify-center bg-black/60 px-[16px]">
         <View className="mb-[8px] flex-row justify-end">
           <TouchableOpacity
-            className="h-[32px] w-[32px] items-center justify-center rounded-full bg-card"
+            className="h-[32px] w-[32px] items-center justify-center rounded-full bg-cardBackground"
             onPress={onClose}
             hitSlop={8}
           >
-            <Ionicons name="close" size={18} color={Colors.gray2Color} />
+            <Ionicons name="close" size={18} color={Colors.subText1} />
           </TouchableOpacity>
         </View>
         <DayDetail date={date} log={log} onBeforeNavigate={onClose} onAfterDelete={onClose} />

@@ -126,16 +126,16 @@ export default function RecordScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View
-        className="flex-1 bg-bg"
+        className="flex-1 bg-background"
         style={{ paddingTop: Platform.OS === 'ios' ? 16 : insets.top + 8 }}
       >
         {/* 헤더 */}
         <View className="flex-row items-center justify-between px-[16px] pb-[8px]">
-          <Text className="text-[17px] font-medium text-fg">
+          <Text className="text-[17px] font-medium text-mainText">
             {formatKorean(logDate)} {existing ? '수정' : '기록'}
           </Text>
           <Pressable onPress={() => router.back()} hitSlop={8}>
-            <Ionicons name="close" size={24} color={Colors.gray2Color} />
+            <Ionicons name="close" size={24} color={Colors.subText1} />
           </Pressable>
         </View>
 
@@ -145,7 +145,7 @@ export default function RecordScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* 1. 부위 */}
-          <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">부위</Text>
+          <Text className="mb-[10px] mt-[22px] text-[13px] text-subText1">부위</Text>
           <View className="flex-row flex-wrap gap-[8px]">
             {visibleParts.map((p) => (
               <Chip
@@ -160,17 +160,17 @@ export default function RecordScreen() {
           {adding && (
             <View className="mt-[12px] flex-row items-center gap-[14px]">
               <TextInput
-                className="flex-1 rounded-[10px] bg-card px-[12px] py-[9px] text-[15px] text-fg"
+                className="flex-1 rounded-[10px] bg-cardBackground px-[12px] py-[9px] text-[15px] text-mainText"
                 value={newName}
                 onChangeText={setNewName}
                 placeholder="새 부위 이름"
-                placeholderTextColor={Colors.disabledColor}
+                placeholderTextColor={Colors.disabledText}
                 autoFocus
                 onSubmitEditing={onAddPart}
                 returnKeyType="done"
               />
               <Pressable onPress={onAddPart} hitSlop={8}>
-                <Text className="text-[15px] font-medium text-fg">추가</Text>
+                <Text className="text-[15px] font-medium text-mainText">추가</Text>
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -179,7 +179,7 @@ export default function RecordScreen() {
                 }}
                 hitSlop={8}
               >
-                <Text className="text-[15px] text-sub">취소</Text>
+                <Text className="text-[15px] text-subText1">취소</Text>
               </Pressable>
             </View>
           )}
@@ -188,8 +188,8 @@ export default function RecordScreen() {
           {selectedParts.length > 0 && (
             <>
               <View className="mb-[10px] mt-[22px] flex-row items-center justify-between">
-                <Text className="text-[13px] text-sub">부위별 시간</Text>
-                <Text className="text-[13px] font-medium text-fg">
+                <Text className="text-[13px] text-subText1">부위별 시간</Text>
+                <Text className="text-[13px] font-medium text-mainText">
                   총 {formatDuration(totalMin)}
                 </Text>
               </View>
@@ -211,11 +211,11 @@ export default function RecordScreen() {
           )}
 
           {/* 3. 강도 */}
-          <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">강도</Text>
+          <Text className="mb-[10px] mt-[22px] text-[13px] text-subText1">강도</Text>
           <ScaleSelector value={intensity} onChange={setIntensity} labels={INTENSITY_LABELS} />
 
           {/* 4. 컨디션 */}
-          <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">컨디션</Text>
+          <Text className="mb-[10px] mt-[22px] text-[13px] text-subText1">컨디션</Text>
           <ScaleSelector
             value={condition}
             onChange={setCondition}
@@ -224,13 +224,13 @@ export default function RecordScreen() {
           />
 
           {/* 5. 메모 (선택) */}
-          <Text className="mb-[10px] mt-[22px] text-[13px] text-sub">메모</Text>
+          <Text className="mb-[10px] mt-[22px] text-[13px] text-subText1">메모</Text>
           <TextInput
-            className="rounded-[12px] bg-card px-[14px] py-[12px] text-[15px] text-fg"
+            className="rounded-[12px] bg-cardBackground px-[14px] py-[12px] text-[15px] text-mainText"
             value={memo}
             onChangeText={setMemo}
             placeholder="한 줄 메모 (선택)"
-            placeholderTextColor={Colors.disabledColor}
+            placeholderTextColor={Colors.disabledText}
             returnKeyType="done"
           />
         </ScrollView>
@@ -238,12 +238,12 @@ export default function RecordScreen() {
         {/* 저장 */}
         <View className="px-[16px] pt-[8px]" style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
           <Pressable
-            className={`items-center rounded-[14px] py-[15px] ${canSave ? 'bg-accent' : 'bg-card'}`}
+            className={`items-center rounded-[14px] py-[15px] ${canSave ? 'bg-main' : 'bg-cardBackground'}`}
             disabled={!canSave}
             onPress={onSave}
           >
             <Text
-              className={`text-[16px] font-medium ${canSave ? 'text-on-accent' : 'text-dim'}`}
+              className={`text-[16px] font-medium ${canSave ? 'text-textOnMain' : 'text-subText2'}`}
             >
               {entries.length === 0
                 ? '부위를 선택하세요'

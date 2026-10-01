@@ -33,7 +33,7 @@ export function WeekGrass({
           hitSlop={4}
         >
           <Cell day={d} onStampPlayed={onStampPlayed} />
-          <Text className={`text-[12px] ${d.isToday ? 'font-medium text-fg' : 'text-sub'}`}>
+          <Text className={`text-[12px] ${d.isToday ? 'font-medium text-mainText' : 'text-subText1'}`}>
             {WEEKDAY[i]}
           </Text>
         </Pressable>
@@ -48,17 +48,17 @@ function Cell({ day, onStampPlayed }: { day: WeekDay; onStampPlayed?: () => void
   return (
     <View className="w-full items-center justify-center" style={{ aspectRatio: 1 }}>
       <View
-        className="rounded-full bg-line"
+        className="rounded-full bg-border"
         style={[
           { position: 'absolute', top: 2, right: 2, bottom: 2, left: 2 },
-          day.isToday && !day.stamped && { borderWidth: 1, borderColor: Colors.gray2Color },
+          day.isToday && !day.stamped && { borderWidth: 1, borderColor: Colors.subText1 },
         ]}
       />
       {day.stamped && (
         <StampDot level={day.level} animate={day.stampAnimate} inset={2} onPlayed={onStampPlayed} />
       )}
       <Text
-        className={`text-[14px] ${darkText ? 'text-on-accent' : highlight ? 'text-fg' : 'text-sub'} ${day.isToday ? 'font-semibold' : ''}`}
+        className={`text-[14px] ${darkText ? 'text-textOnMain' : highlight ? 'text-mainText' : 'text-subText1'} ${day.isToday ? 'font-semibold' : ''}`}
       >
         {Number(day.date.slice(8, 10))}
       </Text>
