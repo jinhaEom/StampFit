@@ -2,7 +2,7 @@ import { AlertModal } from "@/components/AlertModal";
 import { Colors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Modal, Pressable, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
-import Toast from "react-native-simple-toast";
+import { toast } from '@/lib/toast';
 import { useGoalForm } from "../hooks/useGoalForm";
 
 interface GoalModalProps {
@@ -27,7 +27,7 @@ export const GoalModal = ({ visible, onClose }: GoalModalProps) => {
       setInvalidGoalAlertVisible(true);
       return;
     }
-    Toast.show("저장되었어요.", Toast.SHORT);
+    toast.done('저장했어요');
     onClose();
   };
 
@@ -38,7 +38,7 @@ export const GoalModal = ({ visible, onClose }: GoalModalProps) => {
           <View className="flex-row items-center justify-between mb-[16px]">
             <Text className="text-[17px] font-semibold text-mainText">주간 목표 설정</Text>
             <TouchableOpacity onPress={onClose} hitSlop={8}>
-              <Ionicons name="close" size={22} color={Colors.disabledText} />
+              <Ionicons name="close" size={22} color={Colors.subText1} />
             </TouchableOpacity>
           </View>
 

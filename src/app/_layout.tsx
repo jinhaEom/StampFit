@@ -4,7 +4,6 @@ import { LaunchStamp } from '@/components/LaunchStamp';
 import { Colors } from '@/constants/colors';
 import { createSessionFromUrl } from '@/lib/socialAuth';
 import { syncAll } from '@/lib/sync';
-import { useAdsStore } from '@/store/useAdsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { startWidgetSync } from '@/widget/syncWidget';
@@ -14,24 +13,20 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import mobileAds from 'react-native-google-mobile-ads';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const loadAll = useWorkoutStore((s) => s.loadAll);
   const initializeAuth = useAuthStore((s) => s.initialize);
-  const initAds = useAdsStore((s) => s.init);
   const hydrated = useAuthStore((s) => s.hydrated);
 
   useEffect(() => {
     const stopWidgetSync = startWidgetSync();
     loadAll();
     initializeAuth();
-    mobileAds().initialize();
-    initAds();
     return stopWidgetSync;
-  }, [loadAll, initializeAuth, initAds]);
+  }, [loadAll, initializeAuth]);
 
   useEffect(() => {
     if (hydrated) SplashScreen.hideAsync();

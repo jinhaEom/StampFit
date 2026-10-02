@@ -1,4 +1,3 @@
-import { AdBanner } from '@/components/AdBanner';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -71,7 +70,6 @@ export default function CalendarScreen() {
       </View>
 
       <View style={{ paddingBottom: insets.bottom }}>
-        <AdBanner />
       </View>
     </View>
   );

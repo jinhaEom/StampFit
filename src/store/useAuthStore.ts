@@ -10,6 +10,7 @@ interface AuthState {
   isLoggedIn: boolean;
   initialize: () => void;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 let initialized = false;
@@ -39,6 +40,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     const db = getDb();
     wipeLocalData(db);
     seedDefaultPartsIfEmpty(db); // 로그아웃 뒤에도 기본 부위는 보이게
+    setSyncOwner(null);
+  },
+  /** 회원 탈퇴 (서버 계정·기록 삭제 후 이 기기 기록 삭제) */
+  deleteAccount: async () => {
+    const { error } = await supabase.rpc('delete_user');
+    if (error) throw error;
+    await supabase.auth.signOut({ scope: 'local' }); // 계정이 이미 없어서 기기 세션만 정리
+    const db = getDb();
+    wipeLocalData(db);
+    seedDefaultPartsIfEmpty(db);
     setSyncOwner(null);
   },
 }));

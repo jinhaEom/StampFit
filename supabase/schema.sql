@@ -45,3 +45,16 @@ create policy "own workout_logs" on public.workout_logs
 
 create policy "own workout_log_parts" on public.workout_log_parts
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- 회원 탈퇴 
+create or replace function public.delete_user()
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  delete from auth.users where id = auth.uid();
+$$;
+
+revoke execute on function public.delete_user() from public, anon;
+grant execute on function public.delete_user() to authenticated;

@@ -5,9 +5,9 @@ export const Colors = {
   cardSelected: '#2E3135',
   border: '#26282C',
   mainText: '#ECECEC',
-  subText1: '#8A8C91',
-  subText2: '#6E7075',
-  disabledText: '#4a4c4fff',
+  subText1: '#A3A5AA',
+  subText2: '#83858A',
+  disabledText: '#64666B', 
   main: '#4FD1B3', // 민트
   textOnMain: '#111214',
   danger: '#E5484D',

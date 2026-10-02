@@ -90,7 +90,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
     },
     setCycle: (steps) => {
       repo.setCycleSteps(steps);
-      refresh();
+      set(readSnapshot()); // 기기 전용이라 서버 동기화 안 함
     },
     resetAll: () => {
       repo.resetAllData();

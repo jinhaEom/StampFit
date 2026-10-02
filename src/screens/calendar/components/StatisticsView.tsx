@@ -139,17 +139,17 @@ export default function StatisticsView() {
               <View className="flex-row items-center gap-[6px]">
                 <View className="flex-row items-center">
                   {diff.isSame ? (
-                    <Ionicons name="remove-outline" size={16} color="#8E8E93" />
+                    <Ionicons name="remove-outline" size={16} color={Colors.subText1} />
                   ) : diff.isIncrease ? (
-                    <Ionicons name="trending-up-outline" size={16} color="#FF3B30" />
+                    <Ionicons name="trending-up-outline" size={16} color={Colors.main} />
                   ) : (
-                    <Ionicons name="trending-down-outline" size={16} color="#007AFF" />
+                    <Ionicons name="trending-down-outline" size={16} color={Colors.subText1} />
                   )}
                 </View>
                 <Text className="text-[13px] font-medium text-subText1">전월 대비 성장</Text>
               </View>
               <View className="rounded-full bg-white/5 px-[8px] py-[2px]">
-                <Text className="text-[11px] text-subText2">지난달 비교</Text>
+                <Text className="text-[12px] text-subText2">지난달 비교</Text>
               </View>
             </View>
 
@@ -173,7 +173,7 @@ export default function StatisticsView() {
               <Text className="mt-[6px] text-[20px] font-bold text-mainText">
                 {formatDuration(analytics.totalMinutes)}
               </Text>
-              <Text className="mt-[4px] text-[11px] text-subText2">
+              <Text className="mt-[4px] text-[12px] text-subText2">
                 회당 평균 {analytics.avgMinutesPerWorkout}분
               </Text>
             </View>
@@ -183,10 +183,8 @@ export default function StatisticsView() {
               <Text className="mt-[6px] text-[20px] font-bold text-main">
                 {analytics.totalCount}일
               </Text>
-              <Text className="mt-[4px] text-[11px] text-subText2">
-                {analytics.maxStreak > 0
-                  ? `최대 연속 ${analytics.maxStreak}일`
-                  : '꾸준히 진행 중'}
+              <Text className="mt-[4px] text-[12px] text-subText2">
+                주 평균 {analytics.weeklyAvg}회
               </Text>
             </View>
           </View>
@@ -194,7 +192,7 @@ export default function StatisticsView() {
           <View className="mt-[10px] flex-row gap-[10px]">
             <View className="flex-1 flex-row items-center justify-between rounded-[16px] bg-cardBackground p-[14px]">
               <View>
-                <Text className="text-[11px] text-subText1">평균 강도</Text>
+                <Text className="text-[12px] text-subText1">평균 강도</Text>
                 <Text className="mt-[2px] text-[16px] font-bold text-mainText">
                   {analytics.avgIntensity} / 5.0
                 </Text>
@@ -204,7 +202,7 @@ export default function StatisticsView() {
 
             <View className="flex-1 flex-row items-center justify-between rounded-[16px] bg-cardBackground p-[14px]">
               <View>
-                <Text className="text-[11px] text-subText1">평균 컨디션</Text>
+                <Text className="text-[12px] text-subText1">평균 컨디션</Text>
                 <Text className="mt-[2px] text-[16px] font-bold text-mainText">
                   {analytics.avgCondition} / 5.0
                 </Text>

@@ -1,30 +1,32 @@
 import { AlertModal } from '@/components/AlertModal';
-import { Colors, PART_PALETTE } from '@/constants/colors';
-import { useAdsStore } from '@/store/useAdsStore';
+import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SettingRow } from './components/SettingRow';
+import { useDeleteAccount } from './hooks/useDeleteAccount';
 import { useLogout } from './hooks/useLogout';
+
+/* 로그인 방식별 표시 (이메일 가입은 주소 표시) */
+const PROVIDER_LABEL: Record<string, string> = { google: '구글 로그인', apple: 'Apple 로그인' };
+const PROVIDER_ICON: Record<string, keyof typeof Ionicons.glyphMap> = { google: 'logo-google', apple: 'logo-apple' };
+const APP_VERSION = '1.0.0';
 
 export default function SettingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const parts = useWorkoutStore((s) => s.parts);
   const { loggingOut, unsyncedCount, requestLogout, logoutNow, dismissWarning } = useLogout();
-
-  const adsRemoved = useAdsStore((s) => s.adsRemoved);
-  const purchasing = useAdsStore((s) => s.purchasing);
-  const purchaseRemoveAds = useAdsStore((s) => s.purchaseRemoveAds);
-  const restorePurchases = useAdsStore((s) => s.restorePurchases);
+  const { confirmVisible, deleting, requestDelete, cancelDelete, confirmDelete } = useDeleteAccount();
 
   const authUser = useAuthStore((s) => s.user);
-  const PROVIDER_LABEL: Record<string, string> = { google: '구글', apple: 'Apple', email: '이메일' };
-  const provider = authUser?.app_metadata?.provider;
-  const accountLabel =
-    authUser?.email ?? (provider ? (PROVIDER_LABEL[provider] ?? provider) : '알 수 없음');
+  const provider = authUser?.app_metadata?.provider ?? '';
+  const accountLabel = PROVIDER_LABEL[provider] ?? authUser?.email ?? '알 수 없음';
+  const accountIcon = PROVIDER_ICON[provider] ?? 'mail-outline';
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }}>
@@ -34,64 +36,53 @@ export default function SettingScreen() {
       >
         <Text className="mt-[8px] text-[26px] font-medium text-mainText">설정</Text>
 
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">부위 관리</Text>
-        <TouchableOpacity
-          className="flex-row items-center justify-between rounded-[16px] bg-cardBackground p-[16px]"
-          onPress={() => router.push('/settings/parts')}
-        >
-          <Text className="text-[15px] text-mainText">부위 설정</Text>
-          <Ionicons name="chevron-forward" size={16} color={Colors.subText1} />
-        </TouchableOpacity>
-
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">계정</Text>
-        <View className="rounded-[16px] bg-cardBackground p-[16px]">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-[15px] text-subText2">로그인 계정</Text>
-            <Text className="ml-[12px] flex-1 text-right text-[13px] text-subText1" numberOfLines={1}>
+        {/* 로그인 계정 */}
+        <View className="mt-[20px] flex-row items-center gap-[14px] rounded-[20px] bg-cardBackground p-[16px]">
+          <View className="h-[48px] w-[48px] items-center justify-center rounded-full bg-background">
+            <Ionicons name={accountIcon} size={22} color={Colors.mainText} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-[16px] font-medium text-mainText" numberOfLines={1}>
               {accountLabel}
             </Text>
+            <Text className="mt-[2px] text-[13px] text-subText1">운동 기록이 이 계정에 저장돼요</Text>
           </View>
         </View>
 
-
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">광고</Text>
-        <View className="rounded-[16px] bg-cardBackground p-[16px]">
-          {adsRemoved ? (
-            <View className="flex-row items-center justify-between">
-              <Text className="text-[15px] text-mainText">광고가 제거됐어요</Text>
-              <Ionicons name="checkmark-circle" size={18} color={Colors.main} />
-            </View>
-          ) : (
-            <>
-              <TouchableOpacity
-                onPress={purchaseRemoveAds}
-                disabled={purchasing}
-                className="flex-row items-center justify-between"
-              >
-                <Text className="text-[15px] text-mainText">광고 제거</Text>
-                {purchasing ? (
-                  <ActivityIndicator size="small" color={Colors.subText1} />
-                ) : (
-                  <Ionicons name="chevron-forward" size={16} color={Colors.subText1} />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity onPress={restorePurchases} className="mt-[12px]">
-                <Text className="text-[13px] text-subText1">구매 복원</Text>
-              </TouchableOpacity>
-            </>
-          )}
+        <Text className="mb-[8px] ml-[4px] mt-[28px] text-[13px] font-medium text-subText1">운동</Text>
+        <View className="overflow-hidden rounded-[16px] bg-cardBackground">
+          <SettingRow
+            icon="barbell-outline"
+            label="부위 관리"
+            value={`${parts.length}개`}
+            onPress={() => router.push('/settings/parts')}
+            chevron
+          />
         </View>
 
-        <Text className="mb-[8px] mt-[24px] text-[13px] text-subText1">앱 정보</Text>
-        <View className="rounded-[16px] bg-cardBackground p-[16px]">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-[15px] text-mainText">버전</Text>
-            <Text className="text-[13px] text-subText1">{'1.0.0'}</Text>
-          </View>
+        <Text className="mb-[8px] ml-[4px] mt-[28px] text-[13px] font-medium text-subText1">앱 정보</Text>
+        <View className="overflow-hidden rounded-[16px] bg-cardBackground">
+          <SettingRow
+            icon="shield-checkmark-outline"
+            label="개인정보처리방침"
+            onPress={() => router.push('/settings/privacy')}
+            chevron
+          />
+          <View className="ml-[60px] h-[1px] bg-border" />
+          <SettingRow icon="information-circle-outline" label="버전" value={APP_VERSION} />
         </View>
 
-        <TouchableOpacity onPress={requestLogout} disabled={loggingOut} className="items-end  mt-[24px]">
-          <Text className="text-[13px] text-subText2">{loggingOut ? '로그아웃 중…' : '로그아웃'}</Text>
+        <View className="mt-[28px] overflow-hidden rounded-[16px] bg-cardBackground">
+          <SettingRow
+            icon="log-out-outline"
+            label={loggingOut ? '로그아웃 중…' : '로그아웃'}
+            onPress={requestLogout}
+            disabled={loggingOut}
+          />
+        </View>
+
+        <TouchableOpacity onPress={requestDelete} disabled={deleting} hitSlop={8} className="mt-[20px] self-end">
+          <Text className="text-[13px] text-subText2">{deleting ? '탈퇴 중…' : '회원 탈퇴'}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -104,6 +95,16 @@ export default function SettingScreen() {
         danger
         onCancel={dismissWarning}
         onOk={logoutNow}
+      />
+      <AlertModal
+        visible={confirmVisible}
+        title="정말 탈퇴할까요?"
+        contents="모든 운동 기록이 서버와 이 기기에서 삭제되고, 되돌릴 수 없어요."
+        cancelLabel="취소"
+        okLabel="탈퇴"
+        danger
+        onCancel={cancelDelete}
+        onOk={confirmDelete}
       />
 
     </View>

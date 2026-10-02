@@ -17,7 +17,7 @@ export function AlertModal({ visible, title, contents, okLabel, cancelLabel, dan
       <Pressable className="flex-1 items-center justify-center bg-black/80" onPress={onCancel}>
         <Pressable className="w-[280px] rounded-[16px] bg-cardBackground p-[20px]" onPress={(e) => e.stopPropagation()}>
           <Text className="text-[16px] font-medium text-mainText">{title}</Text>
-          <Text className="mt-[6px] text-[13px] text-subText2">{contents}</Text>
+          <Text className="mt-[6px] text-[13px] leading-[19px] text-subText1">{contents}</Text>
           <View className="mt-[18px] flex-row justify-end gap-[16px]">
             {cancelLabel && (
               <TouchableOpacity onPress={onCancel} hitSlop={8}>

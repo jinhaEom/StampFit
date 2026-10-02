@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/store/useAuthStore';
 import { getDb, getSyncOwner, seedDefaultPartsIfEmpty, setSyncOwner, wipeLocalData } from './db';
-import Toast from 'react-native-simple-toast';
+import { toast } from '@/lib/toast';
 import { supabase } from './supabase';
 
 interface ServerPart {
@@ -66,8 +66,8 @@ export function pushAfterWrite(): Promise<void> {
   /* 진행 중이던 동기화에 묻힌 변경분까지 한 번 더 push */
   return syncAll(userId).then(() => pushUnsynced(userId)).catch((e) => {
     console.warn('서버 반영 실패(다음 동기화에서 재시도)', e);
-    /* 실패 원인 바로 표시 */
-    Toast.show(`서버 저장 실패: ${e?.message ?? e}`, Toast.LONG);
+    /* 개발 중엔 실패 원인까지 표시 */
+    toast.error('서버에 저장하지 못했어요', __DEV__ ? String(e?.message ?? e) : '다음 동기화 때 다시 시도해요');
   });
 }
 

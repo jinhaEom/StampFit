@@ -2,7 +2,7 @@ import { countUnsyncedLogs, syncAll } from '@/lib/sync';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { useState } from 'react';
-import Toast from 'react-native-simple-toast';
+import { toast } from '@/lib/toast';
 
 /** 로그아웃 (이 기기 기록을 지우므로 서버 저장 먼저 확인) */
 export function useLogout() {
@@ -17,10 +17,10 @@ export function useLogout() {
     try {
       await logout();
       loadAll(); // 비워진 로컬 DB로 화면 갱신
-      Toast.show('로그아웃됐어요', Toast.SHORT);
+      toast.done('로그아웃했어요');
     } catch (e) {
       console.warn('로그아웃 실패', e);
-      Toast.show('로그아웃하지 못했어요. 인터넷 연결을 확인해 주세요', Toast.SHORT);
+      toast.error('로그아웃하지 못했어요', '인터넷 연결을 확인해 주세요');
     } finally {
       setLoggingOut(false);
     }

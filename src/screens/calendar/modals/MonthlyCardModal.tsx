@@ -1,5 +1,4 @@
 import { Colors } from '@/constants/colors';
-import { CONDITION_EMOJI } from '@/constants/recovery';
 import { MonthlyAnalytics } from '@/lib/analytics';
 import { formatDuration } from '@/lib/date';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +17,7 @@ import {
   View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Toast from 'react-native-simple-toast';
+import { toast } from '@/lib/toast';
 import { captureRef } from 'react-native-view-shot';
 
 interface Props {
@@ -34,7 +33,6 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
   const [saving, setSaving] = useState(false);
   const [sharing, setSharing] = useState(false);
 
-  const conditionIndex = Math.max(0, Math.min(4, Math.round(analytics.avgCondition) - 1));
 
   // 1. 사진첩에 저장
   const onSaveToGallery = async () => {
@@ -52,14 +50,13 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
       const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status === 'granted') {
         await MediaLibrary.Asset.create(uri);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Toast.show('사진첩에 저장되었어요!', Toast.SHORT);
+        toast.done('사진첩에 저장했어요');
       } else {
-        Toast.show('사진첩 접근 권한이 필요합니다.', Toast.SHORT);
+        toast.error('사진첩 접근 권한이 필요해요', '설정에서 사진 접근을 허용해 주세요');
       }
     } catch (e) {
       console.warn('사진첩 저장 실패', e);
-      Toast.show('저장에 실패했어요. 앱 재빌드 여부를 확인해주세요.', Toast.SHORT);
+      toast.error('저장하지 못했어요');
     } finally {
       setSaving(false);
     }
@@ -86,11 +83,11 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
           UTI: 'public.png',
         });
       } else {
-        Toast.show('공유 기능을 사용할 수 없는 기기입니다.', Toast.SHORT);
+        toast.error('공유할 수 없는 기기예요');
       }
     } catch (e) {
       console.warn('SNS 공유 실패', e);
-      Toast.show('공유에 실패했어요. 앱 재빌드 여부를 확인해주세요.', Toast.SHORT);
+      toast.error('공유하지 못했어요');
     } finally {
       setSharing(false);
     }
@@ -163,26 +160,18 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
             </View>
 
             <View className="mt-[12px] flex-row gap-[10px]">
-              {analytics.maxStreak > 0 && (
-                <View className="flex-1 flex-row items-center gap-[6px] rounded-[12px] bg-cardBackground px-[12px] py-[10px]">
-                  <Text className="text-[16px]">🔥</Text>
-                  <View>
-                    <Text className="text-[10px] text-subText1">최대 연속</Text>
-                    <Text className="text-[13px] font-bold text-mainText">
-                      {analytics.maxStreak}일 달성
-                    </Text>
-                  </View>
+              <View className="flex-1 flex-row items-center gap-[8px] rounded-[12px] bg-cardBackground px-[12px] py-[10px]">
+                <Ionicons name="calendar-outline" size={16} color={Colors.main} />
+                <View>
+                  <Text className="text-[10px] text-subText1">주 평균</Text>
+                  <Text className="text-[13px] font-bold text-mainText">{analytics.weeklyAvg}회</Text>
                 </View>
-              )}
-              <View className="flex-1 flex-row items-center gap-[6px] rounded-[12px] bg-cardBackground px-[12px] py-[10px]">
-                <Text className="text-[16px]">
-                  {CONDITION_EMOJI[conditionIndex]}
-                </Text>
+              </View>
+              <View className="flex-1 flex-row items-center gap-[8px] rounded-[12px] bg-cardBackground px-[12px] py-[10px]">
+                <Ionicons name="barbell-outline" size={16} color={Colors.main} />
                 <View>
                   <Text className="text-[10px] text-subText1">평균 강도</Text>
-                  <Text className="text-[13px] font-bold text-mainText">
-                    {analytics.avgIntensity} / 5.0
-                  </Text>
+                  <Text className="text-[13px] font-bold text-mainText">{analytics.avgIntensity} / 5.0</Text>
                 </View>
               </View>
             </View>

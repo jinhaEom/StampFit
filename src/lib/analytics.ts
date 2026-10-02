@@ -1,5 +1,5 @@
 import { PART_PALETTE } from '@/constants/colors';
-import { formatDuration } from './date';
+import { formatDuration, todayStr } from './date';
 import type { WorkoutLog } from './types';
 
 export interface PartStat {
@@ -25,7 +25,7 @@ export interface MonthlyAnalytics {
   };
   partStats: PartStat[];
   topParts: PartStat[];
-  maxStreak: number;
+  weeklyAvg: number; // 주 평균 운동 횟수
   hasData: boolean;
 }
 
@@ -100,7 +100,7 @@ export function getMonthlyAnalytics(
       },
       partStats: [],
       topParts: [],
-      maxStreak: 0,
+      weeklyAvg: 0,
       hasData: false,
     };
   }
@@ -115,35 +115,10 @@ export function getMonthlyAnalytics(
 
   const partStats = getPartStatsForLogs(currentLogs, partNamesById);
 
-  /* 이번 달 최대 연속 운동 일수 */
-  const sortedDates = currentLogs
-    .map((l) => l.logDate)
-    .sort();
-
-  let maxStreak = 0;
-  let currentStreak = 0;
-  let lastDate: Date | null = null;
-
-  for (const dStr of sortedDates) {
-    const [y, m, d] = dStr.split('-').map(Number);
-    const currentDate = new Date(y, m - 1, d);
-
-    if (lastDate) {
-      const diffDays = Math.round((currentDate.getTime() - lastDate.getTime()) / 86400000);
-      if (diffDays === 1) {
-        currentStreak += 1;
-      } else if (diffDays > 1) {
-        currentStreak = 1;
-      }
-    } else {
-      currentStreak = 1;
-    }
-
-    if (currentStreak > maxStreak) {
-      maxStreak = currentStreak;
-    }
-    lastDate = currentDate;
-  }
+  /* 주 평균 운동 횟수 (이번 달은 오늘까지, 지난달은 말일까지 기준) */
+  const today = todayStr();
+  const days = today.startsWith(currentPrefix) ? Number(today.slice(8, 10)) : new Date(year, month, 0).getDate();
+  const weeklyAvg = Number((totalCount / Math.max(1, days / 7)).toFixed(1)); // 첫 주는 횟수 그대로
 
   return {
     year,
@@ -159,7 +134,7 @@ export function getMonthlyAnalytics(
     },
     partStats,
     topParts: partStats.slice(0, 3),
-    maxStreak,
+    weeklyAvg,
     hasData: true,
   };
 }

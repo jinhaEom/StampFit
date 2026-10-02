@@ -1,8 +1,6 @@
 import DayDetail from '@/components/DayDetail';
-import { Colors } from '@/constants/colors';
 import type { WorkoutLog } from '@/lib/types';
-import { Ionicons } from '@expo/vector-icons';
-import { Modal, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, View } from 'react-native';
 
 interface Props {
   visible: boolean;
@@ -17,17 +15,10 @@ export function DayLogModal({ visible, date, log, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 justify-center bg-black/60 px-[16px]">
-        <View className="mb-[8px] flex-row justify-end">
-          <TouchableOpacity
-            className="h-[32px] w-[32px] items-center justify-center rounded-full bg-cardBackground"
-            onPress={onClose}
-            hitSlop={8}
-          >
-            <Ionicons name="close" size={18} color={Colors.subText1} />
-          </TouchableOpacity>
-        </View>
-        <DayDetail date={date} log={log} onBeforeNavigate={onClose} onAfterDelete={onClose} />
+      <View className="flex-1 justify-center px-[16px]">
+        {/* 바깥 탭 시 닫기 */}
+        <Pressable className="absolute inset-0 bg-black/60" onPress={onClose} />
+        <DayDetail date={date} log={log} onBeforeNavigate={onClose} onAfterDelete={onClose} onClose={onClose} />
       </View>
     </Modal>
   );

@@ -15,11 +15,13 @@ export default function DayDetail({
   log,
   onBeforeNavigate,
   onAfterDelete,
+  onClose,
 }: {
   date: string;
   log: WorkoutLog | undefined;
   onBeforeNavigate?: () => void;
   onAfterDelete?: () => void;
+  onClose?: () => void; // 있으면 헤더에 닫기 버튼 (모달용)
 }) {
   const router = useRouter();
   const today = todayStr();
@@ -38,16 +40,23 @@ export default function DayDetail({
     <View className="rounded-[16px] bg-cardBackground p-[16px]">
       <View className="flex-row items-center justify-between">
         <Text className="text-[13px] text-subText1">{formatKorean(date)}</Text>
-        {log ? (
-          <View className="flex-row items-center gap-[16px]">
-            <Pressable onPress={goRecord} hitSlop={8}>
-              <Ionicons name="pencil" size={18} color={Colors.subText1} />
+        <View className="flex-row items-center gap-[16px]">
+          {log ? (
+            <>
+              <Pressable onPress={goRecord} hitSlop={8}>
+                <Ionicons name="pencil" size={18} color={Colors.subText1} />
+              </Pressable>
+              <Pressable onPress={() => setConfirmVisible(true)} hitSlop={8}>
+                <Ionicons name="trash-outline" size={18} color={Colors.subText1} />
+              </Pressable>
+            </>
+          ) : null}
+          {onClose ? (
+            <Pressable onPress={onClose} hitSlop={8}>
+              <Ionicons name="close" size={22} color={Colors.subText1} />
             </Pressable>
-            <Pressable onPress={() => setConfirmVisible(true)} hitSlop={8}>
-              <Ionicons name="trash-outline" size={18} color={Colors.subText1} />
-            </Pressable>
-          </View>
-        ) : null}
+          ) : null}
+        </View>
       </View>
 
       {!log ? (

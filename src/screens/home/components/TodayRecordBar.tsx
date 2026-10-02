@@ -26,7 +26,7 @@ export function TodayRecordBar({ todayLog, onPress }: Props) {
           </View>
         ) : (
           <View className="h-[34px] w-[34px] items-center justify-center rounded-full border-[1.5px] border-dashed border-subText2">
-            <Ionicons name="barbell" size={16} color="#6E7075" />
+            <Ionicons name="barbell" size={16} color={Colors.subText2} />
           </View>
         )}
         <View className="flex-1">

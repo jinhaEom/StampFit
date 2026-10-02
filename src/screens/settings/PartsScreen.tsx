@@ -53,7 +53,7 @@ export default function PartsScreen() {
           <Text className="text-[17px] font-medium text-mainText">부위 관리</Text>
         </View>
         <Pressable onPress={() => setEditMode((v) => !v)} hitSlop={8}>
-          <Text className={`text-[15px] ${editMode ? 'font-medium text-main' : 'text-white'}`}>
+          <Text className={`text-[15px] ${editMode ? 'font-medium text-main' : 'text-mainText'}`}>
             {editMode ? '완료' : '편집'}
           </Text>
         </Pressable>
@@ -86,7 +86,7 @@ export default function PartsScreen() {
         </View>
 
         <View className="mb-[8px] mt-[20px] flex-row justify-between px-[4px]">
-          <Text className="text-[14px] text-white">부위 {parts.length}개</Text>
+          <Text className="text-[14px] text-mainText">부위 {parts.length}개</Text>
           <Text className="text-[12px] text-subText1">
             {editMode ? '끌어서 순서 변경' : '끄면 기록 화면에서 숨겨져요'}
           </Text>

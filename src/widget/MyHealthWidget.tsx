@@ -23,7 +23,7 @@ const MyHealthWidget = (props: MyHealthWidgetProps, environment: WidgetEnvironme
   'widget';
   const ACCENT = '#4FD1B3';
   const FG = '#ECECEC';
-  const SUB = '#8A8C91';
+  const SUB = '#A3A5AA';
   const CELL = '#26282C';
   const BG = '#0E0F11';
   const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];

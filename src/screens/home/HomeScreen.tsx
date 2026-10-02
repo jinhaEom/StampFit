@@ -1,4 +1,3 @@
-import { AdBanner } from '@/components/AdBanner';
 import { BottomTabInset } from '@/constants/constant';
 import { todayStr } from '@/lib/date';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
@@ -6,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Toast from 'react-native-simple-toast';
+import { toast } from '@/lib/toast';
 import { StreakHero } from './components/StreakHero';
 import { TodayCycleHeader } from './components/TodayCycleHeader';
 import { TodayRecordBar } from './components/TodayRecordBar';
@@ -31,7 +30,7 @@ export default function HomeScreen() {
   // 미래 날짜는 열지 않음
   const handlePressDay = (date: string) => {
     if (date > todayStr()) {
-      Toast.show('미래 날짜예요', Toast.SHORT);
+      toast.info('미래 날짜에요!');
       return;
     }
     setSelectedDate(date);
@@ -74,10 +73,9 @@ export default function HomeScreen() {
           <Text className="text-[13px] leading-[19px] text-subText1" numberOfLines={2}>
             {quoteOfDay.quote}
           </Text>
-          <Text className="mt-[2px] text-[11px] text-subText2">{quoteOfDay.author}</Text>
+          <Text className="mt-[2px] text-[12px] text-subText2">{quoteOfDay.author}</Text>
         </View>
       )}
-          <AdBanner />
       <View
         className="px-[16px] pt-[8px]"
         style={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + BottomTabInset : 16 }}

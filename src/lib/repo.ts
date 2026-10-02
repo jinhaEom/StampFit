@@ -216,7 +216,10 @@ interface CycleRow { steps_json: string; current_index: number }
 export function getCycle(): WorkoutCycle | null {
   const row = getDb().getFirstSync<CycleRow>('SELECT steps_json, current_index FROM workout_cycle WHERE id = 1');
   if (!row) return null;
-  const steps: WorkoutCycleStep[] = JSON.parse(row.steps_json);
+  const steps: WorkoutCycleStep[] = JSON.parse(row.steps_json).map((s: WorkoutCycleStep) => ({
+    ...s,
+    label: s.label.split(' , ').join(' · '), // 예전 구분자 변환
+  }));
   if (steps.length === 0) return null;
   return { steps, currentIndex: row.current_index % steps.length };
 }
