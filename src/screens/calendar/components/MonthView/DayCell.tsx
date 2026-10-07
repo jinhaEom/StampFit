@@ -34,7 +34,7 @@ function DayCell({ date, log, partNames, isToday, isSelected, stampAnimate, onSt
           </Text>
         </View>
 
-        <Text className="h-[12px] text-[12px] leading-[12px] text-subText1" numberOfLines={1}>
+        <Text className="h-[12px] text-[11px] leading-[12px] text-subText1" numberOfLines={1}>
           {parts.length ? `${parts[0]}${parts.length > 1 ? ` +${parts.length - 1}` : ''}` : ''}
         </Text>
       </View>

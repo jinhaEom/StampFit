@@ -7,7 +7,7 @@ import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 /** 날짜 탭 시 상세 */
 export default function DayDetail({
@@ -29,7 +29,7 @@ export default function DayDetail({
   const removeLog = useWorkoutStore((s) => s.removeLog);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
-  const maxMin = Math.max(1, ...(log?.parts.map((p) => p.durationMin) ?? [])); 
+  const maxMin = Math.max(1, ...(log?.parts.map((p) => p.durationMin) ?? []));
 
   const goRecord = () => {
     onBeforeNavigate?.();
@@ -63,12 +63,14 @@ export default function DayDetail({
         date > today ? (
           <Text className="mt-[8px] text-[13px] text-subText1">미래 날짜예요</Text>
         ) : (
-          <Pressable
-            className="mt-[12px] items-center rounded-[14px] border border-border py-[12px]"
+
+          <TouchableOpacity
+            className="mt-[12px] flex-row items-center justify-center gap-[6px] rounded-[14px] bg-main/10 py-[13px] "
             onPress={goRecord}
           >
-            <Text className="text-[15px] font-medium text-mainText">이 날짜에 기록하기</Text>
-          </Pressable>
+            <Ionicons name="add" size={20} color={Colors.main} />
+            <Text className="text-[15px] font-medium text-main">운동 기록하기</Text>
+          </TouchableOpacity>
         )
       ) : (
         <>

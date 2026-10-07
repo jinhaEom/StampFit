@@ -63,10 +63,10 @@ export const GoalModal = ({ visible, onClose }: GoalModalProps) => {
             />
           </View>
           <Pressable
-            className="mt-[20px] items-center rounded-[12px] bg-main py-[12px]"
+            className="mt-[20px] items-center bg-main/10 rounded-[12px] bg-main py-[12px]"
             onPress={handleSave}
           >
-            <Text className="text-[15px] font-semibold text-textOnMain">저장</Text>
+            <Text className="text-[15px] font-semibold text-main">저장</Text>
           </Pressable>
         </View>
       </View>
