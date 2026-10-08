@@ -1,6 +1,7 @@
 import { Colors } from '@/constants/colors';
 import { MonthlyAnalytics } from '@/lib/analytics';
 import { formatDuration } from '@/lib/date';
+import { toast } from '@/lib/toast';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as MediaLibrary from 'expo-media-library';
@@ -17,7 +18,6 @@ import {
   View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { toast } from '@/lib/toast';
 import { captureRef } from 'react-native-view-shot';
 
 interface Props {
@@ -225,19 +225,20 @@ export function MonthlyCardModal({ visible, onClose, analytics }: Props) {
               <TouchableOpacity
                 onPress={onSaveToGallery}
                 disabled={saving || sharing}
-                className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[16px] bg-main py-[15px]"
+                className="flex-1 flex-row items-center justify-center gap-[6px] rounded-[16px] bg-cardBackground border border-main/30 py-[15px]"
               >
                 {saving ? (
-                  <ActivityIndicator size="small" color={Colors.textOnMain} />
+                  <ActivityIndicator size="small" color={Colors.main} />
                 ) : (
                   <>
-                    <Ionicons name="download-outline" size={18} color={Colors.textOnMain} />
-                    <Text className="text-[15px] font-bold text-textOnMain">
+                    <Ionicons name="download-outline" size={18} color={Colors.main} />
+                    <Text className="text-[15px] font-bold text-main">
                       사진첩 저장
                     </Text>
                   </>
                 )}
               </TouchableOpacity>
+
 
               <TouchableOpacity
                 onPress={onShareSNS}

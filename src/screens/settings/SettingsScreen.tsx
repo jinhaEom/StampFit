@@ -3,7 +3,6 @@ import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { Ionicons } from '@expo/vector-icons';
-import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -81,9 +80,13 @@ export default function SettingScreen() {
           />
         </View>
 
-        <TouchableOpacity onPress={requestDelete} disabled={deleting} hitSlop={8} className="mt-[20px] self-end">
-          <Text className="text-[13px] text-subText2">{deleting ? '탈퇴 중…' : '회원 탈퇴'}</Text>
-        </TouchableOpacity>
+        <View className="mt-[32px] mb-[16px] items-end">
+          <TouchableOpacity onPress={requestDelete} disabled={deleting} hitSlop={12}>
+            <Text className="text-[13px] text-subText2 underline">
+              {deleting ? '탈퇴 처리 중…' : '회원 탈퇴'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <AlertModal

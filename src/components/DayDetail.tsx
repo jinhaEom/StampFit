@@ -65,7 +65,7 @@ export default function DayDetail({
         ) : (
 
           <TouchableOpacity
-            className="mt-[12px] flex-row items-center justify-center gap-[6px] rounded-[14px] bg-main/10 py-[13px] "
+            className="mt-[12px] flex-row items-center justify-center gap-[6px] rounded-[14px] bg-cardBackground border border-main/30 py-[13px] "
             onPress={goRecord}
           >
             <Ionicons name="add" size={20} color={Colors.main} />

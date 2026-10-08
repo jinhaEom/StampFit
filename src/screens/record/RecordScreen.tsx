@@ -238,12 +238,12 @@ export default function RecordScreen() {
         {/* 저장 */}
         <View className="px-[16px] pt-[8px]" style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
           <Pressable
-            className={`items-center rounded-[14px] py-[15px] ${canSave ? 'bg-main' : 'bg-cardBackground'}`}
+            className={`items-center rounded-[14px] py-[15px] ${canSave ? 'bg-cardBackground border border-main/30' : 'bg-cardBackground'}`}
             disabled={!canSave}
             onPress={onSave}
           >
             <Text
-              className={`text-[16px] font-medium ${canSave ? 'text-textOnMain' : 'text-subText2'}`}
+              className={`text-[16px] font-medium ${canSave ? 'text-main' : 'text-subText2'}`}
             >
               {entries.length === 0
                 ? '부위를 선택하세요'

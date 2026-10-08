@@ -40,9 +40,9 @@ export function TodayRecordBar({ todayLog, onPress }: Props) {
           <Text className="text-[14px] font-semibold text-mainText">수정</Text>
         </View>
       ) : (
-        <View className="h-[44px] flex-row items-center gap-[4px] rounded-full bg-main px-[18px]">
-          <Ionicons name="add" size={16} color={Colors.textOnMain} />
-          <Text className="text-[15px] font-semibold text-textOnMain">기록</Text>
+        <View className="h-[44px] flex-row items-center gap-[4px] rounded-full bg-main/10 px-[18px]">
+          <Ionicons name="add" size={16} color={Colors.main} />
+          <Text className="text-[15px] font-semibold text-main">기록</Text>
         </View>
       )}
     </Pressable>

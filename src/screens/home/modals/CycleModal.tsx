@@ -1,8 +1,8 @@
 import { Chip } from '@/components/Chip';
 import { Colors } from '@/constants/colors';
+import { toast } from '@/lib/toast';
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { toast } from '@/lib/toast';
 import { useCycleEditor } from '../hooks/useCycleEditor';
 
 interface CycleModalProps {
@@ -83,14 +83,14 @@ function CycleEditor({ onClose }: { onClose: () => void }) {
                     </View>
                     <View className="mt-[14px] flex-row items-center justify-between">
                       <TouchableOpacity onPress={() => removeStep(step.id)} hitSlop={8}>
-                        <Text className="text-[13px] text-subText2">삭제</Text>
+                        <Text className="text-[13px] text-red-500">싸이클 삭제</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={finishStep}
                         disabled={!canFinish}
-                        className={`rounded-full px-[16px] py-[7px] ${canFinish ? 'bg-main' : 'bg-border'}`}
+                        className={`rounded-full px-[16px] py-[7px]`}
                       >
-                        <Text className={`text-[13px] font-medium ${canFinish ? 'text-textOnMain' : 'text-subText2'}`}>
+                        <Text className={`text-[13px] font-medium ${canFinish ? 'text-main' : 'text-subText2'}`}>
                           완료
                         </Text>
                       </TouchableOpacity>
