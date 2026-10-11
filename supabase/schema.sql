@@ -58,3 +58,44 @@ $$;
 
 revoke execute on function public.delete_user() from public, anon;
 grant execute on function public.delete_user() to authenticated;
+
+-- 주간 목표·목표 이력·운동 싸이클 (2026-10 추가)
+create table if not exists public.goals (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  target_count integer not null,
+  recurring boolean not null default false,
+  week_start date not null,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.goal_history (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  week_start date not null,
+  target_count integer not null,
+  recurring boolean not null default false,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, week_start)
+);
+
+create table if not exists public.workout_cycle (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  steps jsonb not null,
+  current_index integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.goals enable row level security;
+alter table public.goal_history enable row level security;
+alter table public.workout_cycle enable row level security;
+
+drop policy if exists "own goals" on public.goals;
+create policy "own goals" on public.goals
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "own goal_history" on public.goal_history;
+create policy "own goal_history" on public.goal_history
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "own workout_cycle" on public.workout_cycle;
+create policy "own workout_cycle" on public.workout_cycle
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

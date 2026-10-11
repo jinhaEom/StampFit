@@ -53,7 +53,7 @@ function migrate(db: SQLiteDatabase) {
       user_id TEXT
     );
 
-    -- 주간 운동 횟수 목표 (기기 전용, 로그아웃 시 삭제)
+    -- 주간 운동 횟수 목표 (서버 동기화)
     -- 싱글턴 행 (id=1)
     -- recurring=0이면 week_start 주에만 유효
     CREATE TABLE IF NOT EXISTS goals (
@@ -64,7 +64,7 @@ function migrate(db: SQLiteDatabase) {
       updated_at TEXT NOT NULL
     );
 
-    -- 주간 목표 변경 이력 (기기 전용)
+    -- 주간 목표 변경 이력 (서버 동기화)
     -- 지난주 달성 여부를 그 주 목표로 판정하는 데 사용
     -- 주(월요일)당 한 행, 같은 주 재설정 시 마지막 값만
     CREATE TABLE IF NOT EXISTS goal_history (
@@ -74,7 +74,7 @@ function migrate(db: SQLiteDatabase) {
       updated_at TEXT NOT NULL
     );
 
-    -- 운동 싸이클
+    -- 운동 싸이클 (서버 동기화)
     CREATE TABLE IF NOT EXISTS workout_cycle (
       id INTEGER PRIMARY KEY CHECK (id = 1),
       steps_json TEXT NOT NULL,
@@ -86,6 +86,10 @@ function migrate(db: SQLiteDatabase) {
   /* 예전 버전 기기에 없을 수 있는 컬럼 추가 */
   ensureColumn(db, 'body_parts', 'deleted_at', 'TEXT');
   ensureColumn(db, 'workout_log_parts', 'duration_min', 'INTEGER NOT NULL DEFAULT 0');
+  /* 목표·싸이클 서버 동기화용 (기존 값은 0이라 다음 동기화 때 올라감) */
+  ensureColumn(db, 'goals', 'synced', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(db, 'goal_history', 'synced', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(db, 'workout_cycle', 'synced', 'INTEGER NOT NULL DEFAULT 0');
 
   /* 이력 테이블 이전 목표를 첫 이력으로 옮김 (있으면 무시) */
   db.execSync(`

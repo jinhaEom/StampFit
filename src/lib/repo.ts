@@ -193,19 +193,19 @@ export function setGoal(targetCount: number, recurring: boolean) {
   const now = nowIso();
   db.withTransactionSync(() => {
     db.runSync(
-      `INSERT INTO goals (id, target_count, recurring, week_start, updated_at)
-       VALUES (1, ?, ?, ?, ?)
+      `INSERT INTO goals (id, target_count, recurring, week_start, updated_at, synced)
+       VALUES (1, ?, ?, ?, ?, 0)
        ON CONFLICT (id) DO UPDATE SET
          target_count = excluded.target_count, recurring = excluded.recurring,
-         week_start = excluded.week_start, updated_at = excluded.updated_at`,
+         week_start = excluded.week_start, updated_at = excluded.updated_at, synced = 0`,
       targetCount, recurring ? 1 : 0, ws, now,
     );
     db.runSync(
-      `INSERT INTO goal_history (week_start, target_count, recurring, updated_at)
-       VALUES (?, ?, ?, ?)
+      `INSERT INTO goal_history (week_start, target_count, recurring, updated_at, synced)
+       VALUES (?, ?, ?, ?, 0)
        ON CONFLICT (week_start) DO UPDATE SET
          target_count = excluded.target_count, recurring = excluded.recurring,
-         updated_at = excluded.updated_at`,
+         updated_at = excluded.updated_at, synced = 0`,
       ws, targetCount, recurring ? 1 : 0, now,
     );
   });
@@ -232,10 +232,11 @@ export function setCycleSteps(steps: WorkoutCycleStep[]) {
   );
   const currentIndex = steps.length === 0 ? 0 : (existing?.current_index ?? 0) % steps.length;
   db.runSync(
-    `INSERT INTO workout_cycle (id, steps_json, current_index, updated_at)
-     VALUES (1, ?, ?, ?)
+    `INSERT INTO workout_cycle (id, steps_json, current_index, updated_at, synced)
+     VALUES (1, ?, ?, ?, 0)
      ON CONFLICT (id) DO UPDATE SET
-       steps_json = excluded.steps_json, current_index = excluded.current_index, updated_at = excluded.updated_at`,
+       steps_json = excluded.steps_json, current_index = excluded.current_index,
+       updated_at = excluded.updated_at, synced = 0`,
     JSON.stringify(steps), currentIndex, nowIso(),
   );
 }
@@ -247,7 +248,7 @@ function advanceCycleStep(db: ReturnType<typeof getDb>) {
   const steps: WorkoutCycleStep[] = JSON.parse(row.steps_json);
   if (steps.length === 0) return;
   const nextIndex = (row.current_index + 1) % steps.length;
-  db.runSync('UPDATE workout_cycle SET current_index = ?, updated_at = ? WHERE id = 1', nextIndex, nowIso());
+  db.runSync('UPDATE workout_cycle SET current_index = ?, updated_at = ?, synced = 0 WHERE id = 1', nextIndex, nowIso());
 }
 
 /** 데이터 초기화 (전부 삭제 후 기본 부위 재삽입) */

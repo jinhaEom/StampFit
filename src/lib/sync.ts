@@ -2,6 +2,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { getDb, getSyncOwner, seedDefaultPartsIfEmpty, setSyncOwner, wipeLocalData } from './db';
 import { toast } from '@/lib/toast';
 import { supabase } from './supabase';
+import type { WorkoutCycleStep } from './types';
 
 interface ServerPart {
   id: string;
@@ -21,6 +22,19 @@ interface ServerLog {
   memo: string | null;
   updated_at: string;
   deleted_at: string | null;
+}
+
+interface ServerGoal {
+  target_count: number;
+  recurring: boolean;
+  week_start: string;
+  updated_at: string;
+}
+
+interface ServerCycle {
+  steps: WorkoutCycleStep[];
+  current_index: number;
+  updated_at: string;
 }
 
 const later = (a: string, b: string) => new Date(a).getTime() > new Date(b).getTime();
@@ -51,10 +65,14 @@ async function runSync(userId: string) {
   await pushUnsynced(userId);
 }
 
-/** 서버에 안 올라간 기록 수 (로그아웃 시 사라질 기록) */
-export function countUnsyncedLogs(): number {
+/** 서버에 안 올라간 데이터 수 (로그아웃 시 사라질 기록·목표·싸이클) */
+export function countUnsynced(): number {
   const row = getDb().getFirstSync<{ n: number }>(
-    'SELECT COUNT(*) AS n FROM workout_logs WHERE synced = 0 AND deleted_at IS NULL',
+    `SELECT
+       (SELECT COUNT(*) FROM workout_logs WHERE synced = 0 AND deleted_at IS NULL)
+     + (SELECT COUNT(*) FROM goals WHERE synced = 0)
+     + (SELECT COUNT(*) FROM goal_history WHERE synced = 0)
+     + (SELECT COUNT(*) FROM workout_cycle WHERE synced = 0) AS n`,
   );
   return row?.n ?? 0;
 }
@@ -72,15 +90,19 @@ export function pushAfterWrite(): Promise<void> {
 }
 
 async function pullMerge() {
-  // 내 행만 옴 (RLS라 user_id 필터 생략, 목표는 기기 전용이라 제외)
-  const [partsRes, logsRes, logPartsRes] = await Promise.all([
+  // 내 행만 옴 (RLS라 user_id 필터 생략)
+  const [partsRes, logsRes, logPartsRes, goalRes, historyRes, cycleRes] = await Promise.all([
     supabase.from('body_parts').select('id, name, sort_order, is_active, updated_at, deleted_at'),
     supabase
       .from('workout_logs')
       .select('id, log_date, duration_min, intensity, condition, memo, updated_at, deleted_at'),
     supabase.from('workout_log_parts').select('log_id, body_part_id, duration_min'),
+    supabase.from('goals').select('target_count, recurring, week_start, updated_at').maybeSingle(),
+    supabase.from('goal_history').select('target_count, recurring, week_start, updated_at'),
+    supabase.from('workout_cycle').select('steps, current_index, updated_at').maybeSingle(),
   ]);
-  const error = partsRes.error ?? logsRes.error ?? logPartsRes.error;
+  const error =
+    partsRes.error ?? logsRes.error ?? logPartsRes.error ?? goalRes.error ?? historyRes.error ?? cycleRes.error;
   if (error) throw error;
 
   const serverParts = (partsRes.data ?? []) as ServerPart[];
@@ -109,6 +131,12 @@ async function pullMerge() {
             sp.id, byName.id,
           );
           db.runSync('UPDATE body_parts SET id = ? WHERE id = ?', sp.id, byName.id);
+          /* 싸이클 단계 속 부위 id도 교체 */
+          db.runSync(
+            `UPDATE workout_cycle SET steps_json = REPLACE(steps_json, ?, ?), synced = 0
+             WHERE id = 1 AND instr(steps_json, ?) > 0`,
+            byName.id, sp.id, byName.id,
+          );
           local = { id: sp.id, updated_at: byName.updated_at };
         }
       }
@@ -160,6 +188,44 @@ async function pullMerge() {
         );
       }
     }
+
+    /* 목표·이력·싸이클 (서버가 더 최신일 때만 덮어씀) */
+    const sg = goalRes.data as ServerGoal | null;
+    if (sg) {
+      const local = db.getFirstSync<{ updated_at: string }>('SELECT updated_at FROM goals WHERE id = 1');
+      if (!local || later(sg.updated_at, local.updated_at)) {
+        db.runSync(
+          `INSERT OR REPLACE INTO goals (id, target_count, recurring, week_start, updated_at, synced)
+           VALUES (1, ?, ?, ?, ?, 1)`,
+          sg.target_count, sg.recurring ? 1 : 0, sg.week_start, sg.updated_at,
+        );
+      }
+    }
+
+    for (const sh of (historyRes.data ?? []) as ServerGoal[]) {
+      const local = db.getFirstSync<{ updated_at: string }>(
+        'SELECT updated_at FROM goal_history WHERE week_start = ?', sh.week_start,
+      );
+      if (!local || later(sh.updated_at, local.updated_at)) {
+        db.runSync(
+          `INSERT OR REPLACE INTO goal_history (week_start, target_count, recurring, updated_at, synced)
+           VALUES (?, ?, ?, ?, 1)`,
+          sh.week_start, sh.target_count, sh.recurring ? 1 : 0, sh.updated_at,
+        );
+      }
+    }
+
+    const sc = cycleRes.data as ServerCycle | null;
+    if (sc) {
+      const local = db.getFirstSync<{ updated_at: string }>('SELECT updated_at FROM workout_cycle WHERE id = 1');
+      if (!local || later(sc.updated_at, local.updated_at)) {
+        db.runSync(
+          `INSERT OR REPLACE INTO workout_cycle (id, steps_json, current_index, updated_at, synced)
+           VALUES (1, ?, ?, ?, 1)`,
+          JSON.stringify(sc.steps), sc.current_index, sc.updated_at,
+        );
+      }
+    }
   });
 }
 
@@ -189,6 +255,8 @@ async function pushUnsynced(userId: string) {
       }
     });
   }
+
+  await pushGoalAndCycle(userId);
 
   const logs = db.getAllSync<{
     id: string; log_date: string; duration_min: number; intensity: number;
@@ -233,4 +301,62 @@ async function pushUnsynced(userId: string) {
       db.runSync('UPDATE workout_logs SET synced = 1 WHERE id = ? AND updated_at = ?', l.id, l.updated_at);
     }
   });
+}
+
+/** 목표·목표 이력·싸이클 push */
+async function pushGoalAndCycle(userId: string) {
+  const db = getDb();
+
+  const goal = db.getFirstSync<{ target_count: number; recurring: number; week_start: string; updated_at: string }>(
+    'SELECT target_count, recurring, week_start, updated_at FROM goals WHERE id = 1 AND synced = 0',
+  );
+  if (goal) {
+    const { error } = await supabase.from('goals').upsert({
+      user_id: userId,
+      target_count: goal.target_count,
+      recurring: goal.recurring === 1,
+      week_start: goal.week_start,
+      updated_at: goal.updated_at,
+    });
+    if (error) throw error;
+    db.runSync('UPDATE goals SET synced = 1 WHERE id = 1 AND updated_at = ?', goal.updated_at);
+  }
+
+  const history = db.getAllSync<{ target_count: number; recurring: number; week_start: string; updated_at: string }>(
+    'SELECT target_count, recurring, week_start, updated_at FROM goal_history WHERE synced = 0',
+  );
+  if (history.length > 0) {
+    const { error } = await supabase.from('goal_history').upsert(
+      history.map((h) => ({
+        user_id: userId,
+        week_start: h.week_start,
+        target_count: h.target_count,
+        recurring: h.recurring === 1,
+        updated_at: h.updated_at,
+      })),
+      { onConflict: 'user_id,week_start' },
+    );
+    if (error) throw error;
+    db.withTransactionSync(() => {
+      for (const h of history) {
+        db.runSync(
+          'UPDATE goal_history SET synced = 1 WHERE week_start = ? AND updated_at = ?', h.week_start, h.updated_at,
+        );
+      }
+    });
+  }
+
+  const cycle = db.getFirstSync<{ steps_json: string; current_index: number; updated_at: string }>(
+    'SELECT steps_json, current_index, updated_at FROM workout_cycle WHERE id = 1 AND synced = 0',
+  );
+  if (cycle) {
+    const { error } = await supabase.from('workout_cycle').upsert({
+      user_id: userId,
+      steps: JSON.parse(cycle.steps_json),
+      current_index: cycle.current_index,
+      updated_at: cycle.updated_at,
+    });
+    if (error) throw error;
+    db.runSync('UPDATE workout_cycle SET synced = 1 WHERE id = 1 AND updated_at = ?', cycle.updated_at);
+  }
 }

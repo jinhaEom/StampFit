@@ -1,4 +1,4 @@
-import { countUnsyncedLogs, syncAll } from '@/lib/sync';
+import { countUnsynced, syncAll } from '@/lib/sync';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { useState } from 'react';
@@ -10,7 +10,7 @@ export function useLogout() {
   const logout = useAuthStore((s) => s.logout);
   const loadAll = useWorkoutStore((s) => s.loadAll);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [unsyncedCount, setUnsyncedCount] = useState(0); // 서버에 못 올린 기록 수 (0 초과 시 경고)
+  const [unsyncedCount, setUnsyncedCount] = useState(0); // 서버에 못 올린 데이터 수 (0 초과 시 경고)
 
   const logoutNow = async () => {
     setUnsyncedCount(0);
@@ -35,7 +35,7 @@ export function useLogout() {
     } catch (e) {
       console.warn('로그아웃 전 동기화 실패', e);
     }
-    const unsynced = countUnsyncedLogs();
+    const unsynced = countUnsynced();
     if (unsynced > 0) {
       setUnsyncedCount(unsynced);
       setLoggingOut(false);

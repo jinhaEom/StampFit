@@ -92,7 +92,7 @@ export default function SettingScreen() {
       <AlertModal
         visible={unsyncedCount > 0}
         title="아직 서버에 저장되지 않은 기록이 있어요"
-        contents={`기록 ${unsyncedCount}개가 이 기기에만 있어서, 지금 로그아웃하면 사라져요. 인터넷 연결을 확인하고 다시 시도해 주세요.`}
+        contents="서버에 저장되지 않은 기록이나 설정이 이 기기에만 있어서, 지금 로그아웃하면 사라져요. 인터넷 연결을 확인하고 다시 시도해 주세요."
         cancelLabel="취소"
         okLabel="그래도 로그아웃"
         danger
