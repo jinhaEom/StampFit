@@ -1,6 +1,6 @@
 const CONTACT_EMAIL = 'umjin98@naver.com';
 const SERVER_REGION = '싱가포르 (AWS ap-southeast-1)';
-const EFFECTIVE_DATE = '2026년 10월 2일';
+const EFFECTIVE_DATE = '2026년 10월 12일';
 
 export interface LegalDoc {
   title: string;
@@ -29,6 +29,7 @@ export const PRIVACY: LegalDoc = {
       title: '2. 개인정보의 처리 목적',
       body: [
         '· 회원 식별과 로그인 상태 유지',
+        '· 이메일 가입 회원의 비밀번호 재설정 안내 메일 발송',
         '· 운동 기록 저장과 여러 기기 간 동기화',
         '· 서비스 장애 대응과 부정 이용 방지',
         '위 목적 외의 용도로는 이용하지 않으며, 광고나 마케팅에 사용하지 않습니다. 목적이 바뀌는 경우 미리 동의를 받습니다.',
@@ -63,6 +64,8 @@ export const PRIVACY: LegalDoc = {
         '· 수탁자: Supabase Pte. Ltd. (연락처: privacy@supabase.com)',
         '· 위탁 업무: 회원 인증, 데이터베이스 호스팅',
         `· 데이터 저장 위치: ${SERVER_REGION}`,
+        '· 수탁자: Google LLC (Gmail)',
+        '· 위탁 업무: 비밀번호 재설정 메일 발송 (이전 항목: 이메일 주소, 위치: 미국 등 Google 서버)',
         '1조의 회원 정보와 운동 기록은 위 저장 위치(국외)의 서버에 보관되며, 서비스를 이용할 때마다 네트워크를 통해 전송됩니다. 이전 목적은 2조, 보유 기간은 3조와 같습니다.',
         '국외 이전을 원하지 않으면 회원 탈퇴로 이전을 중단할 수 있습니다. 다만 이 경우 서비스를 이용할 수 없습니다.',
       ],

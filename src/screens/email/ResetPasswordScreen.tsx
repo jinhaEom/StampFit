@@ -15,7 +15,8 @@ import { EMAIL_REGEX } from './EmailScreen';
 /** Supabase 에러 문구 → 화면 문구 */
 function toMessage(message: string) {
   if (message.includes('expired') || message.includes('invalid')) return '코드가 맞지 않거나 만료됐어요';
-  if (message.includes('security purposes')) return '잠시 후 다시 받아 주세요';
+  if (message.includes('security purposes') || message.includes('rate limit')) return '잠시 후 다시 받아 주세요';
+  if (message.includes('sending')) return '메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요';
   if (message.includes('different from the old')) return '이전과 다른 비밀번호로 정해 주세요';
   return message;
 }

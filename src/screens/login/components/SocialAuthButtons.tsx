@@ -1,8 +1,8 @@
 import { signInWithApple, signInWithGoogle } from '@/lib/socialAuth';
-import { AntDesign } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, Text, View } from 'react-native';
+import { GoogleLogo } from './GoogleLogo';
 
 // 구글 브랜딩 가이드의 다크 테마 버튼 색
 const GOOGLE_DARK = { fill: '#131314', stroke: '#8E918F', text: '#E3E3E3' };
@@ -66,8 +66,7 @@ export function SocialAuthButtons({ onSuccess }: Props) {
           <ActivityIndicator color={GOOGLE_DARK.text} />
         ) : (
           <>
-            {/* TODO: 출시 전 구글 공식 컬러 G 이미지로 교체 (흑백 G 금지) */}
-            <AntDesign name="google" size={18} color={GOOGLE_DARK.text} />
+            <GoogleLogo size={18} />
             <Text className="text-[16px] font-semibold" style={{ color: GOOGLE_DARK.text }}>
               Google로 계속하기
             </Text>
