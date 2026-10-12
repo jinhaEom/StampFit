@@ -21,8 +21,6 @@ export async function createSessionFromUrl(url: string) {
 }
 
 export async function signInWithGoogle() {
-  console.log('[auth] redirectTo:', redirectTo);
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {

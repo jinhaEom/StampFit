@@ -69,6 +69,7 @@ export default function RootLayout() {
         >
           <Stack.Screen name="login/index" />
           <Stack.Screen name="email" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="reset-password" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="record/index" options={{ presentation: 'modal' }} />
         </Stack>

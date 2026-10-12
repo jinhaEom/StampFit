@@ -17,3 +17,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         detectSessionInUrl: false,
     },
 })
+
+export const tempAuthClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        storageKey: 'stampfit-signup',
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+    },
+});
