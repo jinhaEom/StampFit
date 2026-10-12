@@ -65,6 +65,22 @@ async function runSync(userId: string) {
   await pushUnsynced(userId);
 }
 
+/** 로그인 직후 서버 기록 받기 (실패하면 2초 뒤 한 번 더, 그래도 실패면 토스트만 띄우고 진행) */
+export async function syncAfterLogin(userId: string) {
+  try {
+    await syncAll(userId);
+  } catch (e) {
+    console.warn('로그인 후 동기화 실패, 재시도', e);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      await syncAll(userId);
+    } catch (e2: any) {
+      console.warn('로그인 후 동기화 재시도 실패', e2);
+      toast.error('기록을 불러오지 못했어요', String(e2?.message ?? e2));
+    }
+  }
+}
+
 /** 서버에 안 올라간 데이터 수 (로그아웃 시 사라질 기록·목표·싸이클) */
 export function countUnsynced(): number {
   const row = getDb().getFirstSync<{ n: number }>(

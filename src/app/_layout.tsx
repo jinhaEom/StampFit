@@ -3,7 +3,8 @@ import '@/global.css';
 import { LaunchStamp } from '@/components/LaunchStamp';
 import { Colors } from '@/constants/colors';
 import { createSessionFromUrl } from '@/lib/socialAuth';
-import { syncAll } from '@/lib/sync';
+import { getSyncOwner } from '@/lib/db';
+import { syncAfterLogin, syncAll } from '@/lib/sync';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { startWidgetSync } from '@/widget/syncWidget';
@@ -33,12 +34,22 @@ export default function RootLayout() {
   }, [hydrated]);
 
   const userId = useAuthStore((s) => s.user?.id);
+  const setSyncing = useWorkoutStore((s) => s.setSyncing);
   useEffect(() => {
     if (!userId) return;
+    /* 로그인 직후 (이 기기에 이 계정 기록 없음): 다 받을 때까지 홈 스켈레톤 */
+    if (getSyncOwner() !== userId) {
+      setSyncing(true);
+      syncAfterLogin(userId).finally(() => {
+        loadAll();
+        setSyncing(false);
+      });
+      return;
+    }
     syncAll(userId)
       .catch((e) => console.warn('서버 동기화 실패', e))
       .finally(loadAll);
-  }, [userId, loadAll]);
+  }, [userId, loadAll, setSyncing]);
 
   const url = Linking.useLinkingURL();
   useEffect(() => {

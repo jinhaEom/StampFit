@@ -12,6 +12,7 @@ interface WorkoutState {
   goalHistory: Goal[]; // 목표 변경 이력 (연속 달성 계산용)
   cycle: WorkoutCycle | null;
   stampingDate: string | null; // 방금 새로 기록한 날짜 (돌아간 화면에서 도장 1회)
+  syncing: boolean; // 로그인 직후 서버 기록 받는 중 (홈 스켈레톤)
   loadAll: () => void;
   saveLog: (input: repo.UpsertLogInput) => void;
   removeLog: (logDate: string) => void;
@@ -24,6 +25,7 @@ interface WorkoutState {
   resetAll: () => void;
   stampDate: (date: string) => void;
   clearStamping: () => void;
+  setSyncing: (syncing: boolean) => void;
 }
 
 // 로컬 DB 전체 읽기 (화면 상태 한 벌)
@@ -52,6 +54,7 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
     goalHistory: [],
     cycle: null,
     stampingDate: null,
+    syncing: false,
     loadAll: () => {
       try {
         set({ ...readSnapshot(), hydrated: true });
@@ -98,5 +101,6 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
     },
     stampDate: (date) => set({ stampingDate: date }),
     clearStamping: () => set({ stampingDate: null }),
+    setSyncing: (syncing) => set({ syncing }),
   };
 });
