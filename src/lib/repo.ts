@@ -103,7 +103,7 @@ export function upsertLog(input: UpsertLogInput) {
       );
     }
     /* 새 기록일 때만 싸이클 다음 단계로 (수정 시 제외) */
-    if (!existing) advanceCycleStep(db);
+    if (!existing) advanceCycleStep(db, input.logDate, input.parts.map((p) => p.id));
   });
 }
 
@@ -241,13 +241,33 @@ export function setCycleSteps(steps: WorkoutCycleStep[]) {
   );
 }
 
-/** 싸이클 다음 단계로 (새 기록 저장 시) */
-function advanceCycleStep(db: ReturnType<typeof getDb>) {
+/** 싸이클 다음 단계로 (기록한 부위와 가장 많이 겹치는 단계의 다음으로) */
+function advanceCycleStep(db: ReturnType<typeof getDb>, logDate: string, partIds: string[]) {
   const row = db.getFirstSync<CycleRow>('SELECT steps_json, current_index FROM workout_cycle WHERE id = 1');
   if (!row) return;
   const steps: WorkoutCycleStep[] = JSON.parse(row.steps_json);
   if (steps.length === 0) return;
-  const nextIndex = (row.current_index + 1) % steps.length;
+
+  /* 지난 날짜 기록이면 그대로 (더 최근 기록이 있음) */
+  const newer = db.getFirstSync('SELECT 1 FROM workout_logs WHERE log_date > ? AND deleted_at IS NULL LIMIT 1', logDate);
+  if (newer) return;
+
+  /* 지금 차례부터 돌면서 겹치는 부위가 가장 많은 단계 찾기 (같으면 지금 차례에 가까운 쪽) */
+  const current = row.current_index % steps.length;
+  let doneIndex = -1; // 한 단계
+  let bestOverlap = 0; // 겹치는 부위 수
+  for (let i = 0; i < steps.length; i++) {
+    const index = (current + i) % steps.length;
+    const overlap = steps[index].bodyPartIds.filter((id) => partIds.includes(id)).length;
+    if (overlap > bestOverlap) {
+      bestOverlap = overlap;
+      doneIndex = index;
+    }
+  }
+  /* 싸이클에 없는 부위만 했으면 (예: 유산소) 차례 그대로 */
+  if (doneIndex < 0) return;
+
+  const nextIndex = (doneIndex + 1) % steps.length;
   db.runSync('UPDATE workout_cycle SET current_index = ?, updated_at = ?, synced = 0 WHERE id = 1', nextIndex, nowIso());
 }
 

@@ -23,10 +23,7 @@
 
 <br />
 
-<img src="./docs/screenshots/home-done.png" width="200" />&nbsp;
-<img src="./docs/screenshots/record-done.png" width="200" />&nbsp;
-<img src="./docs/screenshots/calendar.png" width="200" />&nbsp;
-<img src="./docs/screenshots/stats.png" width="200" />
+<img src="./docs/banner.png" width="820" alt="스탬핏 배너" />
 
 </div>
 
