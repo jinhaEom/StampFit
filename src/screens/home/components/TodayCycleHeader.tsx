@@ -7,14 +7,14 @@ interface Props {
   currentStep: WorkoutCycleStep | null; // 지금 차례 (기록하면 다음으로 넘어감)
   nextStep: WorkoutCycleStep | null;
   doneToday: boolean;
-  onEditCycle: () => void;
+  onPress: () => void; // 싸이클 있으면 차례 고르기, 없으면 정하기
 }
 
 /** 오늘 할 운동·그다음 (싸이클 없으면 정하기 버튼) */
-export function TodayCycleHeader({ currentStep, nextStep, doneToday, onEditCycle }: Props) {
+export function TodayCycleHeader({ currentStep, nextStep, doneToday, onPress }: Props) {
   if (!currentStep) {
     return (
-      <Pressable className="flex-row items-center gap-[12px] rounded-[20px] bg-cardBackground p-[16px]" onPress={onEditCycle}>
+      <Pressable className="flex-row items-center gap-[12px] rounded-[20px] bg-cardBackground p-[16px]" onPress={onPress}>
         <View
           className="h-[44px] w-[44px] items-center justify-center rounded-full"
           style={{ backgroundColor: 'rgba(79, 209, 179, 0.14)' }}
@@ -33,24 +33,21 @@ export function TodayCycleHeader({ currentStep, nextStep, doneToday, onEditCycle
   }
 
   return (
-    <View className="rounded-[20px] bg-cardBackground p-[16px]">
-      <View className="flex-row items-center justify-between">
+    <Pressable className="flex-row items-center gap-[12px] rounded-[20px] bg-cardBackground p-[16px]" onPress={onPress}>
+      <View className="flex-1">
         <Text className="text-[13px] text-subText1">{doneToday ? '다음 차례' : '오늘 할 운동'}</Text>
-        <Pressable className="flex-row items-center gap-[2px]" onPress={onEditCycle} hitSlop={10}>
-          <Text className="text-[12px] text-subText1">싸이클 편집</Text>
-          <Ionicons name="chevron-forward" size={12} color={Colors.subText1} />
-        </Pressable>
-      </View>
-      <View className="mt-[6px] flex-row items-baseline gap-[8px]">
-        <Text className="shrink text-[24px] font-extrabold text-mainText" numberOfLines={1}>
-          {currentStep.label}
-        </Text>
-        {nextStep && (
-          <Text className="shrink text-[13px] text-subText2" numberOfLines={1}>
-            {'Next: ' + nextStep.label}
+        <View className="mt-[6px] flex-row items-baseline gap-[8px]">
+          <Text className="shrink text-[24px] font-extrabold text-mainText" numberOfLines={1}>
+            {currentStep.label}
           </Text>
-        )}
+          {nextStep && (
+            <Text className="shrink text-[13px] text-subText2" numberOfLines={1}>
+              {'Next: ' + nextStep.label}
+            </Text>
+          )}
+        </View>
       </View>
-    </View>
+      <Ionicons name="chevron-forward" size={18} color={Colors.subText2} />
+    </Pressable>
   );
 }

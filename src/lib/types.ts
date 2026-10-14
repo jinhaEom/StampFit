@@ -38,5 +38,5 @@ export interface WorkoutCycleStep {
 
 export interface WorkoutCycle {
   steps: WorkoutCycleStep[];
-  currentIndex: number;
+  currentIndex: number; // 지금 차례 (기록으로 계산)
 }

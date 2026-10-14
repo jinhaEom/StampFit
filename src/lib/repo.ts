@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto';
+import { computeCurrentIndex, type CycleAnchor } from './cycle';
 import { todayStr, weekStart } from './date';
-import { getDb, seedDefaultPartsIfEmpty, wipeLocalData } from './db';
+import { getDb, getLogPartIds, seedDefaultPartsIfEmpty, wipeLocalData } from './db';
 import type { BodyPart, Goal, WorkoutCycle, WorkoutCycleStep, WorkoutLog, WorkoutLogPart } from './types';
 
 /* 로컬 DB 읽기·쓰기 */
@@ -102,8 +103,6 @@ export function upsertLog(input: UpsertLogInput) {
         id, part.id, part.durationMin,
       );
     }
-    /* 새 기록일 때만 싸이클 다음 단계로 (수정 시 제외) */
-    if (!existing) advanceCycleStep(db, input.logDate, input.parts.map((p) => p.id));
   });
 }
 
@@ -211,64 +210,64 @@ export function setGoal(targetCount: number, recurring: boolean) {
   });
 }
 
-interface CycleRow { steps_json: string; current_index: number }
+interface CycleRow { steps_json: string; current_index: number; anchor_date: string | null; anchor_part_ids: string }
 
-export function getCycle(): WorkoutCycle | null {
-  const row = getDb().getFirstSync<CycleRow>('SELECT steps_json, current_index FROM workout_cycle WHERE id = 1');
+/** 싸이클 (지금 차례는 기준점 이후 기록으로 계산) */
+export function getCycle(logs: WorkoutLog[]): WorkoutCycle | null {
+  const row = getDb().getFirstSync<CycleRow>(
+    'SELECT steps_json, current_index, anchor_date, anchor_part_ids FROM workout_cycle WHERE id = 1',
+  );
   if (!row) return null;
   const steps: WorkoutCycleStep[] = JSON.parse(row.steps_json).map((s: WorkoutCycleStep) => ({
     ...s,
     label: s.label.split(' , ').join(' · '), // 예전 구분자 변환
   }));
   if (steps.length === 0) return null;
-  return { steps, currentIndex: row.current_index % steps.length };
+  const anchor: CycleAnchor = {
+    index: row.current_index,
+    date: row.anchor_date ?? todayStr(),
+    partIds: JSON.parse(row.anchor_part_ids),
+  };
+  return { steps, currentIndex: computeCurrentIndex(steps, anchor, logs) };
 }
 
-/** 싸이클 단계 저장 */
+/** 싸이클 단계 저장 (지금 차례 단계 유지, 지워졌으면 그다음 남은 단계) */
 export function setCycleSteps(steps: WorkoutCycleStep[]) {
-  const db = getDb();
-  const existing = db.getFirstSync<{ current_index: number }>(
-    'SELECT current_index FROM workout_cycle WHERE id = 1',
-  );
-  const currentIndex = steps.length === 0 ? 0 : (existing?.current_index ?? 0) % steps.length;
-  db.runSync(
-    `INSERT INTO workout_cycle (id, steps_json, current_index, updated_at, synced)
-     VALUES (1, ?, ?, ?, 0)
-     ON CONFLICT (id) DO UPDATE SET
-       steps_json = excluded.steps_json, current_index = excluded.current_index,
-       updated_at = excluded.updated_at, synced = 0`,
-    JSON.stringify(steps), currentIndex, nowIso(),
-  );
-}
-
-/** 싸이클 다음 단계로 (기록한 부위와 가장 많이 겹치는 단계의 다음으로) */
-function advanceCycleStep(db: ReturnType<typeof getDb>, logDate: string, partIds: string[]) {
-  const row = db.getFirstSync<CycleRow>('SELECT steps_json, current_index FROM workout_cycle WHERE id = 1');
-  if (!row) return;
-  const steps: WorkoutCycleStep[] = JSON.parse(row.steps_json);
-  if (steps.length === 0) return;
-
-  /* 지난 날짜 기록이면 그대로 (더 최근 기록이 있음) */
-  const newer = db.getFirstSync('SELECT 1 FROM workout_logs WHERE log_date > ? AND deleted_at IS NULL LIMIT 1', logDate);
-  if (newer) return;
-
-  /* 지금 차례부터 돌면서 겹치는 부위가 가장 많은 단계 찾기 (같으면 지금 차례에 가까운 쪽) */
-  const current = row.current_index % steps.length;
-  let doneIndex = -1; // 한 단계
-  let bestOverlap = 0; // 겹치는 부위 수
-  for (let i = 0; i < steps.length; i++) {
-    const index = (current + i) % steps.length;
-    const overlap = steps[index].bodyPartIds.filter((id) => partIds.includes(id)).length;
-    if (overlap > bestOverlap) {
-      bestOverlap = overlap;
-      doneIndex = index;
+  const prev = getCycle(getLogs());
+  let index = 0;
+  if (prev) {
+    for (let i = 0; i < prev.steps.length; i++) {
+      const at = steps.findIndex((s) => s.id === prev.steps[(prev.currentIndex + i) % prev.steps.length].id);
+      if (at >= 0) {
+        index = at;
+        break;
+      }
     }
   }
-  /* 싸이클에 없는 부위만 했으면 (예: 유산소) 차례 그대로 */
-  if (doneIndex < 0) return;
+  writeCycle(steps, index);
+}
 
-  const nextIndex = (doneIndex + 1) % steps.length;
-  db.runSync('UPDATE workout_cycle SET current_index = ?, updated_at = ?, synced = 0 WHERE id = 1', nextIndex, nowIso());
+/** 지금 차례 직접 바꾸기 */
+export function setCycleCurrent(stepId: string) {
+  const cycle = getCycle(getLogs());
+  const index = cycle?.steps.findIndex((s) => s.id === stepId) ?? -1;
+  if (!cycle || index < 0) return;
+  writeCycle(cycle.steps, index);
+}
+
+/** 싸이클 저장 + 기준점을 지금으로 (오늘 이미 기록한 부위는 기준에 포함) */
+function writeCycle(steps: WorkoutCycleStep[], index: number) {
+  const db = getDb();
+  const today = todayStr();
+  db.runSync(
+    `INSERT INTO workout_cycle (id, steps_json, current_index, anchor_date, anchor_part_ids, updated_at, synced)
+     VALUES (1, ?, ?, ?, ?, ?, 0)
+     ON CONFLICT (id) DO UPDATE SET
+       steps_json = excluded.steps_json, current_index = excluded.current_index,
+       anchor_date = excluded.anchor_date, anchor_part_ids = excluded.anchor_part_ids,
+       updated_at = excluded.updated_at, synced = 0`,
+    JSON.stringify(steps), index, today, JSON.stringify(getLogPartIds(db, today)), nowIso(),
+  );
 }
 
 /** 데이터 초기화 (전부 삭제 후 기본 부위 재삽입) */

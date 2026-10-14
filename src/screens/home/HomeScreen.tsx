@@ -14,9 +14,9 @@ import { TodayRecordBar } from './components/TodayRecordBar';
 import { WeekCard } from './components/WeekCard';
 import { useTodayPlan } from './hooks/useTodayPlan';
 import { useWeekSummary } from './hooks/useWeekSummary';
-import { CycleModal } from './modals/CycleModal';
 import { DayLogModal } from './modals/DayLogModal';
 import { GoalModal } from './modals/GoalModal';
+import { StepPickSheet } from './modals/StepPickSheet';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -24,7 +24,7 @@ export default function HomeScreen() {
   const { weekDays, weekMin, weeklyStreak, onStampPlayed } = useWeekSummary();
   const { todayLog, currentStep, nextStep, quoteOfDay } = useTodayPlan();
 
-  const [isCycleModalOpen, setIsCycleModalOpen] = useState(false);
+  const [isStepSheetOpen, setIsStepSheetOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null); // 7칸에서 누른 날짜
   const selectedLog = useWorkoutStore((s) => s.logs.find((l) => l.logDate === selectedDate));
@@ -59,16 +59,23 @@ export default function HomeScreen() {
                 currentStep={currentStep}
                 nextStep={nextStep}
                 doneToday={!!todayLog}
-                onEditCycle={() => setIsCycleModalOpen(true)}
+                onPress={() => (currentStep ? setIsStepSheetOpen(true) : router.push('/home/cycle'))}
               />
             </View>
           </>
         )}
 
-      
+
       </ScrollView>
 
-      <CycleModal visible={isCycleModalOpen} onClose={() => setIsCycleModalOpen(false)} />
+      <StepPickSheet
+        visible={isStepSheetOpen}
+        onClose={() => setIsStepSheetOpen(false)}
+        onEditCycle={() => {
+          setIsStepSheetOpen(false);
+          router.push('/home/cycle');
+        }}
+      />
       <DayLogModal
         visible={selectedDate !== null}
         date={selectedDate}

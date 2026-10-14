@@ -22,6 +22,7 @@ interface WorkoutState {
   reorderParts: (parts: BodyPart[]) => void;
   setGoal: (targetCount: number, recurring: boolean) => void;
   setCycle: (steps: WorkoutCycleStep[]) => void;
+  setCycleCurrent: (stepId: string) => void;
   resetAll: () => void;
   stampDate: (date: string) => void;
   clearStamping: () => void;
@@ -29,14 +30,17 @@ interface WorkoutState {
 }
 
 // 로컬 DB 전체 읽기 (화면 상태 한 벌)
-const readSnapshot = () => ({
-  parts: repo.getBodyParts(),
-  partNamesById: repo.getBodyPartNamesById(),
-  logs: repo.getLogs(),
-  goal: repo.getGoal(),
-  goalHistory: repo.getGoalHistory(),
-  cycle: repo.getCycle(),
-});
+const readSnapshot = () => {
+  const logs = repo.getLogs();
+  return {
+    parts: repo.getBodyParts(),
+    partNamesById: repo.getBodyPartNamesById(),
+    logs,
+    goal: repo.getGoal(),
+    goalHistory: repo.getGoalHistory(),
+    cycle: repo.getCycle(logs), // 기록이 바뀌면 지금 차례도 다시 계산
+  };
+};
 
 export const useWorkoutStore = create<WorkoutState>((set) => {
   // 쓰기 후 화면 갱신 + 서버 반영
@@ -93,6 +97,10 @@ export const useWorkoutStore = create<WorkoutState>((set) => {
     },
     setCycle: (steps) => {
       repo.setCycleSteps(steps);
+      refresh();
+    },
+    setCycleCurrent: (stepId) => {
+      repo.setCycleCurrent(stepId);
       refresh();
     },
     resetAll: () => {

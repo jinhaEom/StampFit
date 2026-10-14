@@ -83,6 +83,8 @@ create table if not exists public.workout_cycle (
   current_index integer not null default 0,
   updated_at timestamptz not null default now()
 );
+alter table public.workout_cycle add column if not exists anchor_date date;
+alter table public.workout_cycle add column if not exists anchor_part_ids jsonb not null default '[]'::jsonb;
 
 alter table public.goals enable row level security;
 alter table public.goal_history enable row level security;

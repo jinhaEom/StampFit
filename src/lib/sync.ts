@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/store/useAuthStore';
-import { getDb, getSyncOwner, seedDefaultPartsIfEmpty, setSyncOwner, wipeLocalData } from './db';
+import { todayStr } from './date';
+import { getDb, getLogPartIds, getSyncOwner, seedDefaultPartsIfEmpty, setSyncOwner, wipeLocalData } from './db';
 import { toast } from '@/lib/toast';
 import { supabase } from './supabase';
 import type { WorkoutCycleStep } from './types';
@@ -33,7 +34,9 @@ interface ServerGoal {
 
 interface ServerCycle {
   steps: WorkoutCycleStep[];
-  current_index: number;
+  current_index: number; // 기준 날짜를 시작할 때의 차례
+  anchor_date: string | null; // 예전 버전이 올린 행은 null
+  anchor_part_ids: string[] | null;
   updated_at: string;
 }
 
@@ -115,7 +118,7 @@ async function pullMerge() {
     supabase.from('workout_log_parts').select('log_id, body_part_id, duration_min'),
     supabase.from('goals').select('target_count, recurring, week_start, updated_at').maybeSingle(),
     supabase.from('goal_history').select('target_count, recurring, week_start, updated_at'),
-    supabase.from('workout_cycle').select('steps, current_index, updated_at').maybeSingle(),
+    supabase.from('workout_cycle').select('steps, current_index, anchor_date, anchor_part_ids, updated_at').maybeSingle(),
   ]);
   const error =
     partsRes.error ?? logsRes.error ?? logPartsRes.error ?? goalRes.error ?? historyRes.error ?? cycleRes.error;
@@ -147,11 +150,12 @@ async function pullMerge() {
             sp.id, byName.id,
           );
           db.runSync('UPDATE body_parts SET id = ? WHERE id = ?', sp.id, byName.id);
-          /* 싸이클 단계 속 부위 id도 교체 */
+          /* 싸이클 단계·기준점 속 부위 id도 교체 */
           db.runSync(
-            `UPDATE workout_cycle SET steps_json = REPLACE(steps_json, ?, ?), synced = 0
-             WHERE id = 1 AND instr(steps_json, ?) > 0`,
-            byName.id, sp.id, byName.id,
+            `UPDATE workout_cycle
+               SET steps_json = REPLACE(steps_json, ?, ?), anchor_part_ids = REPLACE(anchor_part_ids, ?, ?), synced = 0
+             WHERE id = 1 AND (instr(steps_json, ?) > 0 OR instr(anchor_part_ids, ?) > 0)`,
+            byName.id, sp.id, byName.id, sp.id, byName.id, byName.id,
           );
           local = { id: sp.id, updated_at: byName.updated_at };
         }
@@ -235,10 +239,15 @@ async function pullMerge() {
     if (sc) {
       const local = db.getFirstSync<{ updated_at: string }>('SELECT updated_at FROM workout_cycle WHERE id = 1');
       if (!local || later(sc.updated_at, local.updated_at)) {
+        /* 기준점 없는 예전 행은 지금 차례를 오늘 기준점으로 (다시 올림) */
+        const anchorDate = sc.anchor_date ?? todayStr();
+        const anchorPartIds = sc.anchor_date ? (sc.anchor_part_ids ?? []) : getLogPartIds(db, anchorDate);
         db.runSync(
-          `INSERT OR REPLACE INTO workout_cycle (id, steps_json, current_index, updated_at, synced)
-           VALUES (1, ?, ?, ?, 1)`,
-          JSON.stringify(sc.steps), sc.current_index, sc.updated_at,
+          `INSERT OR REPLACE INTO workout_cycle
+             (id, steps_json, current_index, anchor_date, anchor_part_ids, updated_at, synced)
+           VALUES (1, ?, ?, ?, ?, ?, ?)`,
+          JSON.stringify(sc.steps), sc.current_index, anchorDate, JSON.stringify(anchorPartIds), sc.updated_at,
+          sc.anchor_date ? 1 : 0,
         );
       }
     }
@@ -362,14 +371,18 @@ async function pushGoalAndCycle(userId: string) {
     });
   }
 
-  const cycle = db.getFirstSync<{ steps_json: string; current_index: number; updated_at: string }>(
-    'SELECT steps_json, current_index, updated_at FROM workout_cycle WHERE id = 1 AND synced = 0',
+  const cycle = db.getFirstSync<{
+    steps_json: string; current_index: number; anchor_date: string; anchor_part_ids: string; updated_at: string;
+  }>(
+    'SELECT steps_json, current_index, anchor_date, anchor_part_ids, updated_at FROM workout_cycle WHERE id = 1 AND synced = 0',
   );
   if (cycle) {
     const { error } = await supabase.from('workout_cycle').upsert({
       user_id: userId,
       steps: JSON.parse(cycle.steps_json),
       current_index: cycle.current_index,
+      anchor_date: cycle.anchor_date,
+      anchor_part_ids: JSON.parse(cycle.anchor_part_ids),
       updated_at: cycle.updated_at,
     });
     if (error) throw error;

@@ -35,9 +35,11 @@ export function TodayRecordBar({ todayLog, onPress }: Props) {
         </View>
       </View>
 
+      {/* 기록한 날은 운동 추가 (하루 두 번 운동, 수정도 같은 화면) */}
       {done ? (
-        <View className="h-[44px] items-center justify-center rounded-full bg-cardSelected px-[18px]">
-          <Text className="text-[14px] font-semibold text-mainText">수정</Text>
+        <View className="h-[44px] flex-row items-center gap-[4px] rounded-full bg-cardSelected px-[18px]">
+          <Ionicons name="add" size={16} color={Colors.mainText} />
+          <Text className="text-[14px] font-semibold text-mainText">추가</Text>
         </View>
       ) : (
         <View className="h-[44px] flex-row items-center gap-[4px] rounded-full bg-main/10 px-[18px]">

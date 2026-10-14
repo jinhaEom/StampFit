@@ -1,6 +1,7 @@
 import { DEFAULT_BODY_PARTS } from '@/constants/recovery';
 import * as Crypto from 'expo-crypto';
 import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
+import { todayStr } from './date';
 
 let db: SQLiteDatabase | null = null; // 로컬 SQLite
 
@@ -90,12 +91,34 @@ function migrate(db: SQLiteDatabase) {
   ensureColumn(db, 'goals', 'synced', 'INTEGER NOT NULL DEFAULT 0');
   ensureColumn(db, 'goal_history', 'synced', 'INTEGER NOT NULL DEFAULT 0');
   ensureColumn(db, 'workout_cycle', 'synced', 'INTEGER NOT NULL DEFAULT 0');
+  /* 싸이클 기준점 (current_index는 기준 날짜를 시작할 때의 차례) */
+  ensureColumn(db, 'workout_cycle', 'anchor_date', 'TEXT');
+  ensureColumn(db, 'workout_cycle', 'anchor_part_ids', "TEXT NOT NULL DEFAULT '[]'");
 
   /* 이력 테이블 이전 목표를 첫 이력으로 옮김 (있으면 무시) */
   db.execSync(`
     INSERT OR IGNORE INTO goal_history (week_start, target_count, recurring, updated_at)
     SELECT week_start, target_count, recurring, updated_at FROM goals WHERE id = 1;
   `);
+
+  /* 예전 싸이클은 지금 차례를 오늘 기준점으로 */
+  const today = todayStr();
+  db.runSync(
+    'UPDATE workout_cycle SET anchor_date = ?, anchor_part_ids = ?, synced = 0 WHERE id = 1 AND anchor_date IS NULL',
+    today, JSON.stringify(getLogPartIds(db, today)),
+  );
+}
+
+/** 그날 기록된 부위 id (싸이클 기준점용) */
+export function getLogPartIds(db: SQLiteDatabase, logDate: string): string[] {
+  return db
+    .getAllSync<{ body_part_id: string }>(
+      `SELECT p.body_part_id FROM workout_log_parts p
+         JOIN workout_logs l ON l.id = p.log_id
+       WHERE l.log_date = ? AND l.deleted_at IS NULL`,
+      logDate,
+    )
+    .map((r) => r.body_part_id);
 }
 
 function ensureColumn(db: SQLiteDatabase, table: string, column: string, ddl: string) {
