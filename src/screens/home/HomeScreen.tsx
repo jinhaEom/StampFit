@@ -1,9 +1,10 @@
 import { BottomTabInset } from '@/constants/constant';
 import { todayStr } from '@/lib/date';
+import { requestReminderPermission } from '@/lib/reminder';
 import { Skeleton } from '@/components/Skeleton';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from '@/lib/toast';
@@ -29,6 +30,11 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null); // 7칸에서 누른 날짜
   const selectedLog = useWorkoutStore((s) => s.logs.find((l) => l.logDate === selectedDate));
   const syncing = useWorkoutStore((s) => s.syncing);
+
+  /* 홈 첫 진입 시 알림 권한 요청 */
+  useEffect(() => {
+    requestReminderPermission().catch((e) => console.warn('알림 권한 요청 실패', e));
+  }, []);
 
   // 미래 날짜는 열지 않음
   const handlePressDay = (date: string) => {

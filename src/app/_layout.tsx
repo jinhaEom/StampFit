@@ -4,6 +4,7 @@ import { LaunchStamp } from '@/components/LaunchStamp';
 import { Colors } from '@/constants/colors';
 import { createSessionFromUrl } from '@/lib/socialAuth';
 import { getSyncOwner } from '@/lib/db';
+import { startReminderSync } from '@/lib/reminder';
 import { syncAfterLogin, syncAll } from '@/lib/sync';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
@@ -24,9 +25,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     const stopWidgetSync = startWidgetSync();
+    const stopReminderSync = startReminderSync();
     loadAll();
     initializeAuth();
-    return stopWidgetSync;
+    return () => {
+      stopWidgetSync();
+      stopReminderSync();
+    };
   }, [loadAll, initializeAuth]);
 
   useEffect(() => {
