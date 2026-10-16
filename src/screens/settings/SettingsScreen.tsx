@@ -9,12 +9,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SettingRow } from './components/SettingRow';
 import { useDeleteAccount } from './hooks/useDeleteAccount';
 import { useLogout } from './hooks/useLogout';
+import Constants from 'expo-constants';
 
 /* 로그인 방식별 표시 (이메일 가입은 주소 표시) */
 const PROVIDER_LABEL: Record<string, string> = { google: '구글 로그인', apple: 'Apple 로그인' };
 const PROVIDER_ICON: Record<string, keyof typeof Ionicons.glyphMap> = { google: 'logo-google', apple: 'logo-apple' };
-const APP_VERSION = '1.0.0';
-
+const APP_VERSION = Constants.expoConfig?.version ?? '';
 export default function SettingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
