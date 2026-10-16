@@ -1,14 +1,11 @@
-import { PART_PALETTE } from '@/constants/colors';
-import { formatDuration, todayStr } from './date';
+import { todayStr } from './date';
 import type { WorkoutLog } from './types';
 
 export interface PartStat {
   id: string;
   name: string;
   minutes: number;
-  percentage: number;
   count: number;
-  color: string;
 }
 
 export interface MonthlyAnalytics {
@@ -24,18 +21,16 @@ export interface MonthlyAnalytics {
     diffCount: number;
   };
   partStats: PartStat[];
-  topParts: PartStat[];
   weeklyAvg: number; // 주 평균 운동 횟수
   hasData: boolean;
 }
 
-/** 부위별 시간·횟수·비중 */
+/** 부위별 시간·횟수 */
 export function getPartStatsForLogs(
   logs: WorkoutLog[],
   partNamesById: Record<string, string>,
 ): PartStat[] {
   const partMap = new Map<string, { minutes: number; count: number }>();
-  let totalMinutes = 0;
 
   for (const log of logs) {
     for (const part of log.parts) {
@@ -45,20 +40,15 @@ export function getPartStatsForLogs(
       existing.minutes += part.durationMin;
       existing.count += 1;
       partMap.set(part.id, existing);
-      totalMinutes += part.durationMin;
     }
   }
 
   return Array.from(partMap.entries())
     .map(([id, data]) => {
       const name = partNamesById[id] || '기타';
-      const roundedMin = Math.round(data.minutes);
-      const percentage =
-        totalMinutes > 0 ? Math.round((data.minutes / totalMinutes) * 100) : 0;
-      return { id, name, minutes: roundedMin, percentage, count: data.count, color: '' };
+      return { id, name, minutes: Math.round(data.minutes), count: data.count };
     })
-    .sort((a, b) => b.minutes - a.minutes)
-    .map((item, idx) => ({ ...item, color: PART_PALETTE[idx % PART_PALETTE.length] }));
+    .sort((a, b) => b.minutes - a.minutes);
 }
 
 /** 월간 통계 */
@@ -99,7 +89,6 @@ export function getMonthlyAnalytics(
         diffCount: -prevTotalCount,
       },
       partStats: [],
-      topParts: [],
       weeklyAvg: 0,
       hasData: false,
     };
@@ -133,38 +122,16 @@ export function getMonthlyAnalytics(
       diffCount: totalCount - prevTotalCount,
     },
     partStats,
-    topParts: partStats.slice(0, 3),
     weeklyAvg,
     hasData: true,
   };
 }
 
-/** 전월 대비 증감 문구 */
-export function formatDiffText(diffMinutes: number, diffCount: number): {
-  timeText: string;
-  countText: string;
-  isIncrease: boolean;
-  isSame: boolean;
-} {
-  const isSame = diffMinutes === 0 && diffCount === 0;
-  const isIncrease = diffMinutes > 0 || (diffMinutes === 0 && diffCount > 0);
-
-  let timeText = '';
-  if (diffMinutes === 0) {
-    timeText = '지난달과 동일';
-  } else {
-    const absMin = Math.abs(diffMinutes);
-    const sign = diffMinutes > 0 ? '+' : '-';
-    timeText = `${sign}${formatDuration(absMin)}`;
-  }
-
-  let countText = '';
-  if (diffCount === 0) {
-    countText = '동일';
-  } else {
-    const sign = diffCount > 0 ? '+' : '';
-    countText = `${sign}${diffCount}회`;
-  }
-
-  return { timeText, countText, isIncrease, isSame };
+/** 지난달 비교 문구 (지난달 기록 없으면 null) */
+export function formatCompareText(totalCount: number, diffCount: number): string | null {
+  const prevCount = totalCount - diffCount;
+  if (prevCount === 0) return null;
+  if (diffCount > 0) return `지난달보다 ${diffCount}번 더`;
+  if (diffCount < 0) return `지난달보다 ${-diffCount}번 적게`;
+  return '지난달과 같은 횟수';
 }

@@ -21,10 +21,11 @@
       "bundleIdentifier": "com.jinhaeom.stampfit",
       "appleTeamId": "DNPA47GWF6",
       "usesAppleSignIn": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
-        "CFBundleDevelopmentRegion": "ko",
-        "NSPhotoLibraryUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다.",
-        "NSPhotoLibraryAddUsageDescription": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다."
+        "CFBundleDevelopmentRegion": "ko"
       }
     },
     "android": {
@@ -35,15 +36,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_MEDIA_VIDEO",
-        "android.permission.READ_MEDIA_AUDIO"
-      ]
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
@@ -83,14 +76,8 @@
       "expo-sqlite",
       "expo-web-browser",
       "expo-build-properties",
-      "expo-sharing",
-      [
-        "expo-media-library",
-        {
-          "photosPermission": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다.",
-          "savePhotosPermission": "운동 리포트 카드를 사진첩에 저장하기 위해 권한이 필요합니다."
-        }
-      ]
+      "expo-font",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

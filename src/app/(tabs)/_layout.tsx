@@ -17,7 +17,11 @@ export default function TabsLayout() {
 
 function IosTabs() {
   return (
-    <NativeTabs>
+    <NativeTabs
+      tintColor={Colors.mainText}
+      iconColor={{ default: Colors.subText2, selected: Colors.mainText }}
+      labelStyle={{ default: { color: Colors.subText2 }, selected: { color: Colors.mainText } }}
+    >
       <NativeTabs.Trigger name="home">
         <NativeTabs.Trigger.Label>홈</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="house.fill" md="home" />

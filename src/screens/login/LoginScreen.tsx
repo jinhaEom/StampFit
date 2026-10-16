@@ -27,7 +27,7 @@ export default function LoginScreen() {
       <Text className="text-[30px] font-bold leading-[39px] text-mainText">
         매일 한 칸씩,{'\n'}운동 도장을 찍어요
       </Text>
-      <Text className="mt-[10px] text-[15px] text-subText1">세트·무게 없이, 부위랑 시간만 3초 기록</Text>
+      <Text className="mt-[10px] text-[15px] text-subText1">세트·무게 없이, 부위랑 시간만 간단 기록</Text>
 
       <View className="mt-[36px]">
         <SocialAuthButtons onSuccess={() => router.replace('/home')} />
