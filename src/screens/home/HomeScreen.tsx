@@ -9,14 +9,17 @@ import { Platform, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from '@/lib/toast';
 import { HomeSkeleton } from './components/HomeSkeleton';
+import { QuickRecordChip } from './components/QuickRecordChip';
 import { StreakHero } from './components/StreakHero';
 import { TodayCycleHeader } from './components/TodayCycleHeader';
 import { TodayRecordBar } from './components/TodayRecordBar';
 import { WeekCard } from './components/WeekCard';
+import { useQuickRecord } from './hooks/useQuickRecord';
 import { useTodayPlan } from './hooks/useTodayPlan';
 import { useWeekSummary } from './hooks/useWeekSummary';
 import { DayLogModal } from './modals/DayLogModal';
 import { GoalModal } from './modals/GoalModal';
+import { QuickRecordModal } from './modals/QuickRecordModal';
 import { StepPickSheet } from './modals/StepPickSheet';
 
 export default function HomeScreen() {
@@ -30,6 +33,7 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null); // 7칸에서 누른 날짜
   const selectedLog = useWorkoutStore((s) => s.logs.find((l) => l.logDate === selectedDate));
   const syncing = useWorkoutStore((s) => s.syncing);
+  const quick = useQuickRecord(currentStep);
 
   /* 홈 첫 진입 시 알림 권한 요청 */
   useEffect(() => {
@@ -89,6 +93,13 @@ export default function HomeScreen() {
         onClose={() => setSelectedDate(null)}
       />
       <GoalModal visible={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} />
+      <QuickRecordModal
+        visible={quick.noticeVisible}
+        label={quick.label}
+        minutes={quick.minutes}
+        onConfirm={quick.confirm}
+        onCancel={quick.cancel}
+      />
 
       {!syncing && !todayLog && quoteOfDay && (
         <View className="px-[24px] pb-[8px] pt-[4px]">
@@ -108,7 +119,13 @@ export default function HomeScreen() {
             <Skeleton width="45%" height={14} />
           </View>
         ) : (
-          <TodayRecordBar todayLog={todayLog} onPress={() => router.push('/record')} />
+          <>
+            {/* 오늘 기록 전 + 싸이클 있을 때만 */}
+            {!todayLog && quick.available && (
+              <QuickRecordChip label={quick.label} minutes={quick.minutes} onPress={quick.request} />
+            )}
+            <TodayRecordBar todayLog={todayLog} onPress={() => router.push('/record')} />
+          </>
         )}
       </View>
     </View>
