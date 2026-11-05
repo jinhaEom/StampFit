@@ -12,7 +12,7 @@ import {
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { usePartsEditor } from './hooks/usePartsEditor';
 
 export default function PartsScreen() {
