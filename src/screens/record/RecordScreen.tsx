@@ -1,5 +1,4 @@
 import { AlertModal } from '@/components/AlertModal';
-import { Chip } from '@/components/Chip';
 import { Colors } from '@/constants/colors';
 import {
   CONDITION_EMOJI,
@@ -7,7 +6,7 @@ import {
   DURATION_DEFAULT,
   INTENSITY_LABELS,
 } from '@/constants/recovery';
-import { formatDuration, formatKorean, todayStr } from '@/lib/date';
+import { daysBetween, formatDuration, formatKorean, todayStr } from '@/lib/date';
 import type { WorkoutLogPart } from '@/lib/types';
 import { useWorkoutStore } from '@/store/useWorkoutStore';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,24 +20,53 @@ import {
   ScrollView,
   Text,
   TextInput,
-  View
+  useWindowDimensions,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DoneStamp } from './components/DoneStamp';
 import { PartDurationCard } from './components/PartDurationCard';
+import { AddPartTile, PartTile } from './components/PartTile';
 import { ScaleSelector } from './components/ScaleSelector';
+
+const SCREEN_H_PADDING = 16 * 2;
+const TILE_GAP = 8;
+
+function formatRecoveryDays(days: number | undefined): string {
+  if (days === undefined) return '첫 기록';
+  if (days === 1) return '어제';
+  if (days > 99) return '99일+ 전';
+  return `${days}일 전`;
+}
 
 export default function RecordScreen() {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
   const router = useRouter();
   const { date } = useLocalSearchParams<{ date?: string }>();
   const logDate = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : todayStr();
 
+  const tileWidth = Math.floor((screenWidth - SCREEN_H_PADDING - TILE_GAP * 2) / 3);
+
   const parts = useWorkoutStore((s) => s.parts);
+  const logs = useWorkoutStore((s) => s.logs);
   const saveLog = useWorkoutStore((s) => s.saveLog);
   const stampDate = useWorkoutStore((s) => s.stampDate);
   const addPart = useWorkoutStore((s) => s.addPart);
-  const existing = useWorkoutStore((s) => s.logs.find((l) => l.logDate === logDate));
+  const existing = React.useMemo(() => logs.find((l) => l.logDate === logDate), [logs, logDate]);
+
+  // 기록 날짜(logDate) 이전 기준으로 각 부위를 마지막으로 운동한 경과일 계산
+  const lastDaysByPartId = React.useMemo(() => {
+    const map = new Map<string, number>();
+    for (const log of logs) {
+      if (log.logDate >= logDate) continue;
+      const diff = daysBetween(log.logDate, logDate);
+      for (const p of log.parts) {
+        map.set(p.id, diff);
+      }
+    }
+    return map;
+  }, [logs, logDate]);
 
   const existingPartIds = React.useMemo(() => existing?.parts.map((p) => p.id) ?? [], [existing]);
 
@@ -147,15 +175,21 @@ export default function RecordScreen() {
           {/* 1. 부위 */}
           <Text className="mb-[10px] mt-[22px] text-[13px] text-subText1">부위</Text>
           <View className="flex-row flex-wrap gap-[8px]">
-            {visibleParts.map((p) => (
-              <Chip
-                key={p.id}
-                label={p.name}
-                selected={selectedIds.includes(p.id)}
-                onPress={() => togglePart(p.id)}
-              />
-            ))}
-            {!adding && <Chip label="＋" dashed onPress={() => setAdding(true)} />}
+            {visibleParts.map((p) => {
+              const lastDays = lastDaysByPartId.get(p.id);
+              return (
+                <PartTile
+                  key={p.id}
+                  label={p.name}
+                  subLabel={formatRecoveryDays(lastDays)}
+                  selected={selectedIds.includes(p.id)}
+                  highlightSub={lastDays !== undefined && lastDays >= 4}
+                  width={tileWidth}
+                  onPress={() => togglePart(p.id)}
+                />
+              );
+            })}
+            {!adding && <AddPartTile width={tileWidth} onPress={() => setAdding(true)} />}
           </View>
           {adding && (
             <View className="mt-[12px] flex-row items-center gap-[14px]">
